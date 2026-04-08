@@ -1,0 +1,696 @@
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Nothing-brand Reset ───────────────────────────────────────── */
+:root {
+  color-scheme: dark;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 99px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #000;
+  color: #e5e5e5;
+  font-family: 'Space Mono', 'Roboto Mono', monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Static dot grid removed — replaced by ReactiveGrid canvas */
+
+/* ─── Card ──────────────────────────────────────────────────────── */
+@layer components {
+  .nothing-card {
+    background: #0a0a0a;
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+  }
+
+  .nothing-card:hover {
+    border-color: #666;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+  }
+
+  /* ─── Industrial Glass-Tile ────────────────────────────────────── */
+  .glass-tile {
+    background: rgba(10, 10, 10, 0.65);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+
+  .glass-tile:hover {
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
+  }
+
+  /* Pill button – outline style (secondary) */
+  .btn-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-radius: 9999px;
+    border: 1px solid #444;
+    background: transparent;
+    color: #e5e5e5;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-pill:hover {
+    border-color: #fff;
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  .btn-pill:active {
+    transform: translateY(0) scale(0.97);
+  }
+
+  /* Pill button – inverted / primary (white bg, black text) */
+  .btn-pill-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border-radius: 9999px;
+    border: 1px solid #fff;
+    background: #fff;
+    color: #000;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-pill-primary:hover {
+    background: #e5e5e5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.08);
+  }
+
+  .btn-pill-primary:active {
+    transform: translateY(0) scale(0.97);
+    background: #ccc;
+  }
+
+  .btn-pill-primary:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Flush input — bottom border only */
+  .nothing-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #2a2a2a;
+    border-radius: 0;
+    color: #e5e5e5;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    padding: 12px 0;
+    transition: border-color 0.2s ease;
+    width: 100%;
+  }
+
+  .nothing-input::placeholder {
+    color: #555;
+  }
+
+  .nothing-input:focus {
+    border-bottom-color: #fff;
+  }
+
+  /* Bordered input (for datetime, etc) */
+  .nothing-input-bordered {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    color: #e5e5e5;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    padding: 8px 12px;
+    transition: border-color 0.2s ease;
+  }
+
+  .nothing-input-bordered::placeholder {
+    color: #555;
+  }
+
+  .nothing-input-bordered:focus {
+    border-color: #555;
+  }
+
+  .nothing-input-bordered::-webkit-calendar-picker-indicator {
+    filter: invert(0.6);
+    cursor: pointer;
+  }
+}
+
+/* ─── Checkbox (Nothing-style) ──────────────────────────────────── */
+.task-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #444;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  background: transparent;
+}
+
+.task-checkbox:hover {
+  border-color: #888;
+}
+
+.task-checkbox:checked {
+  background: #fff;
+  border-color: #fff;
+  animation: checkPop 0.35s ease-out;
+}
+
+.task-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 5px;
+  height: 9px;
+  border: solid #000;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* ─── Task Strikethrough ────────────────────────────────────────── */
+.task-done-text {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: #555;
+  color: #555;
+}
+
+/* ─── Timer Ring ────────────────────────────────────────────────── */
+.timer-track {
+  stroke: #222;
+}
+
+.timer-progress {
+  transition: stroke-dashoffset 1s linear;
+  stroke: #fff;
+}
+
+/* ─── Rich Editor ───────────────────────────────────────────────── */
+.rich-editor {
+  padding: 16px;
+  outline: none;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  line-height: 24px;
+  /* Matches background grid */
+  color: #bbb;
+  min-height: 200px;
+  background-image: linear-gradient(transparent 23px, #222 24px);
+  background-size: 100% 24px;
+  background-origin: content-box;
+}
+
+.rich-editor:empty::before {
+  content: attr(data-placeholder);
+  color: #444;
+  pointer-events: none;
+  font-style: normal;
+}
+
+.rich-editor h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin: 12px 0 4px;
+}
+
+.rich-editor ul {
+  padding-left: 20px;
+  list-style: disc;
+}
+
+.rich-editor li {
+  margin: 2px 0;
+  color: #999;
+}
+
+.rich-editor img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 8px 0;
+  border: 1px solid #2a2a2a;
+}
+
+/* Code blocks */
+.rich-editor pre,
+.rich-editor .code-block-container,
+.rich-editor-preview pre {
+  background: #111 !important;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-x: auto;
+  margin: 8px 0;
+  color: #aaa;
+}
+
+.rich-editor code,
+.rich-editor-preview code {
+  font-family: 'Space Mono', monospace;
+  background: #1a1a1a;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.85em;
+  color: #ddd;
+}
+
+.rich-editor pre code,
+.rich-editor-preview pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.rich-editor-preview img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 6px 0;
+}
+
+.rich-editor-preview h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  margin: 8px 0 4px;
+}
+
+/* ─── Toggle Switch ─────────────────────────────────────────────── */
+.toggle-switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  background: #222;
+  border: 1px solid #333;
+  border-radius: 11px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #555;
+  transition: all 0.25s ease;
+}
+
+.toggle-switch.active {
+  background: #333;
+  border-color: #555;
+}
+
+.toggle-switch.active::after {
+  left: 20px;
+  background: #fff;
+}
+
+/* ─── Enforcer ──────────────────────────────────────────────────── */
+.enforcer-scanlines {
+  background: repeating-linear-gradient(0deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 0, 0, 0.02) 2px,
+      rgba(255, 0, 0, 0.02) 4px);
+}
+
+/* ─── Intensity Dot ─────────────────────────────────────────────── */
+.intensity-dot-low {
+  background: #4a4a4a;
+}
+
+.intensity-dot-medium {
+  background: #666;
+}
+
+.intensity-dot-high {
+  background: #ef4444;
+}
+
+/* ─── LCD Reminder Label ──────────────────────────────────────────── */
+.lcd-reminder {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'DotGothic16', 'Space Mono', monospace;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.lcd-reminder .lcd-dots {
+  flex: 1;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.15);
+  min-width: 20px;
+}
+
+.lcd-reminder .lcd-time,
+.lcd-reminder .lcd-date {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.1em;
+}
+
+/* ─── Glass Calendar Fade ─────────────────────────────────────────── */
+.calendar-glass-enter {
+  animation: calendarGlassFade 0.35s ease-out forwards;
+}
+
+.calendar-glass-exit {
+  animation: calendarGlassFade 0.25s ease-in reverse forwards;
+}
+
+/* ─── Mic Recording Pulse ─────────────────────────────────────────── */
+.mic-recording {
+  animation: micPulse 1s ease-in-out infinite;
+}
+
+/* ─── Keyframes ─────────────────────────────────────────────────── */
+@keyframes checkPop {
+  0% {
+    transform: scale(1);
+  }
+
+  40% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* Haptic shake — sharp, industrial, brief */
+@keyframes hapticShake {
+  0% {
+    transform: translateX(0);
+  }
+  10% {
+    transform: translateX(-3px);
+  }
+  20% {
+    transform: translateX(3px);
+  }
+  30% {
+    transform: translateX(-2px);
+  }
+  40% {
+    transform: translateX(2px);
+  }
+  50% {
+    transform: translateX(-1px);
+  }
+  60% {
+    transform: translateX(1px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulseSlow {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes screenGlitch {
+  0% {
+    transform: translate(0) scale(1);
+    filter: contrast(1);
+  }
+
+  20% {
+    transform: translate(-4px, 2px) skewX(2deg);
+    filter: contrast(2) hue-rotate(90deg) drop-shadow(4px 0px 0px red) drop-shadow(-4px 0px 0px cyan);
+  }
+
+  40% {
+    transform: translate(4px, -2px) skewX(-2deg);
+    filter: contrast(2) hue-rotate(90deg) drop-shadow(4px 0px 0px red) drop-shadow(-4px 0px 0px cyan);
+  }
+
+  60% {
+    transform: translate(-2px, 4px) skewX(1deg);
+    filter: contrast(1.5) drop-shadow(2px 0px 0px red);
+  }
+
+  80% {
+    transform: translate(2px, -4px) skewX(-1deg);
+    filter: contrast(1.5) drop-shadow(-2px 0px 0px cyan);
+  }
+
+  100% {
+    transform: translate(0) scale(1);
+    filter: contrast(1);
+  }
+}
+
+.animate-glitch {
+  animation: screenGlitch 0.3s cubic-bezier(.25, .46, .45, .94) both;
+}
+
+@keyframes agentPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+    border-color: #fff;
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+    border-color: #fff;
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+.animate-agent-pulse {
+  animation: agentPulse 1s ease-out;
+}
+
+@keyframes calendarGlassFade {
+  0% {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+    transform: translateY(-6px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    backdrop-filter: blur(14px);
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes micPulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
+  }
+}
+
+/* ─── PrismJS Monochrome 'Nothing' Theme ───────────────────────── */
+pre[class*="language-"],
+code[class*="language-"] {
+  color: #bbb;
+  font-family: "Space Mono", "JetBrains Mono", monospace;
+  font-size: 13px;
+  text-shadow: none;
+  direction: ltr;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  line-height: 1.5;
+  tab-size: 4;
+  hyphens: none;
+  background: transparent;
+}
+
+/* Tokens */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #555555;
+  font-style: italic;
+}
+
+.token.punctuation {
+  color: #888888;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #999999;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: #666666;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: #777777;
+}
+
+.token.function,
+.token.class-name {
+  color: #aaaaaa;
+}
+
+.token.keyword {
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+  color: #ef4444;
+  /* Subtle alarm red accent */
+}
+
+/* ─── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .three-col-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .three-col-grid {
+    grid-template-columns: 260px 1fr 280px !important;
+  }
+}
