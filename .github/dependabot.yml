@@ -1,0 +1,12 @@
+version: 2
+updates:
+  # Maintain dependencies for npm
+  - package-ecosystem: "npm"
+    # Look for the package.json in the root directory
+    directory: "/"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      # You can also specify a day and time, for example:
+      # day: "monday"
+      # time: "09:00"

@@ -22,6 +22,7 @@ export default function RichScratchpad({ onAddTask, onAddAlarm }) {
   const [isShrinking, setIsShrinking] = useState(false);
   const [processedItems, setProcessedItems] = useLocalStorage('nlm-processed', []);
   const [isListening, setIsListening] = useState(false);
+  const [micError, setMicError] = useState('');
 
   const editorRef = useRef(null);
   const debounceRef = useRef(null);
@@ -45,6 +46,8 @@ export default function RichScratchpad({ onAddTask, onAddAlarm }) {
     recognition.lang = 'en-US';
 
     recognition.onresult = (event) => {
+      // Speech detected — kill the silence watchdog
+      clearTimeout(silenceTimerRef.current);
       let finalTranscript = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
@@ -52,8 +55,10 @@ export default function RichScratchpad({ onAddTask, onAddAlarm }) {
         }
       }
       if (finalTranscript && editorRef.current) {
-        // Append transcribed text to editor
-        const textNode = document.createTextNode(finalTranscript + ' ');
+        // Append transcribed text as new bullet line
+        const br = document.createElement('br');
+        const textNode = document.createTextNode('• ' + finalTranscript.trim() + ' ');
+        editorRef.current.appendChild(br);
         editorRef.current.appendChild(textNode);
         // Move cursor to end
         const range = document.createRange();
@@ -68,7 +73,12 @@ export default function RichScratchpad({ onAddTask, onAddAlarm }) {
     };
 
     recognition.onerror = (event) => {
-      console.warn('Speech recognition error:', event.error);
+      if (event.error === 'no-speech') {
+        setMicError('Could not hear anything, please try again.');
+        setTimeout(() => setMicError(''), 4000);
+      } else {
+        console.warn('Speech recognition error:', event.error);
+      }
       setIsListening(false);
     };
 
@@ -85,18 +95,43 @@ export default function RichScratchpad({ onAddTask, onAddAlarm }) {
     };
   }, []);
 
-  const toggleSpeechRecognition = useCallback(() => {
+  const silenceTimerRef = useRef(null);
+
+  const toggleSpeechRecognition = useCallback(async () => {
     playMechanicalClick();
     if (!recognitionRef.current) {
-      alert('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
+      setMicError('Speech recognition not supported. Please use Chrome or Edge.');
+      setTimeout(() => setMicError(''), 4000);
       return;
     }
     if (isListening) {
+      clearTimeout(silenceTimerRef.current);
       recognitionRef.current.stop();
       setIsListening(false);
-    } else {
+      return;
+    }
+    // Request microphone permission first
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch {
+      setMicError('Microphone access required for voice input.');
+      setTimeout(() => setMicError(''), 4000);
+      return;
+    }
+    // Silence watchdog: auto-stop after 8s if no speech detected
+    silenceTimerRef.current = setTimeout(() => {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch {}
+      }
+      setMicError('Could not hear anything, please try again.');
+      setTimeout(() => setMicError(''), 4000);
+    }, 8000);
+    try {
       recognitionRef.current.start();
       setIsListening(true);
+    } catch (e) {
+      clearTimeout(silenceTimerRef.current);
+      console.warn('Recognition start error:', e);
     }
   }, [isListening]);
 
@@ -408,6 +443,13 @@ Rules:
             </svg>
           </button>
         </div>
+
+        {/* Mic error banner */}
+        {micError && (
+          <div className="mx-5 mt-2 px-3 py-2 rounded-sm border border-red-900/60 bg-red-950/30 text-[10px] text-red-400 font-dotmatrix tracking-wider animate-fade-in">
+            ⚠ {micError}
+          </div>
+        )}
 
         <div
           ref={editorRef}

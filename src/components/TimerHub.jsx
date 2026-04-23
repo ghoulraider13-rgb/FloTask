@@ -40,13 +40,23 @@ export default function TimerHub() {
   let strokeColor = '#fff';
   if (isRunning) {
     if (timerMode === 'pomodoro' && pomoPhase === 'break') {
-      strokeColor = '#34d399';
-      glowFilter = 'drop-shadow(0 0 15px rgba(52,211,153,0.6))';
+      // Final 60s: interpolate green → amber
+      if (pomoTime > 60) {
+        strokeColor = '#34d399';
+        glowFilter = 'drop-shadow(0 0 15px rgba(52,211,153,0.6))';
+      } else {
+        const ratio = 1 - pomoTime / 60; // 0 at 60s → 1 at 0s
+        const r = Math.round(0x34 + (0xff - 0x34) * ratio);
+        const g = Math.round(0xd3 + (0xeb - 0xd3) * ratio);
+        const b = Math.round(0x99 + (0x3b - 0x99) * ratio);
+        strokeColor = `rgb(${r},${g},${b})`;
+        glowFilter = `drop-shadow(0 0 15px rgba(${r},${g},${b},0.65))`;
+      }
     } else if (progress <= 0.5) {
       glowFilter = 'drop-shadow(0 0 8px rgba(255,255,255,0.7))';
       strokeColor = '#fff';
     } else if (progress <= 0.9) {
-      glowFilter = 'drop-shadow(0 0 12px rgba(253,230,138,0.8))'; // warm cream
+      glowFilter = 'drop-shadow(0 0 12px rgba(253,230,138,0.8))';
       strokeColor = '#fde68a';
     } else {
       glowFilter = 'drop-shadow(0 0 15px rgba(255,255,255,1)) drop-shadow(0 0 25px rgba(255,255,255,0.8))';
@@ -138,9 +148,14 @@ export default function TimerHub() {
 
   const handleReset = () => {
     playMechanicalClick();
+    // Explicitly kill the interval before state updates
+    clearInterval(intervalRef.current);
+    intervalRef.current = null;
     setIsRunning(false);
     if (timerMode === 'pomodoro') {
-      setPomoTime(pomoPhase === 'work' ? workDuration : breakDuration);
+      // Always reset to work phase, clearing any rest-phase colour state
+      setPomoPhase('work');
+      setPomoTime(workDuration);
     } else {
       setRegTime(regTotal);
     }
@@ -268,12 +283,17 @@ export default function TimerHub() {
                   />
                 </div>
               ) : (
-                <span className={`text-4xl font-mono tracking-widest text-white leading-none ${isRunning && progress > 0.9 ? 'animate-pulse' : ''}`}>
+                <span
+                  className={`text-4xl font-dotmatrix tracking-widest leading-none transition-colors duration-700 ${isRunning && progress > 0.9 ? 'animate-pulse' : ''}`}
+                  style={{ color: (isRunning && timerMode === 'pomodoro' && pomoPhase === 'break') ? strokeColor : '#ffffff' }}
+                >
                   {timerMode === 'regular' ? formatTimeLong(currentTime) : formatTime(currentTime)}
                 </span>
               )}
               
-              <span className={`text-[10px] font-dotmatrix tracking-[0.25em] mt-3 pointer-events-none ${phaseLabel === 'REST' ? 'text-emerald-400' : 'text-gray-400'}`}>
+              <span className={`text-[10px] font-dotmatrix tracking-[0.25em] mt-3 pointer-events-none`}
+                style={{ color: (isRunning && timerMode === 'pomodoro' && pomoPhase === 'break') ? strokeColor : (phaseLabel === 'REST' ? '#34d399' : '#9ca3af') }}
+              >
                 {timerMode === 'regular' && !isRunning ? 'CLICK & TYPE' : phaseLabel}
               </span>
             </div>

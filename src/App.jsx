@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useReminders, fireBrowserNotification } from './hooks/useReminders';
 import { createTask } from './utils/taskHelpers';
@@ -7,6 +7,7 @@ import { playGentleChime, playStandardAlarm, playEnforcerAlarm } from './utils/a
 import ReactiveGrid from './components/ReactiveGrid';
 import TimerHub from './components/TimerHub';
 import TaskList from './components/TaskList';
+import StopwatchModule from './components/StopwatchModule';
 import RichScratchpad from './components/RichScratchpad';
 import AlarmsHub from './components/AlarmSection';
 import NotificationToast from './components/NotificationToast';
@@ -21,6 +22,24 @@ export default function App() {
   const [mediumAlert, setMediumAlert] = useState(null);
   const [enforcerAlert, setEnforcerAlert] = useState(null);
   const alarmStopRef = useRef(null);
+
+  // ── Cursor glow (direct DOM — zero re-renders) ───────────────────
+  const glowRef = useRef(null);
+  useEffect(() => {
+    const glow = glowRef.current;
+    if (!glow) return;
+    const onMove = (e) => {
+      glow.style.transform = `translate(${e.clientX - 60}px, ${e.clientY - 60}px)`;
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const over = !!el?.closest('button, input, [contenteditable], textarea, a, label, select');
+      glow.style.opacity = over ? '1' : '0.45';
+      glow.style.background = over
+        ? 'radial-gradient(circle, rgba(0,255,255,0.13) 0%, rgba(255,255,255,0.07) 40%, transparent 70%)'
+        : 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%)';
+    };
+    window.addEventListener('mousemove', onMove, { passive: true });
+    return () => window.removeEventListener('mousemove', onMove);
+  }, []);
 
   // ── Alert dispatcher ──────────────────────────────────────────
   const handleAlert = useCallback((item, source) => {
@@ -97,6 +116,26 @@ export default function App() {
 
   return (
     <div className="relative">
+      {/* ── Cursor Glow Layer ─────────────────────────────────── */}
+      <div
+        ref={glowRef}
+        aria-hidden="true"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: 120,
+          height: 120,
+          borderRadius: '50%',
+          pointerEvents: 'none',
+          zIndex: 9998,
+          filter: 'blur(6px)',
+          willChange: 'transform',
+          transition: 'background 0.18s ease, opacity 0.18s ease',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%)',
+        }}
+      />
+
       {/* Reactive Magnetic Background */}
       <ReactiveGrid />
 
@@ -144,8 +183,8 @@ export default function App() {
             />
           </aside>
 
-          {/* Center — Tasks */}
-          <main className="min-h-[60vh]">
+          {/* Center — Tasks + Stopwatch */}
+          <main className="min-h-[60vh] flex flex-col gap-5">
             <TaskList
               tasks={tasks}
               onAddTask={handleAddTask}
@@ -153,6 +192,7 @@ export default function App() {
               onDeleteTask={handleDeleteTask}
               onSetReminder={handleSetReminder}
             />
+            <StopwatchModule />
           </main>
 
           {/* Right — Scratchpad */}
