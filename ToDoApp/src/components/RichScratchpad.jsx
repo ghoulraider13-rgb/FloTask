@@ -7,6 +7,7 @@ import 'prismjs/components/prism-css';
 import SavedNotes from './SavedNotes';
 
 import { playMechanicalClick } from '../utils/audioHelpers';
+import useVoiceInput from '../hooks/useVoiceInput';
 
 export default function RichScratchpad({ onAddTask, onAddAlarm }) {
   const [initialHtml] = useState(() => {
@@ -22,6 +23,8 @@ export default function RichScratchpad({ onAddTask, onAddAlarm }) {
   const editorRef = useRef(null);
   const debounceRef = useRef(null);
   const fileInputRef = useRef(null);
+  // Voice input hook
+  const { listening, transcript, startListening, stopListening } = useVoiceInput();
 
   useEffect(() => {
     if (editorRef.current && initialHtml && !editorRef.current.innerHTML) {
@@ -29,52 +32,62 @@ export default function RichScratchpad({ onAddTask, onAddAlarm }) {
     }
   }, [initialHtml]);
 
+  // Insert spoken transcript into the editor and trigger NLM processing
+  useEffect(() => {
+    if (!transcript) return;
+    if (!editorRef.current) return;
+    const sel = window.getSelection();
+    if (sel?.rangeCount) {
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      const textNode = document.createTextNode(transcript + ' ');
+      range.insertNode(textNode);
+      range.collapse(false);
+    } else {
+      editorRef.current.focus();
+      document.execCommand('insertText', false, transcript + ' ');
+    }
+    // Run the same input handling to fire NLM after inserting the spoken text
+    handleInput();
+    // Clear transcript to avoid re‑inserting on next render
+    // (useVoiceInput manages its own state; we don't reset here to keep listening continuity)
+  }, [transcript]);
+
+//  const parseIntentWithGemini = async (fullText) => {
+
   const parseIntentWithGemini = async (fullText) => {
-    // PASTE THIS NEW FUNCTION
-    const parseIntentWithGemini = async (fullText) => {
       try {
         const prompt = `You are a strict JSON parser and intelligent task prioritization agent. Analyze this text: '${fullText}'. Extract tasks and alarms.
-Return ONLY a valid JSON object with the following schema:
-{
-  "tasks": [{ "title": "string", "priority": "High" | "Medium" | "Low" }],
-  "alarms": [{ "label": "string", "time": "HH:MM (24-hour)", "priority": "High" | "Medium" | "Low" }]
-}
-Rules:
-1. If "tonight" or "evening" is mentioned without an exact time, default to "19:00" today.
-2. If no clear items exist, return { "tasks": [], "alarms": [] }.
-3. Return ONLY valid JSON, no markdown formatting, no backticks.
-4. PRIORITY ASSIGNMENT (CRITICAL):
-   - "High": Tasks with deadlines (e.g., "due tomorrow", "tonight", "urgent", "ASAP"), time-sensitive activities, health/safety, meetings.
-   - "Medium": Tasks with moderate importance, scheduled activities without hard deadlines, regular commitments (e.g., "gym tonight").
-   - "Low": Casual notes, ideas, shopping lists, things with no time pressure.
-5. Always evaluate semantic urgency from context — "Finish ML lab due tomorrow" is High, "Buy groceries" is Low.`;
+  Return ONLY a valid JSON object with the following schema:
+  {
+    "tasks": [{ "title": "string", "priority": "High" | "Medium" | "Low" }],
+    "alarms": [{ "label": "string", "time": "HH:MM (24-hour)", "priority": "High" | "Medium" | "Low" }]
+  }
+  Rules:
+  1. If "tonight" or "evening" is mentioned without an exact time, default to "19:00" today.
+  2. If no clear items exist, return { "tasks": [], "alarms": [] }.
+  3. Return ONLY valid JSON, no markdown formatting, no backticks.
+  4. PRIORITY ASSIGNMENT (CRITICAL):
+     - "High": Tasks with deadlines (e.g., "due tomorrow", "tonight", "urgent", "ASAP"), time-sensitive activities, health/safety, meetings.
+     - "Medium": Tasks with moderate importance, scheduled activities without hard deadlines, regular commitments (e.g., "gym tonight").
+     - "Low": Casual notes, ideas, shopping lists, things with no time pressure.
+  5. Always evaluate semantic urgency from context — "Finish ML lab due tomorrow" is High, "Buy groceries" is Low.`;
 
-        // Securely call your new backend
         const response = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: prompt })
+          body: JSON.stringify({ prompt })
         });
-
         if (!response.ok) throw new Error('Network response was not ok');
-
-        const resultData = await response.json();
-        const output = resultData.text.trim();
-
-        const cleaned = output.replace(/```json/g, "").replace(/```/g, "").trim();
+        const result = await response.json();
+        const output = result.text.trim();
+        const cleaned = output.replace(/```json/g, '').replace(/```/g, '').trim();
         const data = JSON.parse(cleaned);
-
-        if (data && (data.tasks || data.alarms)) {
-          return { tasks: data.tasks || [], alarms: data.alarms || [] };
-        }
+        return { tasks: data.tasks || [], alarms: data.alarms || [] };
       } catch (e) {
-        console.error("Secure API Error:", e);
+        console.error('Gemini parse error:', e);
+        return { tasks: [], alarms: [] };
       }
-      return { tasks: [], alarms: [] };
-    };
-    return { tasks: [], alarms: [] };
-  };
-
   const analyzeNLM = async () => {
     if (!editorRef.current) return;
     const text = editorRef.current.innerText || editorRef.current.textContent;
@@ -314,6 +327,9 @@ Rules:
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V5.25a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v14.25a1.5 1.5 0 001.5 1.5z" /></svg>
           </button>
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
+          <button type="button" onClick={() => { if (!listening) startListening(); else stopListening(); }} className="w-8 h-8 rounded-md text-gray-500 hover:text-white hover:bg-surface-3 flex items-center justify-center" title="Voice input">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 1v22M5 12h14" /></svg>
+          </button>
         </div>
 
         <div
