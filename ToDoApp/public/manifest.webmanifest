@@ -1,0 +1,32 @@
+{
+  "name": "FloTask — Focus · Flow · Finish",
+  "short_name": "FloTask",
+  "description": "AI-powered task manager: type or speak naturally and tasks schedule themselves. Pomodoro, alarms, scratchpad.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0a14",
+  "theme_color": "#0a0a14",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

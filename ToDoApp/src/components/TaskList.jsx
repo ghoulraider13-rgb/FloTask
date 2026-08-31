@@ -3,11 +3,11 @@ import AddTaskForm from './AddTaskForm';
 import TaskItem from './TaskItem';
 import { partitionTasks } from '../utils/taskHelpers';
 
-export default function TaskList({ tasks, onAddTask, onToggleTask, onDeleteTask, onSetReminder }) {
+export default function TaskList({ tasks, onAddTask, onToggleTask, onDeleteTask, onNlmText }) {
   const { active, done } = useMemo(() => partitionTasks(tasks), [tasks]);
 
   return (
-    <div className="nothing-card p-6 flex flex-col gap-5 h-full">
+    <div className="nothing-card p-5 sm:p-6 flex flex-col gap-5 h-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase">TASKS</h3>
@@ -19,8 +19,8 @@ export default function TaskList({ tasks, onAddTask, onToggleTask, onDeleteTask,
         </div>
       </div>
 
-      {/* Add Task */}
-      <AddTaskForm onAddTask={onAddTask} />
+      {/* Add Task (typed or spoken, parsed by the NLM) */}
+      <AddTaskForm onAddTask={onAddTask} onNlmText={onNlmText} />
 
       {/* Active Tasks */}
       <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
@@ -32,7 +32,7 @@ export default function TaskList({ tasks, onAddTask, onToggleTask, onDeleteTask,
               </svg>
             </div>
             <p className="text-xs text-gray-500 font-mono tracking-wider uppercase">All clear</p>
-            <p className="text-[10px] text-gray-700 mt-1">Add a task to get started</p>
+            <p className="text-[10px] text-gray-700 mt-1">Type or speak a task to get started</p>
           </div>
         )}
         {active.map((task) => (

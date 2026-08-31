@@ -41,6 +41,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   overflow-x: hidden;
+  /* Respect iPhone notch/home-indicator when installed as an app */
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
 }
 
 body::before {
@@ -587,6 +590,25 @@ code[class*="language-"] {
 @media (max-width: 1024px) {
   .three-col-grid {
     grid-template-columns: 1fr !important;
+  }
+
+  /* Scratchpad: compact on phones instead of the desktop 600px slab */
+  .rich-editor {
+    min-height: 140px;
+    max-height: 260px;
+  }
+
+  /* Timer ring and controls fit narrow screens */
+  header h1 {
+    letter-spacing: 0.22em;
+  }
+}
+
+/* Touch devices have no hover: enlarge hit targets slightly */
+@media (hover: none) {
+  .task-checkbox {
+    width: 26px;
+    height: 26px;
   }
 }
 

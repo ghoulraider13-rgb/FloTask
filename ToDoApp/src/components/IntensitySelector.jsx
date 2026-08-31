@@ -7,7 +7,7 @@ const COLORS_ACTIVE = {
   high: 'bg-red-500 text-white border-red-400',
 };
 
-export default function IntensitySelector({ value, onChange, compact = false }) {
+export default function IntensitySelector({ value, onChange }) {
   return (
     <div className="flex gap-1.5">
       {INTENSITY_LEVELS.map((level) => {

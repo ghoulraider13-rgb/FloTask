@@ -53,7 +53,7 @@ export function useReminders(tasks, alarms, onAlert) {
 /** Fire a browser notification (low intensity fallback). */
 export function fireBrowserNotification(title, body) {
   if ('Notification' in window && Notification.permission === 'granted') {
-    const n = new Notification(title, { body, icon: '/vite.svg' });
+    const n = new Notification(title, { body, icon: '/icons/icon-192.png' });
     setTimeout(() => n.close(), 8000);
   }
 }

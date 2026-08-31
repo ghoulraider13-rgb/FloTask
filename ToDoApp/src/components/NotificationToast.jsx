@@ -13,7 +13,7 @@ export default function NotificationToast({ message, subtext, onDismiss }) {
 
   return (
     <div
-      className={`fixed top-5 right-5 z-[60] max-w-sm transition-all duration-300 ease-out ${
+      className={`fixed z-[60] top-5 inset-x-4 sm:inset-x-auto sm:right-5 max-w-sm transition-all duration-300 ease-out ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
       }`}
     >

@@ -7,8 +7,8 @@ const RING_R = 75;
 const RING_C = 2 * Math.PI * RING_R;
 
 export default function TimerHub() {
-  const [workDuration, setWorkDuration] = useLocalStorage('pomo-work-dur', 25 * 60);
-  const [breakDuration, setBreakDuration] = useLocalStorage('pomo-break-dur', 5 * 60);
+  const [workDuration] = useLocalStorage('pomo-work-dur', 25 * 60);
+  const [breakDuration] = useLocalStorage('pomo-break-dur', 5 * 60);
 
   const [timerMode, setTimerMode] = useLocalStorage('timer-hub-mode', 'pomodoro');
   const [pomoPhase, setPomoPhase] = useLocalStorage('pomo-phase', 'work');
@@ -79,7 +79,7 @@ export default function TimerHub() {
     }, 1000);
 
     return () => clearInterval(intervalRef.current);
-  }, [isRunning, timerMode, pomoPhase, setPomoTime, setRegTime, setPomoPhase, setSessions]);
+  }, [isRunning, timerMode, pomoPhase, workDuration, breakDuration, setPomoTime, setRegTime, setPomoPhase, setSessions]);
 
   const commitCustomTime = useCallback(() => {
     const h = parseInt(hours || '0', 10);
@@ -114,8 +114,14 @@ export default function TimerHub() {
 
   useEffect(() => {
     if (timerMode === 'regular' && !isRunning) {
+      // Sync the H/M/S input fields from the persisted custom duration.
+      // Derived-state sync; no external system to subscribe to, so the
+      // recommended "avoid setState in effect" pattern does not apply here.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHours(String(Math.floor(regTime / 3600)).padStart(2, '0'));
+       
       setMinutes(String(Math.floor((regTime % 3600) / 60)).padStart(2, '0'));
+       
       setSeconds(String(regTime % 60).padStart(2, '0'));
     }
   }, [timerMode, regTime, isRunning]);

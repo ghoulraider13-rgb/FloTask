@@ -1,7 +1,8 @@
 import { useState, useCallback, useRef } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useReminders, fireBrowserNotification } from './hooks/useReminders';
-import { createTask } from './utils/taskHelpers';
+import { createTask, actionToTaskOrAlarm } from './utils/taskHelpers';
+import { parseActions } from './utils/nlm';
 import { playGentleChime, playStandardAlarm, playEnforcerAlarm } from './utils/audioHelpers';
 
 import TimerHub from './components/TimerHub';
@@ -94,6 +95,34 @@ export default function App() {
     setAlarms((prev) => prev.filter((a) => a.id !== id));
   }, [setAlarms]);
 
+  // ── NLM (natural-language model) ───────────────────────────────
+  // Materialize a batch of parsed actions (from the scratchpad agent).
+  const handleNlmActions = useCallback((actions) => {
+    let created = 0;
+    actions.forEach((action) => {
+      const parsed = actionToTaskOrAlarm(action);
+      if (!parsed) return;
+      created++;
+      if (parsed.kind === 'alarm') handleAddAlarm(parsed.alarm);
+      else handleAddTask(parsed.task.title, parsed.task);
+    });
+    if (created > 0) {
+      fireBrowserNotification('🤖 FloTask Agent', `${created} item${created > 1 ? 's' : ''} created from your note`);
+    }
+    return created;
+  }, [handleAddAlarm, handleAddTask]);
+
+  // Parse one free-form sentence (typed or spoken) into task(s)/alarm(s).
+  const handleNlmText = useCallback(async (text) => {
+    const actions = await parseActions(text);
+    if (!actions || actions.length === 0) {
+      // NLM found nothing actionable → keep the user's words as a plain task
+      handleAddTask(text, {});
+      return 1;
+    }
+    return handleNlmActions(actions);
+  }, [handleAddTask, handleNlmActions]);
+
   return (
     <div className="relative">
       {/* Toast notifications */}
@@ -148,12 +177,13 @@ export default function App() {
               onToggleTask={handleToggleTask}
               onDeleteTask={handleDeleteTask}
               onSetReminder={handleSetReminder}
+              onNlmText={handleNlmText}
             />
           </main>
 
           {/* Right — Scratchpad */}
-          <aside className="lg:sticky lg:top-12 h-[calc(100vh-8rem)] min-h-[600px] flex flex-col">
-            <RichScratchpad onAddTask={handleAddTask} onAddAlarm={handleAddAlarm} />
+          <aside className="lg:sticky lg:top-12 lg:h-[calc(100vh-8rem)] lg:min-h-[600px] flex flex-col">
+            <RichScratchpad onNlmActions={handleNlmActions} />
           </aside>
         </div>
       </div>

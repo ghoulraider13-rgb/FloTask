@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import IntensitySelector from './IntensitySelector';
-import { createAlarm, formatDateTime } from '../utils/taskHelpers';
+import { createAlarm, toLocalInputValue } from '../utils/taskHelpers';
 import { playMechanicalClick } from '../utils/audioHelpers';
 
 export default function AlarmsHub({ alarms, onAdd, onDelete }) {
@@ -21,7 +21,7 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
     setShowForm(false);
   };
 
-  const minDateTime = new Date(Date.now() - 60000).toISOString().slice(0, 16);
+  const minDateTime = toLocalInputValue(new Date(Date.now() - 60000));
   const activeAlarms = alarms.filter((a) => !a.fired);
 
   const formatAlarmTime = (iso) => {
@@ -47,16 +47,14 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
     playMechanicalClick();
     const d = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
     d.setHours(9, 0, 0, 0);
-    const offset = d.getTimezoneOffset() * 60000;
-    const localISOTime = (new Date(d - offset)).toISOString().slice(0, 16);
-    setDateTime(localISOTime);
+    setDateTime(toLocalInputValue(d));
     if (!showForm) setShowForm(true);
   };
 
   const calendarDays = [];
   const startDay = getFirstDayOfMonth(currentMonth);
   const daysInMonth = getDaysInMonth(currentMonth);
-  
+
   for (let i = 0; i < startDay; i++) {
     calendarDays.push(<div key={`empty-${i}`} className="w-6 h-6" />);
   }
@@ -101,18 +99,19 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
 
             {/* Label and Date */}
             <span className="text-[10px] text-gray-500 font-dotmatrix uppercase truncate max-w-[150px] flex items-baseline ml-auto">
-              {alarm.label && alarm.label !== 'Alarm' ? alarm.label : ''} 
+              {alarm.label && alarm.label !== 'Alarm' ? alarm.label : ''}
               <span className="text-[10px] opacity-60 ml-2 font-mono tracking-widest">- {formatAlarmDate(alarm.dateTime)}</span>
             </span>
 
             {/* Custom Toggle Symbol */}
             <span className="text-white text-[10px] tracking-widest pl-1.5 font-dotmatrix">⏽</span>
 
-            {/* Delete */}
+            {/* Delete — always visible (mobile has no hover) */}
             <button
               onClick={() => { playMechanicalClick(); onDelete(alarm.id); }}
-              className="opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-500 transition-all ml-1"
+              className="text-gray-600 hover:text-red-500 transition-all ml-1 p-1"
               title="Remove"
+              aria-label="Remove alarm"
             >
               <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-javascript';
@@ -8,8 +9,9 @@ import SavedNotes from './SavedNotes';
 
 import { playMechanicalClick } from '../utils/audioHelpers';
 import useVoiceInput from '../hooks/useVoiceInput';
+import { parseActions } from '../utils/nlm';
 
-export default function RichScratchpad({ onAddTask, onAddAlarm }) {
+export default function RichScratchpad({ onNlmActions }) {
   const [initialHtml] = useState(() => {
     try {
       const stored = window.localStorage.getItem('scratchpad-rich');
@@ -19,12 +21,18 @@ export default function RichScratchpad({ onAddTask, onAddAlarm }) {
   const [notes, setNotes] = useLocalStorage('saved-notes', []);
   const [isShrinking, setIsShrinking] = useState(false);
   const [processedItems, setProcessedItems] = useLocalStorage('nlm-processed', []);
+  const processedRef = useRef(processedItems);
+  useEffect(() => { processedRef.current = processedItems; }, [processedItems]);
 
   const editorRef = useRef(null);
   const debounceRef = useRef(null);
   const fileInputRef = useRef(null);
-  // Voice input hook
-  const { listening, transcript, startListening, stopListening } = useVoiceInput();
+
+  // Voice input hook (Web Speech API)
+  const {
+    listening, supported: voiceSupported, error: voiceError,
+    finalTranscript, startListening, stopListening,
+  } = useVoiceInput();
 
   useEffect(() => {
     if (editorRef.current && initialHtml && !editorRef.current.innerHTML) {
@@ -32,138 +40,98 @@ export default function RichScratchpad({ onAddTask, onAddAlarm }) {
     }
   }, [initialHtml]);
 
-  // Insert spoken transcript into the editor and trigger NLM processing
-  useEffect(() => {
-    if (!transcript) return;
-    if (!editorRef.current) return;
-    const sel = window.getSelection();
-    if (sel?.rangeCount) {
-      const range = sel.getRangeAt(0);
-      range.deleteContents();
-      const textNode = document.createTextNode(transcript + ' ');
-      range.insertNode(textNode);
-      range.collapse(false);
-    } else {
-      editorRef.current.focus();
-      document.execCommand('insertText', false, transcript + ' ');
-    }
-    // Run the same input handling to fire NLM after inserting the spoken text
-    handleInput();
-    // Clear transcript to avoid re‑inserting on next render
-    // (useVoiceInput manages its own state; we don't reset here to keep listening continuity)
-  }, [transcript]);
-
-//  const parseIntentWithGemini = async (fullText) => {
-
-  const parseIntentWithGemini = async (fullText) => {
-      try {
-        const prompt = `You are a strict JSON parser and intelligent task prioritization agent. Analyze this text: '${fullText}'. Extract tasks and alarms.
-  Return ONLY a valid JSON object with the following schema:
-  {
-    "tasks": [{ "title": "string", "priority": "High" | "Medium" | "Low" }],
-    "alarms": [{ "label": "string", "time": "HH:MM (24-hour)", "priority": "High" | "Medium" | "Low" }]
-  }
-  Rules:
-  1. If "tonight" or "evening" is mentioned without an exact time, default to "19:00" today.
-  2. If no clear items exist, return { "tasks": [], "alarms": [] }.
-  3. Return ONLY valid JSON, no markdown formatting, no backticks.
-  4. PRIORITY ASSIGNMENT (CRITICAL):
-     - "High": Tasks with deadlines (e.g., "due tomorrow", "tonight", "urgent", "ASAP"), time-sensitive activities, health/safety, meetings.
-     - "Medium": Tasks with moderate importance, scheduled activities without hard deadlines, regular commitments (e.g., "gym tonight").
-     - "Low": Casual notes, ideas, shopping lists, things with no time pressure.
-  5. Always evaluate semantic urgency from context — "Finish ML lab due tomorrow" is High, "Buy groceries" is Low.`;
-
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt })
-        });
-        if (!response.ok) throw new Error('Network response was not ok');
-        const result = await response.json();
-        const output = result.text.trim();
-        const cleaned = output.replace(/```json/g, '').replace(/```/g, '').trim();
-        const data = JSON.parse(cleaned);
-        return { tasks: data.tasks || [], alarms: data.alarms || [] };
-      } catch (e) {
-        console.error('Gemini parse error:', e);
-        return { tasks: [], alarms: [] };
+  const flashAgentIndicator = useCallback(() => {
+    const saveIndicator = document.getElementById('save-indicator');
+    if (!saveIndicator) return;
+    const prevTx = saveIndicator.textContent;
+    saveIndicator.textContent = 'Agent Executed Actions';
+    saveIndicator.classList.add('text-emerald-400');
+    setTimeout(() => {
+      if (saveIndicator) {
+        saveIndicator.textContent = prevTx;
+        saveIndicator.classList.remove('text-emerald-400');
       }
-  const analyzeNLM = async () => {
+    }, 3000);
+  }, []);
+
+  /**
+   * Send the scratchpad text to the NLM and materialize any new
+   * tasks/alarms it extracts (deduped by type+title).
+   */
+  const analyzeNLM = useCallback(async () => {
     if (!editorRef.current) return;
-    const text = editorRef.current.innerText || editorRef.current.textContent;
+    const text = (editorRef.current.innerText || editorRef.current.textContent || '').trim();
     if (text.length < 5) return;
-
-    const intent = await parseIntentWithGemini(text);
-    if (intent && (intent.tasks.length > 0 || intent.alarms.length > 0)) {
-      let newlyProcessed = [];
-
-      intent.tasks.forEach(taskStr => {
-        const hash = "TASK:" + taskStr.toLowerCase().trim();
-        if (!processedItems.includes(hash)) {
-          onAddTask(taskStr, { intensity: 'medium', reminderDateTime: null, isAgentCreated: true });
-          newlyProcessed.push(hash);
+    try {
+      const actions = await parseActions(text);
+      const fresh = [];
+      actions.forEach((a) => {
+        const hash = `${a.type}:${a.title.toLowerCase().trim()}`;
+        if (!processedRef.current.includes(hash)) {
+          fresh.push({ ...a, hash });
         }
       });
-
-      intent.alarms.forEach(alarmObj => {
-        const hash = "ALARM:" + alarmObj.label.toLowerCase().trim() + alarmObj.time;
-        if (!processedItems.includes(hash)) {
-          const d = new Date();
-          d.setSeconds(0);
-          const timeMatch = alarmObj.time.match(/(\d{1,2})(?::(\d{2}))?/i);
-          if (timeMatch) {
-            d.setHours(parseInt(timeMatch[1], 10), timeMatch[2] ? parseInt(timeMatch[2], 10) : 0);
-          } else {
-            d.setHours(19, 0); // default fallback
-          }
-          onAddAlarm({ id: crypto.randomUUID(), label: alarmObj.label, dateTime: d.toISOString(), intensity: 'medium', fired: false, isAgentCreated: true });
-          newlyProcessed.push(hash);
-        }
-      });
-
-      if (newlyProcessed.length > 0) {
-        setProcessedItems(prev => [...prev, ...newlyProcessed]);
-        const saveIndicator = document.getElementById('save-indicator');
-        if (saveIndicator) {
-          const prevTx = saveIndicator.textContent;
-          saveIndicator.textContent = "Agent Executed Actions";
-          saveIndicator.classList.add("text-emerald-400");
-          setTimeout(() => {
-            if (saveIndicator) {
-              saveIndicator.textContent = prevTx;
-              saveIndicator.classList.remove("text-emerald-400");
-            }
-          }, 3000);
-        }
+      if (fresh.length > 0) {
+        onNlmActions(fresh);
+        setProcessedItems((prev) => [...prev, ...fresh.map((f) => f.hash)]);
+        flashAgentIndicator();
       }
+    } catch (e) {
+      console.warn('NLM parse skipped:', e?.message);
     }
-  };
+  }, [onNlmActions, setProcessedItems, flashAgentIndicator]);
 
   const handleInput = useCallback(() => {
     clearTimeout(debounceRef.current);
     const saveIndicator = document.getElementById('save-indicator');
-    if (saveIndicator && saveIndicator.textContent !== "Agent Executed Actions") {
+    if (saveIndicator && saveIndicator.textContent !== 'Agent Executed Actions') {
       saveIndicator.textContent = 'saving';
     }
 
     debounceRef.current = setTimeout(() => {
       if (editorRef.current) {
-        // NLM processing
-        analyzeNLM();
+        analyzeNLM(); // debounced NLM processing
 
         // Prism Debounced Highlighting
         const codeBlocks = editorRef.current.querySelectorAll('pre code');
         if (codeBlocks.length > 0) {
-          codeBlocks.forEach(block => Prism.highlightElement(block));
+          codeBlocks.forEach((block) => Prism.highlightElement(block));
         }
 
         window.localStorage.setItem('scratchpad-rich', JSON.stringify(editorRef.current.innerHTML));
       }
-      if (saveIndicator && saveIndicator.textContent !== "Agent Executed Actions") {
-        saveIndicator.textContent = 'saved';
+      const indicator = document.getElementById('save-indicator');
+      if (indicator && indicator.textContent !== 'Agent Executed Actions') {
+        indicator.textContent = 'saved';
       }
     }, 2000); // 2 second debounce for NLM API calls
   }, [analyzeNLM]);
+
+  // Insert the final spoken transcript at the cursor; the debounced NLM picks it up.
+  const lastVoiceInsertRef = useRef('');
+  useEffect(() => {
+    if (!finalTranscript) return;
+    const t = finalTranscript.trim();
+    if (!t || lastVoiceInsertRef.current === t) return;
+    lastVoiceInsertRef.current = t;
+    if (!editorRef.current) return;
+
+    editorRef.current.focus();
+    const sel = window.getSelection();
+    if (sel?.rangeCount) {
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      const textNode = document.createTextNode(t + ' ');
+      range.insertNode(textNode);
+      range.setStartAfter(textNode);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } else {
+      editorRef.current.appendChild(document.createTextNode(t + ' '));
+    }
+    handleInput();
+  }, [finalTranscript, handleInput]);
 
   const exec = (cmd, value = null) => {
     document.execCommand(cmd, false, value);
@@ -192,7 +160,6 @@ export default function RichScratchpad({ onAddTask, onAddAlarm }) {
     } else {
       editorRef.current?.appendChild(pre);
     }
-    // ensure clear space below the block
     const br = document.createElement('br');
     pre.after(br);
 
@@ -272,8 +239,6 @@ export default function RichScratchpad({ onAddTask, onAddAlarm }) {
     setNotes((prev) => prev.filter((n) => n.id !== id));
   };
 
-  // Removed handleNLMConfirm as auto-parsing is implemented
-
   const getWordCount = () => {
     const text = editorRef.current?.textContent?.trim() || '';
     return text === '' ? 0 : text.split(/\s+/).length;
@@ -292,16 +257,22 @@ export default function RichScratchpad({ onAddTask, onAddAlarm }) {
     { cmd: 'strikethrough', label: 'S', cls: 'line-through' },
   ];
 
+  const toggleVoice = () => {
+    playMechanicalClick();
+    if (!voiceSupported) return;
+    if (listening) stopListening();
+    else startListening();
+  };
+
   return (
     <div className="flex flex-col gap-5 h-full relative">
-      {/* Ghost Toast removed */}
-
-
-      <div className={`nothing-card flex flex-col flex-1 transition-all duration-400 ${isShrinking ? 'scale-95 opacity-0' : ''
-        }`}>
+      <div className={`nothing-card flex flex-col flex-1 transition-all duration-400 ${isShrinking ? 'scale-95 opacity-0' : ''}`}>
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <h3 className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase">SCRATCHPAD</h3>
           <div className="flex items-center gap-1.5">
+            {listening && (
+              <span className="text-[9px] text-red-400 font-mono animate-pulse tracking-widest">● REC</span>
+            )}
             <span id="save-indicator" className="text-[9px] text-gray-600 font-mono">
               saved
             </span>
@@ -327,8 +298,23 @@ export default function RichScratchpad({ onAddTask, onAddAlarm }) {
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V5.25a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v14.25a1.5 1.5 0 001.5 1.5z" /></svg>
           </button>
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
-          <button type="button" onClick={() => { if (!listening) startListening(); else stopListening(); }} className="w-8 h-8 rounded-md text-gray-500 hover:text-white hover:bg-surface-3 flex items-center justify-center" title="Voice input">
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 1v22M5 12h14" /></svg>
+          <button
+            type="button"
+            id="scratchpad-voice-button"
+            onClick={toggleVoice}
+            disabled={!voiceSupported}
+            className={`w-8 h-8 rounded-md flex items-center justify-center transition-all duration-200 ${
+              listening
+                ? 'bg-white text-black'
+                : 'text-gray-500 hover:text-white hover:bg-surface-3'
+            } ${!voiceSupported ? 'opacity-30 cursor-not-allowed' : ''}`}
+            title={voiceSupported
+              ? (listening ? 'Stop voice input' : 'Voice input — speak; tasks are parsed automatically')
+              : 'Voice input not supported in this browser'}
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+            </svg>
           </button>
         </div>
 
@@ -340,8 +326,12 @@ export default function RichScratchpad({ onAddTask, onAddAlarm }) {
           onPaste={handlePaste}
           onKeyDown={handleKeyDown}
           className="rich-editor flex-1 max-h-[400px] overflow-y-auto"
-          data-placeholder="Start typing, paste images, or insert code blocks..."
+          data-placeholder="Type or speak anything… 'walk the dog tomorrow 6pm' becomes a scheduled task"
         />
+
+        {voiceError && (
+          <p className="px-5 py-2 text-[10px] text-red-400 font-mono">{voiceError}</p>
+        )}
 
         <div className="flex items-center justify-between px-5 py-4 border-t border-gray-800">
           <span className="text-[10px] text-gray-600 font-mono">{wordCount} words</span>

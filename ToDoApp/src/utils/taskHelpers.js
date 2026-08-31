@@ -16,26 +16,86 @@ export const INTENSITY_COLORS = {
  */
 export const createTask = (title, options = {}) => ({
   id: crypto.randomUUID(),
-  title: title.trim(),
+  title: String(title).trim(),
   completed: false,
   createdAt: new Date().toISOString(),
   reminderDateTime: options.reminderDateTime ?? null,   // full ISO string
   intensity: options.intensity ?? 'low',                // 'low' | 'medium' | 'high'
   priority: options.priority ?? 'normal',
   category: options.category ?? 'general',
+  isAgentCreated: options.isAgentCreated ?? false,
 });
 
 /**
  * Create a standalone alarm.
  */
-export const createAlarm = (label, dateTime, intensity = 'medium') => ({
+export const createAlarm = (label, dateTime, intensity = 'medium', isAgentCreated = false) => ({
   id: crypto.randomUUID(),
-  label: label.trim() || 'Alarm',
+  label: String(label).trim() || 'Alarm',
   dateTime,           // ISO string
   intensity,
   fired: false,
   createdAt: new Date().toISOString(),
+  isAgentCreated,
 });
+
+/**
+ * Convert a naive local wall-clock string ("2026-09-01T18:00:00" — what the
+ * NLM returns, and what <input type="datetime-local"> produces) into a full
+ * timezone-aware ISO string. Treating it as UTC (the old bug) shifted every
+ * reminder by the user's UTC offset.
+ */
+export const parseLocalDateTime = (naive) => {
+  if (!naive) return null;
+  const m = String(naive).match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+  if (!m) return null;
+  const d = new Date(
+    Number(m[1]), Number(m[2]) - 1, Number(m[3]),
+    Number(m[4]), Number(m[5]), 0, 0
+  );
+  return isNaN(d.getTime()) ? null : d.toISOString();
+};
+
+/**
+ * Date → value for <input type="datetime-local"> in the user's LOCAL time.
+ * (toISOString().slice(0,16) is UTC and makes the "min" attribute wrong by
+ * the UTC offset — e.g. unusable for the first 5.5 hours of the day in IST.)
+ */
+export const toLocalInputValue = (date) => {
+  const d = date instanceof Date ? date : new Date(date);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+
+/**
+ * Convert one NLM action into a task or alarm object (or null if invalid).
+ * The NLM speaks local wall-clock times; parseLocalDateTime anchors them
+ * to the user's timezone.
+ */
+export const actionToTaskOrAlarm = (action) => {
+  if (!action?.title) return null;
+  const due = parseLocalDateTime(action.dueDateTime);
+  if (action.type === 'alarm') {
+    // An explicitly requested alarm must ring audibly — floor at medium.
+    const intensity = action.intensity === 'high' ? 'high' : 'medium';
+    return {
+      kind: 'alarm',
+      alarm: createAlarm(action.title, due || new Date(Date.now() + 3600000).toISOString(), intensity, true),
+    };
+  }
+  // A task with a due time implies at least a standard alarm too.
+  let intensity = action.intensity || 'low';
+  if (due && intensity === 'low') intensity = 'medium';
+  return {
+    kind: 'task',
+    task: createTask(action.title, {
+      reminderDateTime: due,
+      intensity,
+      priority: (action.priority || 'normal').toLowerCase(),
+      isAgentCreated: true,
+    }),
+  };
+};
 
 /**
  * Partition tasks into active and completed.
