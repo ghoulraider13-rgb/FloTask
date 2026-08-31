@@ -1,0 +1,7 @@
+{
+  "build": {
+    "src": "ToDoApp/package.json",
+    "use": "@vercel/static-build"
+  },
+  "outputDirectory": "ToDoApp/dist"
+}
