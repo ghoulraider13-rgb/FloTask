@@ -12,13 +12,15 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
   const [parsing, setParsing] = useState(false);
 
   const {
-    listening, supported: voiceSupported, error: voiceError,
+    isListening, supported: voiceSupported, error: voiceError,
     interimTranscript, finalTranscript, startListening, stopListening,
   } = useVoiceInput();
+  // Updated API: use isListening, startListening, stopListening, toggleListening
+
 
   // Live partial transcript feedback in the input while speaking
   useEffect(() => {
-    if (listening && interimTranscript) setTitle(interimTranscript);
+    if (isListening && interimTranscript) setTitle(interimTranscript);
   }, [listening, interimTranscript]);
 
   const resetFields = () => {
@@ -78,7 +80,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
   const toggleVoice = () => {
     playMechanicalClick();
     if (!voiceSupported) return;
-    if (listening) stopListening();
+    if (isListening) stopListening();
     else startListening();
   };
 
@@ -91,7 +93,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
           <input
             id="add-task-input"
             type="text"
-            value={listening ? (title || 'Listening…') : title}
+            value={isListening ? (title || 'Listening…') : title}
             onChange={(e) => setTitle(e.target.value)}
             disabled={parsing}
             placeholder={parsing ? 'NLM parsing…' : "What needs to be done? e.g. walk the dog tomorrow 6pm"}

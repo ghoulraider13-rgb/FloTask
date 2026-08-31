@@ -1,22 +1,26 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
- * Web Speech API voice input hook.
- * - `supported`        → false when the browser has no SpeechRecognition (can hide/disable UI)
- * - `listening`        → recognition active
- * - `interimTranscript`→ live partial text (for in-place feedback)
- * - `finalTranscript`  → set once when speech finalizes; consumed by the caller
- * - `error`            → human-readable failure reason (mic denied, etc.)
+ * Continuous dictation hook matching Windows Voice Typing behavior.
+ * Returns a superset of the original API used throughout the app:
+ *   - isListening / listening: whether the recognizer is active
+ *   - supported: true when SpeechRecognition is available
+ *   - error: last error message (if any)
+ *   - interimTranscript / finalTranscript / transcript
+ *   - startListening / stopListening / toggleListening
+ *   - setTranscript: external reset of the accumulated transcript
  */
 export default function useVoiceInput() {
-  // Feature detection is constant per session — derive once, lazily.
+  const [isListening, setIsListening] = useState(false);
+  const [finalTranscript, setFinalTranscript] = useState('');
+  const [interimTranscript, setInterimTranscript] = useState('');
+  const [error, setError] = useState(null);
+
+  // Detect support once
   const [supported] = useState(() =>
     Boolean(typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition))
   );
-  const [listening, setListening] = useState(false);
-  const [interimTranscript, setInterimTranscript] = useState('');
-  const [finalTranscript, setFinalTranscript] = useState('');
-  const [error, setError] = useState(null);
+
   const recognitionRef = useRef(null);
 
   useEffect(() => {
@@ -24,70 +28,84 @@ export default function useVoiceInput() {
     if (!SpeechRecognition) return;
 
     const recognition = new SpeechRecognition();
-    recognition.continuous = false;
+    recognition.continuous = true; // keep mic open
     recognition.interimResults = true;
-    recognition.lang = navigator.language || 'en-US';
+    recognition.lang = 'en-US';
+    recognitionRef.current = recognition;
 
     recognition.onresult = (event) => {
       let interim = '';
       let final = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const part = event.results[i][0]?.transcript || '';
-        if (event.results[i].isFinal) final += part;
-        else interim += part;
+        const result = event.results[i];
+        const text = result[0]?.transcript || '';
+        if (result.isFinal) final += text + ' ';
+        else interim += text;
       }
-      if (interim) setInterimTranscript(interim);
-      if (final) setFinalTranscript(final.trim());
+      if (final) setFinalTranscript((prev) => prev + final);
+      setInterimTranscript(interim);
     };
 
     recognition.onerror = (event) => {
-      const code = event?.error || 'unknown';
-      const messages = {
-        'not-allowed': 'Microphone access denied — allow the mic in your browser settings',
-        'service-not-allowed': 'Speech service blocked by browser settings',
-        'no-speech': 'Nothing heard — try speaking again',
-        'audio-capture': 'No microphone found',
-        network: 'Speech recognition network error',
-      };
-      setError(messages[code] || `Voice error: ${code}`);
-      setListening(false);
+      console.error('Speech recognition error:', event.error);
+      setError(event.error || 'unknown');
+      setIsListening(false);
     };
 
     recognition.onend = () => {
-      setListening(false);
-      // Some engines end without flagging isFinal — promote the interim text.
-      setInterimTranscript((current) => {
-        if (current.trim()) setFinalTranscript((prev) => prev || current.trim());
-        return '';
-      });
+      // Auto-restart to mimic system-level dictation persistence
+      if (isListening) {
+        try { recognition.start(); } catch { /* ignore */ }
+      }
     };
 
-    recognitionRef.current = recognition;
     return () => {
-      try { recognition.abort(); } catch { /* already stopped */ }
+      recognition.stop();
       recognitionRef.current = null;
     };
   }, []);
 
+  // Start / stop helpers
   const startListening = useCallback(() => {
-    const recognition = recognitionRef.current;
-    if (!recognition || listening) return;
-    setError(null);
-    setInterimTranscript('');
-    setFinalTranscript('');
-    try {
-      recognition.start();
-      setListening(true);
-    } catch {
-      // start() throws InvalidStateError if called mid-shutdown; safe to ignore
-      setListening(false);
+    const rec = recognitionRef.current;
+    if (!rec || isListening) return;
+    try { rec.start(); setIsListening(true); setError(null); } catch (e) {
+      console.error('Failed to start speech recognition:', e);
+      setError(e.message || 'start failure');
     }
-  }, [listening]);
+  }, [isListening]);
 
   const stopListening = useCallback(() => {
-    try { recognitionRef.current?.stop(); } catch { /* not running */ }
-    setListening(false);
+    const rec = recognitionRef.current;
+    if (!rec || !isListening) return;
+    try { rec.stop(); } catch (e) {/* ignore */}
+    setIsListening(false);
+  }, [isListening]);
+
+  const toggleListening = useCallback(() => {
+    if (isListening) stopListening(); else startListening();
+  }, [isListening, startListening, stopListening]);
+
+  // External reset of transcript
+  const setTranscript = useCallback((value) => {
+    setFinalTranscript(value);
+    setInterimTranscript('');
+    setError(null);
   }, []);
 
-  return { listening, supported, interimTranscript, finalTranscript, error, startListening, stopListening };
+  return {
+    isListening,
+    listening: isListening,
+    supported,
+    error,
+    interimTranscript,
+    finalTranscript,
+    transcript: finalTranscript + interimTranscript,
+    startListening,
+    stopListening,
+    toggleListening,
+    setTranscript,
+  };
 }
+
+
