@@ -27,10 +27,15 @@ export default function useVoiceInput() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true; // keep mic open
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    // Ensure single global recognizer across hook instances
+    if (!window.__globalSpeechRecognition) {
+      const rec = new SpeechRecognition();
+      rec.continuous = true; // keep mic open
+      rec.interimResults = true;
+      rec.lang = 'en-US';
+      window.__globalSpeechRecognition = rec;
+    }
+    const recognition = window.__globalSpeechRecognition;
     recognitionRef.current = recognition;
 
     recognition.onresult = (event) => {

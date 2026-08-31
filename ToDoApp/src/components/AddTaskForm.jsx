@@ -21,7 +21,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
   // Live partial transcript feedback in the input while speaking
   useEffect(() => {
     if (isListening && interimTranscript) setTitle(interimTranscript);
-  }, [listening, interimTranscript]);
+  }, [isListening, interimTranscript]);
 
   const resetFields = () => {
     setTitle('');
@@ -73,6 +73,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
         onAddTask(t, {});
       }
       setTitle('');
+      setTranscript('');
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finalTranscript]);
@@ -107,12 +108,12 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
             onClick={toggleVoice}
             disabled={!voiceSupported}
             className={`p-2.5 rounded-full transition-all duration-200 flex-shrink-0 ${
-              listening
+              isListening
                 ? 'bg-white text-black animate-pulse'
                 : 'text-gray-600 hover:text-gray-400'
             } ${!voiceSupported ? 'opacity-30 cursor-not-allowed' : ''}`}
             title={voiceSupported
-              ? (listening ? 'Stop — creating task' : 'Speak a task — e.g. “walk the dog tomorrow at 6pm”')
+              ? (isListening ? 'Stop — creating task' : 'Speak a task — e.g. “walk the dog tomorrow at 6pm”')
               : 'Voice input not supported in this browser'}
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

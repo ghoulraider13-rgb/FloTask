@@ -11,7 +11,10 @@ React 18 · Gemini API · Tailwind CSS · Vite
 FloTask turns plain language into scheduled work. Type *"remind me to call mom tomorrow 6pm"*
 and Gemini parses it into a task with date, time, and priority — no forms, no fiddling.
 
-## ✨ Features
+## 🎤 Continuous Voice Input
+
+The app now includes a **continuous dictation** hook matching Windows Voice Typing behavior. SpeechRecognition runs with `continuous=true` and `interimResults=true`, auto‑restarts on `onend`, and exposes `isListening`, `transcript`, `startListening`, `stopListening`, `toggleListening`, and `setTranscript`. This powers real‑time voice entry in both the Add‑Task form and the Rich Scratchpad.
+
 
 - **🧠 Natural-language task entry** — Google Gemini parses free text into structured tasks
   (title, date/time, priority) via the Rich Scratchpad
