@@ -8,8 +8,8 @@ import 'prismjs/components/prism-css';
 import SavedNotes from './SavedNotes';
 
 import { playMechanicalClick } from '../utils/audioHelpers';
-import useVoiceInput from '../hooks/useVoiceInput';
 import { parseActions } from '../utils/nlm';
+import DrawPad from './DrawPad';
 
 export default function RichScratchpad({ onNlmActions }) {
   const [initialHtml] = useState(() => {
@@ -27,12 +27,7 @@ export default function RichScratchpad({ onNlmActions }) {
   const editorRef = useRef(null);
   const debounceRef = useRef(null);
   const fileInputRef = useRef(null);
-
-  // Voice input hook (Web Speech API)
-  const {
-    listening, supported: voiceSupported, error: voiceError,
-    finalTranscript, startListening, stopListening,
-  } = useVoiceInput();
+  const [drawing, setDrawing] = useState(false);
 
   useEffect(() => {
     if (editorRef.current && initialHtml && !editorRef.current.innerHTML) {
@@ -107,31 +102,29 @@ export default function RichScratchpad({ onNlmActions }) {
     }, 2000); // 2 second debounce for NLM API calls
   }, [analyzeNLM]);
 
-  // Insert the final spoken transcript at the cursor; the debounced NLM picks it up.
-  const lastVoiceInsertRef = useRef('');
-  useEffect(() => {
-    if (!finalTranscript) return;
-    const t = finalTranscript.trim();
-    if (!t || lastVoiceInsertRef.current === t) return;
-    lastVoiceInsertRef.current = t;
+  // Insert a sketch PNG into the rich editor at the cursor
+  const insertSketch = (dataUrl) => {
     if (!editorRef.current) return;
-
+    const img = document.createElement('img');
+    img.src = dataUrl;
+    img.style.maxWidth = '100%';
+    img.style.borderRadius = '8px';
+    img.style.border = '1px solid #333';
+    img.alt = 'sketch';
     editorRef.current.focus();
     const sel = window.getSelection();
     if (sel?.rangeCount) {
       const range = sel.getRangeAt(0);
       range.deleteContents();
-      const textNode = document.createTextNode(t + ' ');
-      range.insertNode(textNode);
-      range.setStartAfter(textNode);
+      range.insertNode(img);
+      range.setStartAfter(img);
       range.collapse(false);
-      sel.removeAllRanges();
-      sel.addRange(range);
     } else {
-      editorRef.current.appendChild(document.createTextNode(t + ' '));
+      editorRef.current.appendChild(img);
     }
+    setDrawing(false);
     handleInput();
-  }, [finalTranscript, handleInput]);
+  };
 
   const exec = (cmd, value = null) => {
     document.execCommand(cmd, false, value);
@@ -257,22 +250,12 @@ export default function RichScratchpad({ onNlmActions }) {
     { cmd: 'strikethrough', label: 'S', cls: 'line-through' },
   ];
 
-  const toggleVoice = () => {
-    playMechanicalClick();
-    if (!voiceSupported) return;
-    if (listening) stopListening();
-    else startListening();
-  };
-
   return (
     <div className="flex flex-col gap-5 h-full relative">
       <div className={`nothing-card flex flex-col flex-1 transition-all duration-400 ${isShrinking ? 'scale-95 opacity-0' : ''}`}>
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <h3 className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase">SCRATCHPAD</h3>
           <div className="flex items-center gap-1.5">
-            {listening && (
-              <span className="text-[9px] text-red-400 font-mono animate-pulse tracking-widest">● REC</span>
-            )}
             <span id="save-indicator" className="text-[9px] text-gray-600 font-mono">
               saved
             </span>
@@ -300,37 +283,34 @@ export default function RichScratchpad({ onNlmActions }) {
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
           <button
             type="button"
-            id="scratchpad-voice-button"
-            onClick={toggleVoice}
-            disabled={!voiceSupported}
+            id="scratchpad-draw-button"
+            onClick={() => { playMechanicalClick(); setDrawing((v) => !v); }}
             className={`w-8 h-8 rounded-md flex items-center justify-center transition-all duration-200 ${
-              listening
+              drawing
                 ? 'bg-white text-black'
                 : 'text-gray-500 hover:text-white hover:bg-surface-3'
-            } ${!voiceSupported ? 'opacity-30 cursor-not-allowed' : ''}`}
-            title={voiceSupported
-              ? (listening ? 'Stop voice input' : 'Voice input — speak; tasks are parsed automatically')
-              : 'Voice input not supported in this browser'}
+            }`}
+            title={drawing ? 'Close draw tool' : 'Draw a sketch — inserted into the note'}
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.65 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
             </svg>
           </button>
         </div>
 
-        <div
-          ref={editorRef}
-          contentEditable
-          suppressContentEditableWarning
-          onInput={handleInput}
-          onPaste={handlePaste}
-          onKeyDown={handleKeyDown}
-          className="rich-editor flex-1 max-h-[400px] overflow-y-auto"
-          data-placeholder="Type or speak anything… 'walk the dog tomorrow 6pm' becomes a scheduled task"
-        />
-
-        {voiceError && (
-          <p className="px-5 py-2 text-[10px] text-red-400 font-mono">{voiceError}</p>
+        {drawing ? (
+          <DrawPad onInsert={insertSketch} onCancel={() => setDrawing(false)} />
+        ) : (
+          <div
+            ref={editorRef}
+            contentEditable
+            suppressContentEditableWarning
+            onInput={handleInput}
+            onPaste={handlePaste}
+            onKeyDown={handleKeyDown}
+            className="rich-editor flex-1 max-h-[400px] overflow-y-auto"
+            data-placeholder="Type or draw anything… 'walk the dog tomorrow 6pm' becomes a scheduled task"
+          />
         )}
 
         <div className="flex items-center justify-between px-5 py-4 border-t border-gray-800">

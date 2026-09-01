@@ -46,15 +46,7 @@ body {
   padding-right: env(safe-area-inset-right, 0px);
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
-  background-size: 14px 14px;
-  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.05));
-}
+
 
 /* ─── Card ──────────────────────────────────────────────────────── */
 @layer components {

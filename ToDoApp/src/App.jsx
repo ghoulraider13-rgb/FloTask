@@ -12,6 +12,7 @@ import StopwatchModule from './components/StopwatchModule';
 import RichScratchpad from './components/RichScratchpad';
 import AlarmsHub from './components/AlarmSection';
 import NotificationToast from './components/NotificationToast';
+import PwaUpdateToast from './components/PwaUpdateToast';
 import AlarmModal from './components/AlarmModal';
 import EnforcerModal from './components/EnforcerModal';
 
@@ -169,6 +170,7 @@ export default function App() {
       <ReactiveGrid />
 
       {/* Toast notifications */}
+      <PwaUpdateToast />
       {toasts.map((t) => (
         <NotificationToast
           key={t.id} message={t.message} subtext={t.subtext}

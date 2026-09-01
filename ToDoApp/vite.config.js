@@ -100,6 +100,15 @@ function attach(middlewares) {
   })
 }
 
+/**
+ * TEMP: the SW kill switch lives in scripts/kill-sw.mjs and runs post-build
+ * (see the "build" script in package.json). It could not be a vite plugin:
+ * VitePWA's closeBundle hook always runs last, so a plugin cannot overwrite
+ * dist/sw.js after workbox generates it — a post-build overwrite is the
+ * deterministic approach. Remove that script + the "kill-sw" step from the
+ * build script once all clients are on the clean SW, then redeploy.
+ */
+
 export default defineConfig({
   plugins: [
     react(),
@@ -137,5 +146,6 @@ export default defineConfig({
         enabled: true,
       },
     }),
+    // swKillSwitch() // disabled – using post‑build kill‑sw.mjs instead
   ],
 })
