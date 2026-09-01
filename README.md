@@ -2,7 +2,7 @@
 
 <div align="center">
 
-**Live app → https://flo-task.vercel.app/**
+**Live app → https://flotask-xi.vercel.app/**
 
 React 18 · Gemini API · Tailwind CSS · Vite
 
