@@ -7,7 +7,10 @@
 export async function parseActions(text) {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 20000);
+  // Gemini + serverless cold-start can exceed 30s on first request after a
+  // deploy; 60s keeps the client patient through cold starts. (Measured
+  // cold ~23s vs warm ~3s on 2026-09-01.)
+  const timer = setTimeout(() => controller.abort(), 60000);
   try {
     const res = await fetch('/api/chat', {
       method: 'POST',
