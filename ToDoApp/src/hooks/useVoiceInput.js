@@ -23,6 +23,15 @@ export default function useVoiceInput() {
 
   const recognitionRef = useRef(null);
 
+  // Mirrors isListening without re-running the setup effect. The onend /
+  // onerror handlers below must see the CURRENT intent, not the value
+  // captured on first render (the effect deps are deliberately []).
+  const isListeningRef = useRef(false);
+
+  // Errors that shouldn't kill continuous dictation: Chrome fires these
+  // during long sessions and follows up with `end`, which auto-restarts.
+  const TRANSIENT_ERRORS = new Set(['no-speech', 'aborted', 'network']);
+
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
@@ -53,14 +62,19 @@ export default function useVoiceInput() {
 
     recognition.onerror = (event) => {
       console.error('Speech recognition error:', event.error);
+      // Transient hiccup mid-dictation: leave isListening alone; the
+      // `end` event that follows will auto-restart the recognizer.
+      if (TRANSIENT_ERRORS.has(event.error) && isListeningRef.current) return;
       setError(event.error || 'unknown');
+      isListeningRef.current = false;
       setIsListening(false);
     };
 
     recognition.onend = () => {
-      // Auto-restart to mimic system-level dictation persistence
-      if (isListening) {
-        try { recognition.start(); } catch { /* ignore */ }
+      // Auto-restart to mimic system-level dictation persistence.
+      // Reads the ref so it always sees the user's CURRENT intent.
+      if (isListeningRef.current) {
+        try { recognition.start(); } catch { /* already started */ }
       }
     };
 
@@ -68,28 +82,39 @@ export default function useVoiceInput() {
       recognition.stop();
       recognitionRef.current = null;
     };
+    // Recognizer is a global singleton; handlers only read refs, so the
+    // empty dep array (set up once) is intentional.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Start / stop helpers
   const startListening = useCallback(() => {
     const rec = recognitionRef.current;
-    if (!rec || isListening) return;
-    try { rec.start(); setIsListening(true); setError(null); } catch (e) {
+    if (!rec || isListeningRef.current) return;
+    try {
+      rec.start();
+      isListeningRef.current = true;
+      setIsListening(true);
+      setError(null);
+    } catch (e) {
       console.error('Failed to start speech recognition:', e);
       setError(e.message || 'start failure');
     }
-  }, [isListening]);
+  }, []);
 
   const stopListening = useCallback(() => {
     const rec = recognitionRef.current;
-    if (!rec || !isListening) return;
-    try { rec.stop(); } catch (e) {/* ignore */}
+    if (!rec || !isListeningRef.current) return;
+    // Flip the ref BEFORE stop() so the onend handler doesn't auto-restart.
+    isListeningRef.current = false;
+    try { rec.stop(); } catch { /* ignore */ }
     setIsListening(false);
-  }, [isListening]);
+  }, []);
 
   const toggleListening = useCallback(() => {
-    if (isListening) stopListening(); else startListening();
-  }, [isListening, startListening, stopListening]);
+    if (isListeningRef.current) stopListening();
+    else startListening();
+  }, [startListening, stopListening]);
 
   // External reset of transcript
   const setTranscript = useCallback((value) => {
@@ -112,5 +137,3 @@ export default function useVoiceInput() {
     setTranscript,
   };
 }
-
-
