@@ -4,7 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { buildPrompt, callGemini } from './api/_nlm.js'
+import { buildPrompt, callNemotron } from './api/_nlm.js'
 import { transformText } from './api/_transform.js'
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
@@ -62,7 +62,7 @@ function attach(middlewares) {
     }
 
     try {
-      const actions = await callGemini(
+      const actions = await callNemotron(
         buildPrompt(text, { currentTime: body.currentTime, timezone: body.timezone })
       )
       res.setHeader('Content-Type', 'application/json')

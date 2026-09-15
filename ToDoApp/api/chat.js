@@ -1,4 +1,4 @@
-import { buildPrompt, callGemini } from './_nlm.js';
+import { buildPrompt, callNemotron } from './_nlm.js';
 
 /**
  * POST /api/chat  { text, currentTime, timezone }  ->  { actions: [...] }
@@ -26,9 +26,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const actions = await callGemini(
-      buildPrompt(text, { currentTime: body.currentTime, timezone: body.timezone })
-    );
+    const actions = await callNemotron(
+          buildPrompt(text, { currentTime: body.currentTime, timezone: body.timezone })
+        );
     return res.status(200).json({ actions });
   } catch (error) {
     const code = error?.code === 'NO_KEY' ? 503 : 502;

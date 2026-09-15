@@ -9,10 +9,9 @@
  * structured JSON output, and strict normalization.
  */
 
-export const GEMINI_MODELS = [
-  'gemini-flash-latest',   // always points at the current flash model
-  'gemini-3.6-flash',      // explicit fallbacks in case the alias is retired
-  'gemini-3.5-flash',
+export const NEMOTRON_MODELS = [
+  'nvidia/nemotron-3-8b-base-4k',  // Primary: free Hugging Face inference
+  'nvidia/nemotron-3-8b-instruct',   // Fallback: instruct-tuned variant
 ];
 
 const RESPONSE_SCHEMA = {
@@ -107,31 +106,49 @@ export function normalizeActions(data) {
  * Call Gemini generateContent with the model fallback chain.
  * Returns a normalized action list. Throws on total failure.
  */
-export async function callGemini(prompt) {
-  const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+export async function callNemotron(prompt) {
+  const apiKey = process.env.NEMOTRON_API_KEY || process.env.VITE_NEMOTRON_API_KEY;
   if (!apiKey) {
-    const err = new Error('GEMINI_API_KEY is not configured on the server');
-    err.code = 'NO_KEY';
-    throw err;
+    // If no API key, try free Hugging Face Inference API without auth
+    // Some models allow unauthenticated access
+    const unauthUrl = `https://api-inference.huggingface.co/models/${NEMOTRON_MODELS[0]}`;
+    const unauthController = new AbortController();
+    const unauthTimer = setTimeout(() => unauthController.abort(), 30000);
+    try {
+      const unauthRes = await fetch(unauthUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inputs: prompt }),
+        signal: unauthController.signal,
+      });
+      if (unauthRes.ok) {
+        const data = await unauthRes.json();
+        const textOut = typeof data === 'string' ? data : (data?.generated_text || JSON.stringify(data));
+        const cleaned = textOut.replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim();
+        const parsed = JSON.parse(cleaned);
+        return normalizeActions(parsed);
+      }
+      // If unauth fails, continue to throw below
+    } catch (e) {
+      // unauthenticated access failed, will throw below
+    } finally {
+      clearTimeout(unauthTimer);
+    }
   }
 
   let lastError = null;
-  for (const model of GEMINI_MODELS) {
+  for (const model of NEMOTRON_MODELS) {
     try {
+      // Try with API key first
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        `https://api-inference.huggingface.co/models/${model}`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              temperature: 0.1,
-              maxOutputTokens: 1024,
-              responseMimeType: 'application/json',
-              responseSchema: RESPONSE_SCHEMA,
-            },
-          }),
+          headers: {
+            'Content-Type': 'application/json',
+            ...(apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {}),
+          },
+          body: JSON.stringify({ inputs: prompt }),
         }
       );
 
