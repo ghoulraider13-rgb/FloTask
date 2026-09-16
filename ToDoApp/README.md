@@ -1,16 +1,82 @@
-# React + Vite
+# FloTask - AI-powered task manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![Vercel Deployment](https://vercel.com/badge)](https://flotask-xi.vercel.app)
 
-Currently, two official plugins are available:
+FloTask is an AI-powered task manager that lets you type or speak naturally and tasks schedule themselves. Features include Pomodoro, alarms, scratchpad, and natural language processing via NVIDIA Nemotron models.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Live Demo
 
-## React Compiler
+**https://flotask-xi.vercel.app**
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Quick Start
 
-## Expanding the ESLint configuration
+```bash
+# Development
+uv run vite dev
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+# Build
+npm run build
+
+# Preview
+npm run preview
+```
+
+## NLM (Natural Language Model) Configuration
+
+FloTask uses NVIDIA's Nemotron models for parsing free-form notes into structured tasks/alarms.
+
+**API Configuration:**
+- Primary model: `nvidia/nemotron-3-8b-base-4k`
+- Fallback model: `nvidia/nemotron-3-8b-instruct`
+- API Key: Set `NVIDIA_API_KEY` in `.env` or Vercel environment variables
+
+**Environment Variables:**
+- `NVIDIA_API_KEY` - Your NVIDIA API key (required for NLM functionality)
+- `GEMINI_API_KEY` - Legacy Gemini key (still referenced but NVIDIA is primary)
+
+**How it works:**
+1. User types/speaks a natural language note (e.g., "Walk the dog tomorrow at 6pm")
+2. `buildPrompt()` generates the instruction prompt with current time/timezone
+3. `callNemotron()` sends to NVIDIA API with model fallback chain
+4. `normalizeActions()` parses the JSON response into structured actions
+5. Tasks/alarms are created in the local storage
+
+## Project Structure
+
+```
+ToDoApp/
+  api/              # Serverless API routes (chat, transform)
+  src/              # React frontend
+    App.jsx         # Main component
+    api/            # API clients
+  scripts/          # Build utilities
+    kill-sw.mjs     # Post-build SW kill switch
+  vit.config.js     # Vite config with PWA support
+```
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run dev server
+uv run vite dev
+
+# Build for production
+npm run build
+
+# Run verify
+npm run verify
+```
+
+## Deployment
+
+Built with Vite and deployed to Vercel. The build output includes:
+- Precached PWA assets (workbox)
+- API routes for NLM chat and text transformation
+- React component library
+
+## License
+
+MIT

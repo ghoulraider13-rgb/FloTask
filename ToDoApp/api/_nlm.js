@@ -5,12 +5,11 @@
  * in dev and production. The underscore prefix keeps Vercel from exposing
  * this file as its own endpoint.
  *
- * Uses the Gemini REST API directly (no SDK) with a model fallback chain,
- * structured JSON output, and strict normalization.
+ * Uses the NVIDIA API with model fallback chain, structured JSON output, and strict normalization.
  */
 
 export const NEMOTRON_MODELS = [
-  'nvidia/nemotron-3-8b-base-4k',  // Primary: free Hugging Face inference
+  'nvidia/nemotron-3-8b-base-4k',  // Primary: NVIDIA API endpoint
   'nvidia/nemotron-3-8b-instruct',   // Fallback: instruct-tuned variant
 ];
 
@@ -35,8 +34,7 @@ const RESPONSE_SCHEMA = {
   required: ['actions'],
 };
 
-/**
- * Build the instruction prompt for parsing user text into actions.
+/** Build the instruction prompt for parsing user text into actions.
  * The client sends its local time + IANA timezone so relative phrases
  * ("tomorrow at 6pm") resolve on the user's clock, not the server's.
  */
@@ -81,12 +79,10 @@ RULES:
    scheduled routines; "Low" for casual/optional items.
 7. If the text is not actionable or contains no items, return {"actions": []}.
 
-USER TEXT: """${text}"""`;
+USER TEXT: "${text}"`;
 }
 
-/**
- * Coerce/validate the model output into a safe action list.
- */
+/** Coerce/validate the model output into a safe action list. */
 export function normalizeActions(data) {
   const raw = Array.isArray(data?.actions) ? data.actions : [];
   return raw
@@ -102,51 +98,25 @@ export function normalizeActions(data) {
     .filter((a) => a.title && a.title !== 'Untitled');
 }
 
-/**
- * Call Gemini generateContent with the model fallback chain.
+/** Call NVIDIA API with the model fallback chain.
  * Returns a normalized action list. Throws on total failure.
  */
 export async function callNemotron(prompt) {
-  const apiKey = process.env.NEMOTRON_API_KEY || process.env.VITE_NEMOTRON_API_KEY;
+  const apiKey = process.env.NVIDIA_API_KEY;
   if (!apiKey) {
-    // If no API key, try free Hugging Face Inference API without auth
-    // Some models allow unauthenticated access
-    const unauthUrl = `https://api-inference.huggingface.co/models/${NEMOTRON_MODELS[0]}`;
-    const unauthController = new AbortController();
-    const unauthTimer = setTimeout(() => unauthController.abort(), 30000);
-    try {
-      const unauthRes = await fetch(unauthUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inputs: prompt }),
-        signal: unauthController.signal,
-      });
-      if (unauthRes.ok) {
-        const data = await unauthRes.json();
-        const textOut = typeof data === 'string' ? data : (data?.generated_text || JSON.stringify(data));
-        const cleaned = textOut.replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim();
-        const parsed = JSON.parse(cleaned);
-        return normalizeActions(parsed);
-      }
-      // If unauth fails, continue to throw below
-    } catch (e) {
-      // unauthenticated access failed, will throw below
-    } finally {
-      clearTimeout(unauthTimer);
-    }
+    throw new Error('NO_KEY: NVIDIA_API_KEY not set in environment');
   }
 
   let lastError = null;
   for (const model of NEMOTRON_MODELS) {
     try {
-      // Try with API key first
       const res = await fetch(
-        `https://api-inference.huggingface.co/models/${model}`,
+        `https://api.nvidia.com/v1/models/${model}/generate`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            ...(apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {}),
+            'Authorization': `Bearer ${apiKey}`,
           },
           body: JSON.stringify({ inputs: prompt }),
         }
@@ -159,8 +129,8 @@ export async function callNemotron(prompt) {
       }
 
       const data = await res.json();
-      const parts = data?.candidates?.[0]?.content?.parts || [];
-      const textOut = parts.map((p) => p?.text || '').join('').trim();
+      // NVIDIA API returns structured output
+      const textOut = data?.generated_text || JSON.stringify(data);
       if (!textOut) {
         lastError = new Error(`${model}: empty response`);
         continue;
@@ -176,5 +146,5 @@ export async function callNemotron(prompt) {
     }
   }
 
-  throw lastError || new Error('All Gemini models failed');
+  throw lastError || new Error('All NVIDIA models failed');
 }
