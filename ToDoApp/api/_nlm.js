@@ -9,8 +9,7 @@
  */
 
 export const NEMOTRON_MODELS = [
-  'nvidia/nemotron-3-8b-base-4k',  // Primary: NVIDIA API endpoint
-  'nvidia/nemotron-3-8b-instruct',   // Fallback: instruct-tuned variant
+  'nvidia/nemotron-3.5-lightning-30b-a3b',  // Primary: confirmed working model
 ];
 
 const RESPONSE_SCHEMA = {

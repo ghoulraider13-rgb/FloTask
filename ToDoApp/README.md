@@ -26,20 +26,13 @@ npm run preview
 FloTask uses NVIDIA's Nemotron models for parsing free-form notes into structured tasks/alarms.
 
 **API Configuration:**
-- Primary model: `nvidia/nemotron-3-8b-base-4k`
-- Fallback model: `nvidia/nemotron-3-8b-instruct`
+- Primary model: `nvidia/nemotron-3.5-lightning-30b-a3b`
 - API Key: Set `NVIDIA_API_KEY` in `.env` or Vercel environment variables
+- Architecture: Server-mediated — all NLM calls go through `/api/chat` server endpoint (Vite dev middleware or Vercel serverless function). The client never directly accesses the NVIDIA API.
 
 **Environment Variables:**
 - `NVIDIA_API_KEY` - Your NVIDIA API key (required for NLM functionality)
-- `GEMINI_API_KEY` - Legacy Gemini key (still referenced but NVIDIA is primary)
-
-**How it works:**
-1. User types/speaks a natural language note (e.g., "Walk the dog tomorrow at 6pm")
-2. `buildPrompt()` generates the instruction prompt with current time/timezone
-3. `callNemotron()` sends to NVIDIA API with model fallback chain
-4. `normalizeActions()` parses the JSON response into structured actions
-5. Tasks/alarms are created in the local storage
+- `GEMINI_API_KEY` - Legacy Gemini key (no longer used; client-direct Gemini calls removed)
 
 ## Project Structure
 

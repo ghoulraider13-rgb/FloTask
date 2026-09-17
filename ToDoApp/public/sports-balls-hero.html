@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SportsBalls — The Ultimate Sports Ball Shopping Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --wm-color-primary: #1f2937;
+        --wm-color-secondary: #f9fafb;
+        --wm-color-accent: #f97316;
+        --wm-color-accent-hover: #ea580c;
+        --wm-color-foreground: #111827;
+        --wm-color-muted: #6b7280;
+        --wm-color-card: #ffffff;
+        --wm-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+        --wm-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+        --wm-shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.1);
+        --wm-radius-sm: 0.375rem;
+        --wm-radius-md: 0.5rem;
+        --wm-radius-lg: 0.75rem;
+        --wm-spacing-1: 4px;
+        --wm-spacing-2: 8px;
+        --wm-spacing-3: 16px;
+        --wm-spacing-4: 24px;
+        --wm-spacing-5: 32px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--wm-color-secondary);
+        color: var(--wm-color-foreground);
+      }
+
+      .btn-accent {
+        @apply inline-flex items-center justify-center rounded-md text-sm font-medium 
+               transition-colors focus-visible:outline-none focus-visible:ring-2 
+               focus-visible:ring-primary-500 focus-visible:ring-offset-2 
+               disabled:opacity-50 disabled:pointer-events-none 
+               bg-accent text-white hover:bg-accent-hover;
+      }
+
+      .btn-outline {
+        @apply inline-flex items-center justify-center rounded-md border border-border 
+               text-sm font-medium transition-colors focus-visible:outline-none 
+               focus-visible:ring-2 focus-visible:ring-primary-500 
+               focus-visible:ring-offset-2 disabled:opacity-50 
+               disabled:pointer-events-none text-accent hover:text-accent-hover;
+      }
+
+      .input-field {
+        @apply w-full rounded-md border border-border bg-input px-3 py-2 
+               text-sm placeholder-muted-foreground focus-visible:outline-none 
+               focus-visible:ring-2 focus-visible:ring-primary-500 
+               focus-visible:ring-offset-2 transition-colors;
+      }
+
+      .section-padding {
+        @apply py-12 md:py-20 lg:py-24;
+      }
+
+      .container max-w-7xl mx-auto px-4 {
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Hero Section -->
+    <section class="relative min-h-screen overflow-hidden">
+      <!-- Background Gradient -->
+      <div 
+        class="absolute inset-0 bg-gradient-to-br from-[var(--wm-color-primary)] to-[var(--wm-color-secondary)]"
+      ></div>
+
+      <!-- Decorative Circles -->
+      <div 
+        class="absolute top-0 right-0 w-96 h-96 bg-[var(--wm-color-accent)] opacity-20 rounded-3xl blur-2xl"
+        aria-hidden="true"
+      ></div>
+
+      <div 
+        class="absolute bottom-0 left-0 w-64 h-64 bg-[var(--wm-color-accent)] opacity-10 rounded-2xl blur-lg"
+        aria-hidden="true"
+      ></div>
+
+      <div class="relative z-10 min-h-screen flex items-center justify-center py-16">
+        <div class="max-w-5xl mx-auto text-center">
+          <!-- Main Heading -->
+          <h1 
+            class="mb-6 text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight 
+                   text-[var(--wm-color-primary)] shadow-lg 
+                   bg-gradient-to-r from-[var(--wm-color-primary)] to-[var(--wm-color-accent)] 
+                 bg-clip-text text-transparent"
+          >
+            Find Your Perfect Game
+          </h1>
+
+          <!-- Subheading -->
+          <p 
+            class="mb-8 text-lg sm:text-xl text-[var(--wm-color-muted)] leading-relaxed max-w-2xl mx-auto"
+          >
+            Shop the finest collection of sports balls for every game. From 
+            footballs to basketballs, we have the equipment you need to 
+            dominate the field.
+          </p>
+
+          <!-- CTA Button Group -->
+          <div class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+            <button 
+              class="btn-accent py-3 px-6"
+              style="background-color: var(--wm-color-accent);"
+            >
+              Shop All Balls
+            </button>
+            <button 
+              class="btn-outline py-3 px-6"
+              style="color: var(--wm-color-accent); border-color: var(--wm-color-accent);"
+            >
+              View Categories
+            </button>
+          </div>
+
+          <!-- Secondary Info -->
+          <p 
+            class="mt-8 text-sm text-[var(--wm-color-muted)] 
+                   opacity-70 flex justify-center items-center gap-2"
+          >
+            ✓ Free shipping on orders over $50
+            ✓ 30-day returns
+            ✓ Secure checkout
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Grid -->
+    <main class="section-padding">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+        <!-- Football Card -->
+        <article 
+          class="group rounded-lg border border-border bg-[var(--wm-color-card)] 
+                 shadow-sm hover:shadow-md transition-shadow group-hover:shadow-lg"
+        >
+          <div 
+            class="p-6 text-center group-hover:bg-[var(--wm-color-primary)] group-hover:text-white transition-colors duration-300"
+          >
+            <div 
+              class="w-14 h-14 mx-auto rounded-full bg-[var(--wm-color-accent)] 
+                     flex items-center justify-center mb-4"
+            >
+              <svg 
+                class="w-7 h-7 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  class="stroke-2"
+                  d="M12 19l9 2-9-18-9 18 9 2zM12 3L2 9l10 8 10-8-10-8z"
+                />
+              </svg>
+            </div>
+            <h3 
+              class="text-xl font-medium text-[var(--wm-color-primary)] 
+                     group-hover:text-[var(--wm-color-accent)] transition-colors"
+            >
+              Premium Footballs
+            </h3>
+            <p 
+              class="mt-2 text-sm text-[var(--wm-color-muted)] leading-relaxed"
+            >
+              Official size and weight, perfect for professional play.
+            </p>
+          </div>
+        </article>
+
+        <!-- Basketball Card -->
+        <article 
+          class="group rounded-lg border border-border bg-[var(--wm-color-card)] 
+                 shadow-sm hover:shadow-md transition-shadow group-hover:bg-[var(--wm-color-primary)] 
+                 group-hover:text-white transition-colors duration-300"
+        >
+          <div 
+            class="p-6 text-center group-hover:bg-[var(--wm-color-primary)] group-hover:text-white transition-colors duration-300"
+          >
+            <div 
+              class="w-14 h-14 mx-auto rounded-full bg-[var(--wm-color-accent)] 
+                     flex items-center justify-center mb-4"
+            >
+              <svg 
+                class="w-7 h-7 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  class="stroke-2"
+                  d="M12 19l9 2-9-18-9 18 9 2zM12 3L2 9l10 8 10-8-10-8z"
+              </svg>
+            </div>
+            <h3 
+              class="text-xl font-medium text-[var(--wm-color-primary)] 
+                     group-hover:text-[var(--wm-color-accent)] transition-colors"
+            >
+              Championship Basketballs
+            </h3>
+            <p 
+              class="mt-2 text-sm text-[var(--wm-color-muted)] leading-relaxed"
+            >
+              Grip-controlled surface for optimal handling.
+            </p>
+          </div>
+        </article>
+
+        <!-- Tennis Card -->
+        <article 
+          class="group rounded-lg border border-border bg-[var(--wm-color-card)] 
+                 shadow-sm hover:shadow-md transition-shadow group-hover:bg-[var(--wm-color-primary)] 
+                 group-hover:text-white transition-colors duration-300"
+        >
+          <div 
+            class="p-6 text-center group-hover:bg-[var(--wm-color-primary)] group-hover:text-white transition-colors duration-300"
+          >
+            <div 
+              class="w-14 h-14 mx-auto rounded-full bg-[var(--wm-color-accent)] 
+                     flex items-center justify-center mb-4"
+            >
+              <svg 
+                class="w-7 h-7 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  class="stroke-2"
+                  d="M12 19l9 2-9-18-9 18 9 2zM12 3L2 9l10 8 10-8-10-8z"
+              </svg>
+            </div>
+            <h3 
+              class="text-xl font-medium text-[var(--wm-color-primary)] 
+                     group-hover:text-[var(--wm-color-accent)] transition-colors"
+            >
+              Premium Tennis Balls
+            </h3>
+            <p 
+              class="mt-2 text-sm text-[var(--wm-color-muted)] leading-relaxed"
+            >
+              Extra-duty felt for all court surfaces.
+            </p>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <!-- CTA Section -->
+    <section 
+      class="relative overflow-hidden section-padding bg-[var(--wm-color-primary)]"
+    >
+      <div 
+        class="absolute top-0 right-0 w-96 h-96 bg-[var(--wm-color-accent)] opacity-20 rounded-3xl blur-2xl"
+        aria-hidden="true"
+      ></div>
+
+      <div class="max-w-3xl mx-auto text-center">
+        <h2 
+          class="mb-6 text-4xl sm:text-5xl font-bold 
+                   text-[var(--wm-color-secondary)] 
+                   bg-gradient-to-r from-[var(--wm-color-accent)] to-[var(--wm-color-primary)] 
+                 bg-clip-text text-transparent"
+        >
+          Ready to Play?
+        </h2>
+        <p 
+          class="mb-8 text-lg text-[var(--wm-color-muted-foreground)] 
+                   max-w-2xl mx-auto"
+        >
+          Join thousands of athletes who trust us for their sports equipment needs.
+        </p>
+        <div>
+          <button 
+            class="btn-accent py-4 px-8 text-lg"
+            style="background-color: var(--wm-color-accent);"
+          >
+            Start Shopping
+          </button>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
