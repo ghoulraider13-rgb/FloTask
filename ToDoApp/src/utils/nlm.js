@@ -1,30 +1,26 @@
-/**
- * Client-side helper that sends free-form text (typed or spoken) to the
- * FloTask NLM endpoint and returns normalized actions.
- * The user's local time + timezone travel with the request so relative
- * phrases like "tomorrow at 6pm" resolve on the user's clock.
- */
 export async function parseActions(text) {
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-  const controller = new AbortController();
-  // Gemini + serverless cold-start can exceed 30s on first request after a
-  // deploy; 60s keeps the client patient through cold starts. (Measured
-  // cold ~23s vs warm ~3s on 2026-09-01.)
-  const timer = setTimeout(() => controller.abort(), 60000);
   try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, currentTime: new Date().toISOString(), timezone }),
-      signal: controller.signal,
+    const res = await fetch('http://192.168.29.141:11434/v1/chat/completions', {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "qwen2.5:3b",
+        response_format: { type: "json_object" },
+        messages: [
+          { 
+            role: "system", 
+            content: "You are a strict task parser. Extract the core task, the time, and whether an alarm is needed. Output ONLY a JSON object with this exact structure: { 'task': 'Cleaned up task name', 'time_24h': 'HH:MM string or null', 'set_alarm': boolean }" 
+          },
+          { role: "user", content: text }
+        ],
+        temperature: 0.1
+      })
     });
-    if (!res.ok) {
-      const detail = await res.json().catch(() => ({}));
-      throw new Error(detail.error || `HTTP ${res.status}`);
-    }
+    
     const data = await res.json();
-    return Array.isArray(data.actions) ? data.actions : [];
-  } finally {
-    clearTimeout(timer);
+    return JSON.parse(data.choices[0].message.content);
+  } catch (error) {
+    console.error("Local Ollama Server unreachable:", error);
+    return null;
   }
 }

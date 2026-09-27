@@ -609,3 +609,59 @@ code[class*="language-"] {
     grid-template-columns: 260px 1fr 280px !important;
   }
 }
+/* ─── Nothing OS Mobile Aesthetic ────────────────────────────────── */
+@media (max-width: 640px) and (pointer: coarse) {
+  /* Dot-matrix inspired text rendering for Nothing OS phones */
+  .nothing-input,
+  .nothing-input-bordered,
+  .btn-pill,
+  h3,
+  .text-xs,
+  .text-[10px],
+  .text-[11px] {
+    font-family: 'Roboto Mono', 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+  
+  /* Stark dot-matrix background accent */
+  body {
+    background-color: #0a0a0f;
+  }
+  
+  /* Nothing OS card styling for mobile */
+  .nothing-card {
+    background-color: #14141f;
+    border-color: #2a2a3f;
+  }
+  
+  /* Focus ring for keyboard navigation on mobile */
+  .nothing-input:focus,
+  .nothing-input-bordered:focus {
+    outline: 2px solid #00d4aa;
+    outline-offset: 2px;
+  }
+  
+  /* Touch-friendly hit targets */
+  .btn-pill,
+  button[type="submit"],
+  button[type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Reduced motion for motion sensitivity */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ─── Nothing OS portrait mode ──────────────────────────────────── */
+@media (orientation: portrait) {
+  /* Portrait-specific adjustments */
+  .rich-editor {
+    max-height: 300px;
+  }
+}
