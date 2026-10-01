@@ -6,11 +6,7 @@ import { parseActions } from './utils/nlm';
 import { playGentleChime, playStandardAlarm, playEnforcerAlarm } from './utils/audioHelpers';
 
 import ReactiveGrid from './components/ReactiveGrid';
-import TimerHub from './components/TimerHub';
-import TaskList from './components/TaskList';
-import StopwatchModule from './components/StopwatchModule';
-import RichScratchpad from './components/RichScratchpad';
-import AlarmsHub from './components/AlarmSection';
+import MobileShell from './components/MobileShell';
 import NotificationToast from './components/NotificationToast';
 import PwaUpdateToast from './components/PwaUpdateToast';
 import AlarmModal from './components/AlarmModal';
@@ -188,8 +184,24 @@ export default function App() {
         <EnforcerModal title={enforcerAlert.title} subtext={enforcerAlert.subtext} onDismiss={dismissEnforcer} />
       )}
 
-      {/* ── Main content ──────────────────────────────────────── */}
-      <div className="relative z-10 max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* ── Layout: MobileShell (≤640px) or desktop 3-column (≥641px) ── */}
+      {/* Both branches render the SAME feature components; the layout
+          is responsive, never forked. Desktop keeps the existing
+          three-column grid + sticky asides untouched. */}
+      <MobileShell
+        tasks={tasks}
+        alarms={alarms}
+        onAddTask={handleAddTask}
+        onToggleTask={handleToggleTask}
+        onDeleteTask={handleDeleteTask}
+        onSetReminder={handleSetReminder}
+        onNlmText={handleNlmText}
+        onAddAlarm={handleAddAlarm}
+        onDeleteAlarm={handleDeleteAlarm}
+        onNlmActions={handleNlmActions}
+      />
+
+      <div className="hidden md:block relative z-10 max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* ── Header ──────────────────────────────────────────── */}
         <header className="text-center mb-12">
