@@ -1,4 +1,7 @@
 /** @type {import('tailwindcss').Config} */
+// FloTask design tokens — single source of truth (see ../../STYLE_GUIDE.md).
+// Components must reference these tokens; never hardcode colors, sizes,
+// radii, shadows, or durations in JSX.
 export default {
   content: [
     "./index.html",
@@ -12,6 +15,7 @@ export default {
         dotmatrix: ['"DotGothic16"', '"Space Mono"', 'monospace'],
       },
       colors: {
+        // Surfaces — Nothing OS monochrome ladder
         surface: {
           0: '#000000',
           1: '#0a0a0a',
@@ -19,7 +23,60 @@ export default {
           3: '#1a1a1a',
           4: '#222222',
           5: '#2a2a2a',
+          deep: '#050505',
+          danger: '#050000',
+          'glass-idle': 'rgba(10, 10, 10, 0.5)',
+          'glass-active': 'rgba(10, 10, 10, 0.65)',
         },
+        // Ink — text hierarchy
+        ink: {
+          primary: '#ffffff',
+          secondary: '#e5e5e5',
+          tertiary: '#bbbbbb',
+          muted: '#999999',
+          soft: '#666666',
+          faint: '#555555',
+          line: '#444444',
+          disabled: '#333333',
+        },
+        // Accents — red is reserved for high intensity / Enforcer / recording
+        accent: {
+          red: '#ef4444',
+          emerald: '#34d399',
+          amber: '#fde68a',
+          focus: '#00d4aa',
+          'intensity-low': '#4a4a4a',
+        },
+      },
+      // Micro type scale (rem-based so system font scaling works).
+      // Line-height intentionally omitted to match the old arbitrary
+      // text-[Npx] utilities (font-size only, line-height inherited).
+      fontSize: {
+        '2xs': '0.6875rem',  // 11px — section labels
+        '3xs': '0.625rem',   // 10px — meta text, counts, controls
+        '4xs': '0.5625rem',  // 9px  — micro buttons, save indicator
+      },
+      // Semantic letter-spacing scale (Nothing OS wide tracking)
+      letterSpacing: {
+        time: '0.1em',      // alarm time
+        btn: '0.15em',      // mode toggles
+        caption: '0.2em',   // buttons, meta text
+        phase: '0.25em',    // phase labels under the ring
+        label: '0.3em',     // section labels (TASKS / ALARMS / …)
+        hero: '0.35em',     // FLOTASK header
+        tagline: '0.4em',   // FOCUS · FLOW · FINISH
+      },
+      borderRadius: {
+        card: '16px',   // .nothing-card
+        input: '8px',   // bordered inputs, images, code blocks
+        row: '12px',    // task rows, saved notes, mini calendar
+      },
+      boxShadow: {
+        glow: '0 0 10px rgba(255, 255, 255, 0.1)',         // card hover
+        'glow-lg': '0 4px 20px rgba(255, 255, 255, 0.08)', // primary hover
+        recording: '0 0 14px rgba(239, 68, 68, 0.35)',     // stopwatch running
+        glass: '0 0 8px rgba(255, 255, 255, 0.04)',        // stopwatch idle
+        danger: '0 0 20px rgba(255, 0, 0, 0.5)',           // Enforcer
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',
