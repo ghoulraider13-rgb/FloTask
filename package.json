@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "install": "cd ToDoApp && npm ci",
+    "dev": "cd ToDoApp && npm run dev",
+    "build": "cd ToDoApp && npm run build",
+    "preview": "cd ToDoApp && npm run preview"
+  }
+}
