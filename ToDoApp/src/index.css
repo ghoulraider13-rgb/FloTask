@@ -4,14 +4,60 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Nothing-brand Reset ───────────────────────────────────────── */
+/* ─── Design Tokens (CSS Variables) ───────────────────────────────── */
 :root {
   color-scheme: dark;
+
+  /* Surfaces */
+  --surface-0: #000000;
+  --surface-1: #0a0a0a;
+  --surface-2: #111111;
+  --surface-3: #1a1a1a;
+  --surface-4: #222222;
+  --surface-5: #2a2a2a;
+  --surface-deep: #050505;
+
+  /* Ink / Text */
+  --ink-primary: #ffffff;
+  --ink-secondary: #e5e5e5;
+  --ink-tertiary: #bbbbbb;
+  --ink-muted: #999999;
+  --ink-faint: #555555;
+  --ink-disabled: #333333;
+
+  /* Accents */
+  --accent-red: #ef4444;
+  --accent-emerald: #34d399;
+  --accent-amber: #fde68a;
+  --accent-focus: #00d4aa;
+
+  /* Radii */
+  --radius-card: 16px;
+  --radius-pill: 9999px;
+  --radius-input: 8px;
+  --radius-row: 12px;
+
+  /* Shadows / Glow */
+  --glow: 0 0 10px rgba(255, 255, 255, 0.1);
+  --glow-lg: 0 4px 20px rgba(255, 255, 255, 0.08);
+  --glow-recording: 0 0 14px rgba(239, 68, 68, 0.35);
+  --glow-glass: 0 0 8px rgba(255, 255, 255, 0.04);
+  --glow-danger: 0 0 20px rgba(255, 0, 0, 0.5);
+
+  /* Touch target */
+  --touch-target: 44px;
+
+  /* Safe area insets (fallback for browsers that don't support env()) */
+  --safe-area-inset-top: 0px;
+  --safe-area-inset-right: 0px;
+  --safe-area-inset-bottom: 0px;
+  --safe-area-inset-left: 0px;
 }
 
+/* ─── Global Reset ────────────────────────────────────────────────── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #333 transparent;
+  scrollbar-color: var(--ink-disabled) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -23,55 +69,117 @@
 }
 
 *::-webkit-scrollbar-thumb {
-  background: #333;
+  background: var(--ink-disabled);
   border-radius: 99px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: var(--ink-muted);
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   margin: 0;
   padding: 0;
-  background-color: #000;
-  color: #e5e5e5;
+  background-color: var(--surface-0);
+  color: var(--ink-secondary);
   font-family: 'Space Mono', 'Roboto Mono', monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
-  /* Respect iPhone notch/home-indicator when installed as an app */
-  padding-left: env(safe-area-inset-left, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
+  padding-left: env(safe-area-inset-left, var(--safe-area-inset-left));
+  padding-right: env(safe-area-inset-right, var(--safe-area-inset-right));
+  padding-bottom: env(safe-area-inset-bottom, var(--safe-area-inset-bottom));
 }
 
+/* ─── Reduced Motion (Global) ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 
+/* ─── Touch Device Adjustments ────────────────────────────────────── */
+@media (hover: none) and (pointer: coarse) {
+  .task-checkbox {
+    width: 26px;
+    height: 26px;
+  }
+}
 
-/* ─── Card ──────────────────────────────────────────────────────── */
+/* ─── Touch Target Hit-Slop (≥44px tappable area without inflating visuals) ── */
+.touch-44 {
+  position: relative;
+}
+
+.touch-44::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(var(--touch-target, 44px), 100%);
+  height: var(--touch-target, 44px);
+  transform: translate(-50%, -50%);
+}
+
+/* Dense toolbars: same hit-slop for icon buttons */
+@media (hover: none) and (pointer: coarse) {
+  .task-checkbox {
+    width: 26px;
+    height: 26px;
+  }
+
+  /* Toolbar icon buttons get hit-slop instead of size inflation */
+  .toolbar-btn {
+    position: relative;
+  }
+
+  .toolbar-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--touch-target, 44px);
+    height: var(--touch-target, 44px);
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* ─── Component Layer ─────────────────────────────────────────────── */
 @layer components {
+  /* Card */
   .nothing-card {
-    background: #0a0a0a;
-    border: 1px solid #2a2a2a;
-    border-radius: 16px;
+    background: var(--surface-1);
+    border: 1px solid var(--surface-5);
+    border-radius: var(--radius-card);
     transition: all 0.3s ease;
   }
 
   .nothing-card:hover {
     border-color: #666;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    box-shadow: var(--glow);
   }
 
-  /* Pill button – outline style (secondary) */
+  /* Pill Button – Secondary */
   .btn-pill {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 10px 24px;
-    border-radius: 9999px;
+    border-radius: var(--radius-pill);
     border: 1px solid #444;
     background: transparent;
-    color: #e5e5e5;
+    color: var(--ink-secondary);
     font-family: 'Space Mono', monospace;
     font-size: 12px;
     font-weight: 700;
@@ -79,11 +187,12 @@ body {
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.2s ease;
+    min-height: 44px; /* touch target */
   }
 
   .btn-pill:hover {
-    border-color: #fff;
-    color: #fff;
+    border-color: var(--ink-primary);
+    color: var(--ink-primary);
     transform: translateY(-1px);
   }
 
@@ -91,16 +200,16 @@ body {
     transform: translateY(0) scale(0.97);
   }
 
-  /* Pill button – inverted / primary (white bg, black text) */
+  /* Pill Button – Primary (inverted) */
   .btn-pill-primary {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     padding: 10px 24px;
-    border-radius: 9999px;
-    border: 1px solid #fff;
-    background: #fff;
-    color: #000;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--ink-primary);
+    background: var(--ink-primary);
+    color: var(--surface-0);
     font-family: 'Space Mono', monospace;
     font-size: 12px;
     font-weight: 700;
@@ -108,12 +217,13 @@ body {
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.2s ease;
+    min-height: 44px;
   }
 
   .btn-pill-primary:hover {
-    background: #e5e5e5;
+    background: var(--ink-tertiary);
     transform: translateY(-1px);
-    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.08);
+    box-shadow: var(--glow-lg);
   }
 
   .btn-pill-primary:active {
@@ -128,48 +238,50 @@ body {
     box-shadow: none;
   }
 
-  /* Flush input — bottom border only */
+  /* Flush Input – Bottom Border Only */
   .nothing-input {
     background: transparent;
     border: none;
-    border-bottom: 1px solid #2a2a2a;
+    border-bottom: 1px solid var(--surface-5);
     border-radius: 0;
-    color: #e5e5e5;
+    color: var(--ink-secondary);
     font-family: 'Space Mono', monospace;
     font-size: 13px;
     outline: none;
     padding: 12px 0;
     transition: border-color 0.2s ease;
     width: 100%;
+    min-height: 44px;
   }
 
   .nothing-input::placeholder {
-    color: #555;
+    color: var(--ink-faint);
   }
 
   .nothing-input:focus {
-    border-bottom-color: #fff;
+    border-bottom-color: var(--ink-primary);
   }
 
-  /* Bordered input (for datetime, etc) */
+  /* Bordered Input (datetime, etc) */
   .nothing-input-bordered {
-    background: #111;
-    border: 1px solid #2a2a2a;
-    border-radius: 8px;
-    color: #e5e5e5;
+    background: var(--surface-2);
+    border: 1px solid var(--surface-5);
+    border-radius: var(--radius-input);
+    color: var(--ink-secondary);
     font-family: 'Space Mono', monospace;
     font-size: 12px;
     outline: none;
     padding: 8px 12px;
     transition: border-color 0.2s ease;
+    min-height: 44px;
   }
 
   .nothing-input-bordered::placeholder {
-    color: #555;
+    color: var(--ink-faint);
   }
 
   .nothing-input-bordered:focus {
-    border-color: #555;
+    border-color: var(--ink-muted);
   }
 
   .nothing-input-bordered::-webkit-calendar-picker-indicator {
@@ -178,7 +290,7 @@ body {
   }
 }
 
-/* ─── Checkbox (Nothing-style) ──────────────────────────────────── */
+/* ─── Checkbox (Nothing-style) ───────────────────────────────────── */
 .task-checkbox {
   appearance: none;
   -webkit-appearance: none;
@@ -198,8 +310,8 @@ body {
 }
 
 .task-checkbox:checked {
-  background: #fff;
-  border-color: #fff;
+  background: var(--ink-primary);
+  border-color: var(--ink-primary);
   animation: checkPop 0.35s ease-out;
 }
 
@@ -210,38 +322,37 @@ body {
   left: 5px;
   width: 5px;
   height: 9px;
-  border: solid #000;
+  border: solid var(--surface-0);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
 
-/* ─── Task Strikethrough ────────────────────────────────────────── */
+/* ─── Task Strikethrough ──────────────────────────────────────────── */
 .task-done-text {
   text-decoration: line-through;
   text-decoration-thickness: 1.5px;
-  text-decoration-color: #555;
-  color: #555;
+  text-decoration-color: var(--ink-faint);
+  color: var(--ink-faint);
 }
 
-/* ─── Timer Ring ────────────────────────────────────────────────── */
+/* ─── Timer Ring ──────────────────────────────────────────────────── */
 .timer-track {
   stroke: #222;
 }
 
 .timer-progress {
   transition: stroke-dashoffset 1s linear;
-  stroke: #fff;
+  stroke: var(--ink-primary);
 }
 
-/* ─── Rich Editor ───────────────────────────────────────────────── */
+/* ─── Rich Editor ─────────────────────────────────────────────────── */
 .rich-editor {
   padding: 16px;
   outline: none;
   font-family: 'Space Mono', monospace;
   font-size: 13px;
   line-height: 24px;
-  /* Matches background grid */
-  color: #bbb;
+  color: var(--ink-tertiary);
   min-height: 200px;
   background-image: linear-gradient(transparent 23px, #222 24px);
   background-size: 100% 24px;
@@ -250,7 +361,7 @@ body {
 
 .rich-editor:empty::before {
   content: attr(data-placeholder);
-  color: #444;
+  color: var(--ink-faint);
   pointer-events: none;
   font-style: normal;
 }
@@ -258,7 +369,7 @@ body {
 .rich-editor h3 {
   font-size: 15px;
   font-weight: 700;
-  color: #fff;
+  color: var(--ink-primary);
   margin: 12px 0 4px;
 }
 
@@ -269,22 +380,22 @@ body {
 
 .rich-editor li {
   margin: 2px 0;
-  color: #999;
+  color: var(--ink-muted);
 }
 
 .rich-editor img {
   max-width: 100%;
   border-radius: 8px;
   margin: 8px 0;
-  border: 1px solid #2a2a2a;
+  border: 1px solid var(--surface-5);
 }
 
 /* Code blocks */
 .rich-editor pre,
 .rich-editor .code-block-container,
 .rich-editor-preview pre {
-  background: #111 !important;
-  border: 1px solid #2a2a2a;
+  background: var(--surface-2) !important;
+  border: 1px solid var(--surface-5);
   border-radius: 8px;
   padding: 14px 16px;
   font-family: 'Space Mono', monospace;
@@ -292,17 +403,17 @@ body {
   line-height: 1.6;
   overflow-x: auto;
   margin: 8px 0;
-  color: #aaa;
+  color: var(--ink-tertiary);
 }
 
 .rich-editor code,
 .rich-editor-preview code {
   font-family: 'Space Mono', monospace;
-  background: #1a1a1a;
+  background: var(--surface-3);
   padding: 2px 6px;
   border-radius: 3px;
   font-size: 0.85em;
-  color: #ddd;
+  color: var(--ink-tertiary);
 }
 
 .rich-editor pre code,
@@ -320,17 +431,17 @@ body {
 .rich-editor-preview h3 {
   font-size: 14px;
   font-weight: 700;
-  color: #fff;
+  color: var(--ink-primary);
   margin: 8px 0 4px;
 }
 
-/* ─── Toggle Switch ─────────────────────────────────────────────── */
+/* ─── Toggle Switch ───────────────────────────────────────────────── */
 .toggle-switch {
   position: relative;
   width: 40px;
   height: 22px;
-  background: #222;
-  border: 1px solid #333;
+  background: var(--surface-4);
+  border: 1px solid var(--surface-5);
   border-radius: 11px;
   cursor: pointer;
   transition: all 0.25s ease;
@@ -345,21 +456,21 @@ body {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #555;
+  background: var(--ink-faint);
   transition: all 0.25s ease;
 }
 
 .toggle-switch.active {
-  background: #333;
-  border-color: #555;
+  background: var(--surface-5);
+  border-color: var(--ink-muted);
 }
 
 .toggle-switch.active::after {
   left: 20px;
-  background: #fff;
+  background: var(--ink-primary);
 }
 
-/* ─── Enforcer ──────────────────────────────────────────────────── */
+/* ─── Enforcer ────────────────────────────────────────────────────── */
 .enforcer-scanlines {
   background: repeating-linear-gradient(0deg,
       transparent,
@@ -368,7 +479,7 @@ body {
       rgba(255, 0, 0, 0.02) 4px);
 }
 
-/* ─── Intensity Dot ─────────────────────────────────────────────── */
+/* ─── Intensity Dot ───────────────────────────────────────────────── */
 .intensity-dot-low {
   background: #4a4a4a;
 }
@@ -378,135 +489,13 @@ body {
 }
 
 .intensity-dot-high {
-  background: #ef4444;
+  background: var(--accent-red);
 }
 
-/* ─── Keyframes ─────────────────────────────────────────────────── */
-@keyframes checkPop {
-  0% {
-    transform: scale(1);
-  }
-
-  40% {
-    transform: scale(1.2);
-  }
-
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeOut {
-  0% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-}
-
-@keyframes shake {
-
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-
-  25% {
-    transform: translateX(-5px);
-  }
-
-  75% {
-    transform: translateX(5px);
-  }
-}
-
-@keyframes pulseSlow {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@keyframes screenGlitch {
-  0% {
-    transform: translate(0) scale(1);
-    filter: contrast(1);
-  }
-
-  20% {
-    transform: translate(-4px, 2px) skewX(2deg);
-    filter: contrast(2) hue-rotate(90deg) drop-shadow(4px 0px 0px red) drop-shadow(-4px 0px 0px cyan);
-  }
-
-  40% {
-    transform: translate(4px, -2px) skewX(-2deg);
-    filter: contrast(2) hue-rotate(90deg) drop-shadow(4px 0px 0px red) drop-shadow(-4px 0px 0px cyan);
-  }
-
-  60% {
-    transform: translate(-2px, 4px) skewX(1deg);
-    filter: contrast(1.5) drop-shadow(2px 0px 0px red);
-  }
-
-  80% {
-    transform: translate(2px, -4px) skewX(-1deg);
-    filter: contrast(1.5) drop-shadow(-2px 0px 0px cyan);
-  }
-
-  100% {
-    transform: translate(0) scale(1);
-    filter: contrast(1);
-  }
-}
-
-.animate-glitch {
-  animation: screenGlitch 0.3s cubic-bezier(.25, .46, .45, .94) both;
-}
-
-@keyframes agentPulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
-    border-color: #fff;
-  }
-
-  70% {
-    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
-    border-color: #fff;
-  }
-
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
-  }
-}
-
-.animate-agent-pulse {
-  animation: agentPulse 1s ease-out;
-}
-
-/* ─── PrismJS Monochrome 'Nothing' Theme ───────────────────────── */
+/* ─── PrismJS Monochrome 'Nothing' Theme ─────────────────────────── */
 pre[class*="language-"],
 code[class*="language-"] {
-  color: #bbb;
+  color: var(--ink-tertiary);
   font-family: "Space Mono", "JetBrains Mono", monospace;
   font-size: 13px;
   text-shadow: none;
@@ -526,7 +515,7 @@ code[class*="language-"] {
 .token.prolog,
 .token.doctype,
 .token.cdata {
-  color: #555555;
+  color: var(--ink-faint);
   font-style: italic;
 }
 
@@ -541,7 +530,7 @@ code[class*="language-"] {
 .token.constant,
 .token.symbol,
 .token.deleted {
-  color: #999999;
+  color: var(--ink-muted);
 }
 
 .token.selector,
@@ -567,40 +556,29 @@ code[class*="language-"] {
 }
 
 .token.keyword {
-  color: #ffffff;
+  color: var(--ink-primary);
   font-weight: bold;
 }
 
 .token.regex,
 .token.important,
 .token.variable {
-  color: #ef4444;
-  /* Subtle alarm red accent */
+  color: var(--accent-red);
 }
 
-/* ─── Responsive ────────────────────────────────────────────────── */
+/* ─── Responsive Breakpoints ──────────────────────────────────────── */
 @media (max-width: 1024px) {
   .three-col-grid {
     grid-template-columns: 1fr !important;
   }
 
-  /* Scratchpad: compact on phones instead of the desktop 600px slab */
   .rich-editor {
     min-height: 140px;
     max-height: 260px;
   }
 
-  /* Timer ring and controls fit narrow screens */
   header h1 {
     letter-spacing: 0.22em;
-  }
-}
-
-/* Touch devices have no hover: enlarge hit targets slightly */
-@media (hover: none) {
-  .task-checkbox {
-    width: 26px;
-    height: 26px;
   }
 }
 
@@ -609,59 +587,22 @@ code[class*="language-"] {
     grid-template-columns: 260px 1fr 280px !important;
   }
 }
-/* ─── Nothing OS Mobile Aesthetic ────────────────────────────────── */
-@media (max-width: 640px) and (pointer: coarse) {
-  /* Dot-matrix inspired text rendering for Nothing OS phones */
-  .nothing-input,
-  .nothing-input-bordered,
-  .btn-pill,
-  h3,
-  .text-xs,
-  .text-[10px],
-  .text-[11px] {
-    font-family: 'Roboto Mono', 'DM Mono', monospace;
-    letter-spacing: 0.05em;
-  }
-  
-  /* Stark dot-matrix background accent */
-  body {
-    background-color: #0a0a0f;
-  }
-  
-  /* Nothing OS card styling for mobile */
-  .nothing-card {
-    background-color: #14141f;
-    border-color: #2a2a3f;
-  }
-  
-  /* Focus ring for keyboard navigation on mobile */
-  .nothing-input:focus,
-  .nothing-input-bordered:focus {
-    outline: 2px solid #00d4aa;
-    outline-offset: 2px;
-  }
-  
-  /* Touch-friendly hit targets */
-  .btn-pill,
-  button[type="submit"],
-  button[type="button"] {
-    min-height: 44px;
-    min-width: 44px;
-  }
-  
-  /* Reduced motion for motion sensitivity */
-  @media (prefers-reduced-motion: reduce) {
-    * {
-      animation-duration: 0.01ms !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
-}
 
-/* ─── Nothing OS portrait mode ──────────────────────────────────── */
+/* ─── Mobile Portrait ─────────────────────────────────────────────── */
 @media (orientation: portrait) {
-  /* Portrait-specific adjustments */
   .rich-editor {
     max-height: 300px;
   }
+}
+
+/* ─── Focus Visible for Keyboard Navigation ───────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent-focus);
+  outline-offset: 2px;
+}
+
+/* ─── Selection ───────────────────────────────────────────────────── */
+::selection {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--ink-primary);
 }

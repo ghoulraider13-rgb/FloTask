@@ -56,7 +56,7 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
   const daysInMonth = getDaysInMonth(currentMonth);
 
   for (let i = 0; i < startDay; i++) {
-    calendarDays.push(<div key={`empty-${i}`} className="w-6 h-6" />);
+    calendarDays.push(<div key={`empty-${i}`} className="w-9 h-9" />);
   }
   for (let d = 1; d <= daysInMonth; d++) {
     const isToday = new Date().toDateString() === new Date(currentMonth.getFullYear(), currentMonth.getMonth(), d).toDateString();
@@ -64,7 +64,7 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
       <button
         key={`day-${d}`}
         onClick={() => handleDateSelect(d)}
-        className={`w-6 h-6 flex items-center justify-center text-[10px] rounded-full transition-all font-mono hover:bg-gray-800 ${
+        className={`toolbar-btn w-9 h-9 flex items-center justify-center text-[11px] rounded-full transition-all font-mono hover:bg-gray-800 ${
           isToday ? 'bg-white text-black font-bold' : 'text-gray-400'
         }`}
       >
@@ -109,7 +109,7 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
             {/* Delete — always visible (mobile has no hover) */}
             <button
               onClick={() => { playMechanicalClick(); onDelete(alarm.id); }}
-              className="text-gray-600 hover:text-red-500 transition-all ml-1 p-1"
+              className="touch-44 text-gray-600 hover:text-red-500 transition-all ml-1 p-1"
               title="Remove"
               aria-label="Remove alarm"
             >
@@ -125,7 +125,7 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
         {/* Add button */}
         <button
           onClick={() => { playMechanicalClick(); setShowForm(!showForm); }}
-          className={`px-4 py-2 text-xs font-dotmatrix tracking-wider rounded-full border border-gray-700 flex items-center gap-2 transition-all duration-200 ${
+          className={`touch-44 px-4 py-2 text-xs font-dotmatrix tracking-wider rounded-full border border-gray-700 flex items-center gap-2 transition-all duration-200 ${
             showForm
               ? 'bg-white text-black border-white'
               : 'bg-transparent text-white hover:border-gray-500 hover:bg-gray-900'
@@ -171,9 +171,9 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
           <span className="text-xs font-bold text-white uppercase tracking-widest font-mono">
             {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
           </span>
-          <div className="flex gap-2">
-            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))} className="text-gray-500 hover:text-white">◀</button>
-            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))} className="text-gray-500 hover:text-white">▶</button>
+          <div className="flex gap-3">
+            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))} className="touch-44 text-gray-500 hover:text-white">◀</button>
+            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))} className="touch-44 text-gray-500 hover:text-white">▶</button>
           </div>
         </div>
         <div className="grid grid-cols-7 gap-1 text-center mb-2">

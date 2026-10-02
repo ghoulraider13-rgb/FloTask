@@ -184,7 +184,7 @@ export default function TimerHub() {
           <button
             key={mode}
             onClick={() => switchTimerMode(mode)}
-            className={`px-6 py-2 text-[10px] font-bold tracking-[0.15em] uppercase transition-all duration-200 ${
+            className={`touch-44 px-6 py-2 text-[10px] font-bold tracking-[0.15em] uppercase transition-all duration-200 ${
               timerMode === mode
                 ? 'bg-white text-black'
                 : 'bg-transparent text-gray-500 hover:text-white'
@@ -202,7 +202,7 @@ export default function TimerHub() {
             <button
               key={phase}
               onClick={() => switchPomoPhase(phase)}
-              className={`text-[10px] font-bold tracking-[0.2em] font-dotmatrix uppercase transition-colors ${
+              className={`touch-44 text-[10px] font-bold tracking-[0.2em] font-dotmatrix uppercase transition-colors ${
                 pomoPhase === phase ? 'text-white border-b-2 border-white' : 'text-gray-600 hover:text-gray-400 border-b-2 border-transparent'
               }`}
             >

@@ -1,0 +1,93 @@
+{
+  "timestamp": "2026-10-01T18:45:23.480Z",
+  "baseUrl": "http://172.30.143.250:5173",
+  "total": 12,
+  "passed": 12,
+  "failed": 0,
+  "results": [
+    {
+      "viewport": "320x568",
+      "theme": "light",
+      "filename": "320x568-light.png",
+      "issues": [],
+      "pass": true
+    },
+    {
+      "viewport": "320x568",
+      "theme": "dark",
+      "filename": "320x568-dark.png",
+      "issues": [],
+      "pass": true
+    },
+    {
+      "viewport": "360x640",
+      "theme": "light",
+      "filename": "360x640-light.png",
+      "issues": [],
+      "pass": true
+    },
+    {
+      "viewport": "360x640",
+      "theme": "dark",
+      "filename": "360x640-dark.png",
+      "issues": [],
+      "pass": true
+    },
+    {
+      "viewport": "390x844",
+      "theme": "light",
+      "filename": "390x844-light.png",
+      "issues": [],
+      "pass": true
+    },
+    {
+      "viewport": "390x844",
+      "theme": "dark",
+      "filename": "390x844-dark.png",
+      "issues": [],
+      "pass": true
+    },
+    {
+      "viewport": "412x915",
+      "theme": "light",
+      "filename": "412x915-light.png",
+      "issues": [],
+      "pass": true
+    },
+    {
+      "viewport": "412x915",
+      "theme": "dark",
+      "filename": "412x915-dark.png",
+      "issues": [],
+      "pass": true
+    },
+    {
+      "viewport": "430x932",
+      "theme": "light",
+      "filename": "430x932-light.png",
+      "issues": [],
+      "pass": true
+    },
+    {
+      "viewport": "430x932",
+      "theme": "dark",
+      "filename": "430x932-dark.png",
+      "issues": [],
+      "pass": true
+    },
+    {
+      "viewport": "768x1024-tablet",
+      "theme": "light",
+      "filename": "768x1024-tablet-light.png",
+      "issues": [],
+      "pass": true
+    },
+    {
+      "viewport": "768x1024-tablet",
+      "theme": "dark",
+      "filename": "768x1024-tablet-dark.png",
+      "issues": [],
+      "pass": true
+    }
+  ]
+}

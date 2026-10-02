@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import IntensitySelector from './IntensitySelector';
 import { playMechanicalClick } from '../utils/audioHelpers';
-import { parseActions } from '../utils/nlm';
 import { toLocalInputValue } from '../utils/taskHelpers';
 import useVoiceInput from '../hooks/useVoiceInput';
 
@@ -15,6 +14,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
   const {
     isListening, supported: voiceSupported, error: voiceError,
     interimTranscript, finalTranscript, startListening, stopListening,
+    setTranscript,
   } = useVoiceInput();
   // Updated API: use isListening, startListening, stopListening, toggleListening
 
@@ -45,20 +45,19 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
         });
         navigator.vibrate([50]); // Haptic feedback for manual task creation
       } else if (onNlmText) {
-        // Natural language: "walk the dog tomorrow at 6pm" → parsed by the NLM
+        // Natural language: "walk dog at 6am" → parsed by the NLM.
+        // Route through onNlmText (App.handleNlmText → actionToTaskOrAlarm)
+        // so reminders map to reminderDateTime and alarms materialize.
+        // If parsing throws, keep the user's words as a plain task — never
+        // drop the input silently.
         setParsing(true);
         try {
-          const parsed = await parseActions(trimmed);
-          if (parsed) {
-            navigator.vibrate([50]); // Haptic feedback on successful parsing
-            onAddTask(parsed.title, {
-              dueDateTime: parsed.dueDateTime,
-              priority: parsed.priority,
-              intensity: parsed.intensity,
-            });
-          }
+          await onNlmText(trimmed, { silent: true });
+          navigator.vibrate([50]); // Haptic feedback on successful parsing
         } catch (e) {
           console.error("NLM parsing failed:", e);
+          onAddTask(trimmed, {}); // fallback: plain task, no silent drop
+          navigator.vibrate([50]);
         } finally { setParsing(false); }
       } else {
         onAddTask(trimmed, {});
@@ -84,17 +83,12 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
         if (onNlmText) {
           setParsing(true);
           try {
-            const parsed = await parseActions(t);
-            if (parsed) {
-              navigator.vibrate([50]); // Haptic feedback on voice parsing
-              onAddTask(parsed.title, {
-                dueDateTime: parsed.dueDateTime,
-                priority: parsed.priority,
-                intensity: parsed.intensity,
-              });
-            }
+            await onNlmText(t);
+            navigator.vibrate([50]); // Haptic feedback on voice parsing
           } catch (e) {
             console.error("Voice NLM parsing failed:", e);
+            onAddTask(t, {}); // fallback: plain task, no silent drop
+            navigator.vibrate([50]);
           } finally { setParsing(false); }
         } else {
           onAddTask(t, {});
@@ -125,7 +119,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
             value={isListening ? (title || 'Listening…') : title}
             onChange={(e) => setTitle(e.target.value)}
             disabled={parsing}
-            placeholder={parsing ? 'NLM parsing…' : "What needs to be done? e.g. walk the dog tomorrow 6pm"}
+            placeholder={parsing ? 'Parsing…' : "What needs to be done? e.g. walk the dog tomorrow 6pm"}
             className="nothing-input flex-1 border-none min-w-0"
             autoComplete="off"
           />
@@ -135,7 +129,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
             id="voice-add-button"
             onClick={toggleVoice}
             disabled={!voiceSupported}
-            className={`p-2.5 rounded-full transition-all duration-200 flex-shrink-0 ${
+            className={`touch-44 p-2.5 rounded-full transition-all duration-200 flex-shrink-0 ${
               isListening
                 ? 'bg-white text-black animate-pulse'
                 : 'text-gray-600 hover:text-gray-400'
@@ -152,7 +146,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
           <button
             type="button"
             onClick={() => { playMechanicalClick(); setShowOptions(!showOptions); }}
-            className={`p-2.5 rounded-full transition-all duration-200 flex-shrink-0 ${
+            className={`touch-44 p-2.5 rounded-full transition-all duration-200 flex-shrink-0 ${
               showOptions
                 ? 'bg-white text-black'
                 : 'text-gray-600 hover:text-gray-400'

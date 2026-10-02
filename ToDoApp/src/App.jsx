@@ -1,7 +1,8 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import useEmblaCarousel from 'embla-carousel-react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useReminders, fireBrowserNotification } from './hooks/useReminders';
-import { createTask, actionToTaskOrAlarm } from './utils/taskHelpers';
+import { createTask, actionToTaskOrAlarm, safeUuid } from './utils/taskHelpers';
 import { parseActions } from './utils/nlm';
 import { playGentleChime, playStandardAlarm, playEnforcerAlarm } from './utils/audioHelpers';
 
@@ -16,6 +17,119 @@ import PwaUpdateToast from './components/PwaUpdateToast';
 import AlarmModal from './components/AlarmModal';
 import EnforcerModal from './components/EnforcerModal';
 
+// Screen components for mobile
+const screens = [
+  { id: 'tasks', label: 'TASKS', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' },
+  { id: 'alarms', label: 'ALARMS', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+  { id: 'timer', label: 'TIMER', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+  { id: 'stopwatch', label: 'STOPWATCH', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+  { id: 'scratchpad', label: 'NOTES', icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' },
+];
+
+const TabButton = ({ screen, isActive, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`flex flex-col items-center gap-1 px-3 py-2.5 transition-all duration-200 ${
+      isActive
+        ? 'text-white'
+        : 'text-gray-500 hover:text-gray-300'
+    }`}
+    aria-label={screen.label}
+    aria-current={isActive ? 'page' : undefined}
+  >
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d={screen.icon} />
+    </svg>
+    <span className="text-[9px] font-bold tracking-[0.15em] uppercase font-dotmatrix">
+      {screen.label}
+    </span>
+  </button>
+);
+
+function MobileTabBar({ selectedIndex, onSelect, scrollProgress }) {
+  return (
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-50 bg-surface-1/95 backdrop-blur-md border-t border-surface-5"
+      style={{
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        paddingLeft: 'env(safe-area-inset-left, 0px)',
+        paddingRight: 'env(safe-area-inset-right, 0px)',
+      }}
+      role="tablist"
+      aria-label="Main navigation"
+    >
+      <div className="flex items-center justify-around h-[64px]">
+        {screens.map((screen, index) => (
+          <TabButton
+            key={screen.id}
+            screen={screen}
+            isActive={index === selectedIndex}
+            onClick={() => onSelect(index)}
+          />
+        ))}
+      </div>
+    </nav>
+  );
+}
+
+// Screen wrappers that adapt existing components for full-height mobile
+function TasksScreen({ tasks, onAddTask, onToggleTask, onDeleteTask, onSetReminder, onNlmText }) {
+  return (
+    <div className="flex flex-col h-full h-dvh pb-[80px]">
+      <div className="nothing-card flex-1 flex flex-col m-4 rounded-xl overflow-hidden">
+        <TaskList
+          tasks={tasks}
+          onAddTask={onAddTask}
+          onToggleTask={onToggleTask}
+          onDeleteTask={onDeleteTask}
+          onSetReminder={onSetReminder}
+          onNlmText={onNlmText}
+        />
+      </div>
+    </div>
+  );
+}
+
+function AlarmsScreen({ alarms, onAdd, onDelete }) {
+  return (
+    <div className="flex flex-col h-full h-dvh pb-[80px]">
+      <div className="nothing-card flex-1 flex flex-col m-4 rounded-xl">
+        <AlarmsHub alarms={alarms} onAdd={onAdd} onDelete={onDelete} />
+      </div>
+    </div>
+  );
+}
+
+function TimerScreen() {
+  return (
+    <div className="flex flex-col h-full h-dvh pb-[80px]">
+      <div className="nothing-card flex-1 flex flex-col m-4 rounded-xl">
+        <TimerHub />
+      </div>
+    </div>
+  );
+}
+
+function StopwatchScreen() {
+  return (
+    <div className="flex flex-col h-full h-dvh pb-[80px]">
+      <div className="nothing-card flex-1 flex flex-col m-4 rounded-xl">
+        <StopwatchModule />
+      </div>
+    </div>
+  );
+}
+
+function ScratchpadScreen({ onNlmActions }) {
+  return (
+    <div className="flex flex-col h-full h-dvh pb-[80px]">
+      <div className="nothing-card flex-1 flex flex-col m-4 rounded-xl">
+        <RichScratchpad onNlmActions={onNlmActions} />
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [tasks, setTasks] = useLocalStorage('todo-tasks', []);
   const [alarms, setAlarms] = useLocalStorage('todo-alarms', []);
@@ -25,9 +139,55 @@ export default function App() {
   const [enforcerAlert, setEnforcerAlert] = useState(null);
   const alarmStopRef = useRef(null);
 
-  // ── Cursor glow (direct DOM — zero re-renders) ───────────────────
+  // Mobile carousel state
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Embla Carousel
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: false,
+    align: 'center',
+    slidesToScroll: 1,
+    dragFree: false,
+    inViewThreshold: 0.5,
+    skipSnaps: false,
+    containScroll: 'trimSnaps',
+    watchDrag: true,
+    watchResize: true,
+    watchSlides: true,
+  });
+
+  const scrollProgress = emblaApi?.scrollProgress() ?? 0;
+  const snapIndex = emblaApi?.selectedScrollSnap() ?? 0;
+
+  // Sync carousel with tab bar
+  useEffect(() => {
+    if (emblaApi && emblaApi.selectedScrollSnap() !== selectedIndex) {
+      emblaApi.scrollTo(selectedIndex);
+    }
+  }, [selectedIndex, emblaApi]);
+
+  useEffect(() => {
+    if (emblaApi) {
+      setSelectedIndex(emblaApi.selectedScrollSnap());
+    }
+  }, [snapIndex, emblaApi]);
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Cursor glow (desktop only)
   const glowRef = useRef(null);
   useEffect(() => {
+    if (isMobile) return;
     const glow = glowRef.current;
     if (!glow) return;
     const onMove = (e) => {
@@ -41,9 +201,9 @@ export default function App() {
     };
     window.addEventListener('mousemove', onMove, { passive: true });
     return () => window.removeEventListener('mousemove', onMove);
-  }, []);
+  }, [isMobile]);
 
-  // ── Alert dispatcher ──────────────────────────────────────────
+  // Alert dispatcher
   const handleAlert = useCallback((item, source) => {
     const intensity = item.intensity || 'low';
     const title = source === 'alarm' ? item.label : item.title;
@@ -53,7 +213,7 @@ export default function App() {
         playGentleChime();
         fireBrowserNotification('⏰ Reminder', title);
         setToasts((prev) => [...prev, {
-          id: crypto.randomUUID(), message: title,
+          id: safeUuid(), message: title,
           subtext: source === 'alarm' ? 'Alarm' : 'Task reminder',
         }]);
         break;
@@ -90,7 +250,7 @@ export default function App() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  // ── Task CRUD ─────────────────────────────────────────────────
+  // Task CRUD
   const handleAddTask = useCallback((title, options = {}) => {
     setTasks((prev) => [createTask(title, options), ...prev]);
   }, [setTasks]);
@@ -107,7 +267,7 @@ export default function App() {
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, reminderDateTime: dateTime, intensity } : t)));
   }, [setTasks]);
 
-  // ── Alarm CRUD ────────────────────────────────────────────────
+  // Alarm CRUD
   const handleAddAlarm = useCallback((alarm) => {
     setAlarms((prev) => [...prev, alarm]);
   }, [setAlarms]);
@@ -116,9 +276,8 @@ export default function App() {
     setAlarms((prev) => prev.filter((a) => a.id !== id));
   }, [setAlarms]);
 
-  // ── NLM (natural-language model) ───────────────────────────────
-  // Materialize a batch of parsed actions (from the scratchpad agent).
-  const handleNlmActions = useCallback((actions) => {
+  // NLM
+  const handleNlmActions = useCallback((actions, { silent = false } = {}) => {
     let created = 0;
     actions.forEach((action) => {
       const parsed = actionToTaskOrAlarm(action);
@@ -127,26 +286,156 @@ export default function App() {
       if (parsed.kind === 'alarm') handleAddAlarm(parsed.alarm);
       else handleAddTask(parsed.task.title, parsed.task);
     });
-    if (created > 0) {
+    if (created > 0 && !silent) {
       fireBrowserNotification('🤖 FloTask Agent', `${created} item${created > 1 ? 's' : ''} created from your note`);
     }
     return created;
   }, [handleAddAlarm, handleAddTask]);
 
-  // Parse one free-form sentence (typed or spoken) into task(s)/alarm(s).
-  const handleNlmText = useCallback(async (text) => {
+  const handleNlmText = useCallback(async (text, opts = {}) => {
     const actions = await parseActions(text);
     if (!actions || actions.length === 0) {
-      // NLM found nothing actionable → keep the user's words as a plain task
       handleAddTask(text, {});
       return 1;
     }
-    return handleNlmActions(actions);
+    return handleNlmActions(actions, opts);
   }, [handleAddTask, handleNlmActions]);
 
-  return (
+  const screenComponents = [
+    <TasksScreen
+      key="tasks"
+      tasks={tasks}
+      onAddTask={handleAddTask}
+      onToggleTask={handleToggleTask}
+      onDeleteTask={handleDeleteTask}
+      onSetReminder={handleSetReminder}
+      onNlmText={handleNlmText}
+    />,
+    <AlarmsScreen
+      key="alarms"
+      alarms={alarms}
+      onAdd={handleAddAlarm}
+      onDelete={handleDeleteAlarm}
+    />,
+    <TimerScreen key="timer" />,
+    <StopwatchScreen key="stopwatch" />,
+    <ScratchpadScreen key="scratchpad" onNlmActions={handleNlmActions} />,
+  ];
+
+  // Disable swipe on contenteditable and swipe-to-delete rows
+  const handleDragStart = useCallback((e) => {
+    const target = e.target;
+    const isEditable = target.closest('[contenteditable="true"]');
+    const isSwipeDelete = target.closest('[data-swipe-delete="true"]');
+    const isInput = target.closest('input, textarea, select');
+    if (isEditable || isSwipeDelete || isInput) {
+      e.preventDefault();
+      emblaApi?.plugins()?.forEach(p => p.name === 'drag' && p.stop?.());
+    }
+  }, [emblaApi]);
+
+  useEffect(() => {
+    const container = emblaRef?.current?.parentElement;
+    if (container) {
+      container.addEventListener('pointerdown', handleDragStart, { passive: false });
+      return () => container.removeEventListener('pointerdown', handleDragStart);
+    }
+  }, [emblaRef, handleDragStart]);
+
+  // Android back button handling
+  useEffect(() => {
+    const handleBackButton = (e) => {
+      if (isMobile && (mediumAlert || enforcerAlert)) {
+        e.preventDefault();
+        if (enforcerAlert) dismissEnforcer();
+        else if (mediumAlert) dismissMedium();
+      }
+    };
+    document.addEventListener('backbutton', handleBackButton, false);
+    return () => document.removeEventListener('backbutton', handleBackButton);
+  }, [isMobile, mediumAlert, enforcerAlert, dismissMedium, dismissEnforcer]);
+
+  // Mobile layout
+  const mobileLayout = (
+    <div className="relative h-screen h-dvh overflow-hidden">
+      {/* Cursor Glow Layer (desktop only) */}
+      {!isMobile && (
+        <div
+          ref={glowRef}
+          aria-hidden="true"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: 120,
+            height: 120,
+            borderRadius: '50%',
+            pointerEvents: 'none',
+            zIndex: 9998,
+            filter: 'blur(6px)',
+            willChange: 'transform',
+            transition: 'background 0.18s ease, opacity 0.18s ease',
+            background: 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%)',
+          }}
+        />
+      )}
+
+      {/* Reactive Magnetic Background */}
+      <ReactiveGrid />
+
+      {/* Toast notifications */}
+      <PwaUpdateToast />
+      {toasts.map((t) => (
+        <NotificationToast
+          key={t.id} message={t.message} subtext={t.subtext}
+          onDismiss={() => dismissToast(t.id)}
+        />
+      ))}
+
+      {/* Medium modal */}
+      {mediumAlert && (
+        <AlarmModal title={mediumAlert.title} subtext={mediumAlert.subtext} onDismiss={dismissMedium} />
+      )}
+
+      {/* Enforcer modal */}
+      {enforcerAlert && (
+        <EnforcerModal title={enforcerAlert.title} subtext={enforcerAlert.subtext} onDismiss={dismissEnforcer} />
+      )}
+
+      {/* Carousel — Embla viewport (overflow hidden) > container (flex) > slides */}
+      <div
+        ref={emblaRef}
+        className="overflow-hidden h-full h-dvh"
+        style={{
+          touchAction: 'pan-y',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        }}
+      >
+        <div className="flex h-full touch-pan-y">
+          {screenComponents.map((screen, i) => (
+            <div
+              key={screens[i].id}
+              className="flex-[0_0_100%] min-w-0 relative"
+            >
+              {screen}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom Tab Bar */}
+      <MobileTabBar
+        selectedIndex={selectedIndex}
+        onSelect={setSelectedIndex}
+        scrollProgress={scrollProgress}
+      />
+    </div>
+  );
+
+  // Desktop layout (original three-column)
+  const desktopLayout = (
     <div className="relative">
-      {/* ── Cursor Glow Layer ─────────────────────────────────── */}
+      {/* Cursor Glow Layer */}
       <div
         ref={glowRef}
         aria-hidden="true"
@@ -235,4 +524,6 @@ export default function App() {
       </div>
     </div>
   );
+
+  return isMobile ? mobileLayout : desktopLayout;
 }

@@ -155,28 +155,28 @@ export default function DrawPad({ onInsert, onCancel }) {
       {/* ── Tool row ────────────────────────────────────────────── */}
       <div className="flex items-center gap-1.5 px-5 py-2 border-b border-gray-800 flex-wrap">
         {COLORS.map((c) => (
-          <button
-            key={c}
-            type="button"
-            onClick={() => { playMechanicalClick(); setColor(c); setErasing(false); }}
-            className={`w-5 h-5 rounded-full border transition-all duration-150 ${
-              color === c && !erasing ? 'border-white scale-110' : 'border-gray-700 hover:border-gray-400'
-            }`}
-            style={{ backgroundColor: c }}
-            title={`Pen ${c}`}
-          />
+        <button
+          key={c}
+          type="button"
+          onClick={() => { playMechanicalClick(); setColor(c); setErasing(false); }}
+          className={`toolbar-btn w-5 h-5 rounded-full border transition-all duration-150 ${
+            color === c && !erasing ? 'border-white scale-110' : 'border-gray-700 hover:border-gray-400'
+          }`}
+          style={{ backgroundColor: c }}
+          title={`Pen ${c}`}
+        />
         ))}
         <div className="w-px h-5 bg-gray-800 mx-1" />
         {WIDTHS.map((w) => (
-          <button
-            key={w}
-            type="button"
-            onClick={() => { playMechanicalClick(); setWidth(w); setErasing(false); }}
-            className={`w-7 h-7 rounded-md flex items-center justify-center transition-all duration-200 ${
-              width === w && !erasing ? 'bg-surface-3' : 'hover:bg-surface-3'
-            }`}
-            title={`Stroke ${w}px`}
-          >
+        <button
+          key={w}
+          type="button"
+          onClick={() => { playMechanicalClick(); setWidth(w); setErasing(false); }}
+          className={`toolbar-btn w-7 h-7 rounded-md flex items-center justify-center transition-all duration-200 ${
+            width === w && !erasing ? 'bg-surface-3' : 'hover:bg-surface-3'
+          }`}
+          title={`Stroke ${w}px`}
+        >
             <span
               className="rounded-full bg-gray-300"
               style={{ width: w + 2, height: w + 2, backgroundColor: color }}
@@ -187,7 +187,7 @@ export default function DrawPad({ onInsert, onCancel }) {
         <button
           type="button"
           onClick={() => { playMechanicalClick(); setErasing((v) => !v); }}
-          className={`px-2 h-7 rounded-md text-[9px] font-bold tracking-widest transition-all duration-200 ${
+          className={`toolbar-btn px-2 h-7 rounded-md text-[9px] font-bold tracking-widest transition-all duration-200 ${
             erasing ? 'bg-white text-black' : 'text-gray-500 hover:text-white hover:bg-surface-3'
           }`}
           title="Eraser"
@@ -198,7 +198,7 @@ export default function DrawPad({ onInsert, onCancel }) {
           type="button"
           onClick={handleUndo}
           disabled={!canUndo}
-          className="px-2 h-7 rounded-md text-[9px] font-bold tracking-widest text-gray-500 hover:text-white hover:bg-surface-3 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+          className="toolbar-btn px-2 h-7 rounded-md text-[9px] font-bold tracking-widest text-gray-500 hover:text-white hover:bg-surface-3 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
           title="Undo last stroke"
         >
           UNDO
@@ -206,7 +206,7 @@ export default function DrawPad({ onInsert, onCancel }) {
         <button
           type="button"
           onClick={handleClear}
-          className="px-2 h-7 rounded-md text-[9px] font-bold tracking-widest text-gray-500 hover:text-red-400 hover:bg-surface-3 transition-all duration-200"
+          className="toolbar-btn px-2 h-7 rounded-md text-[9px] font-bold tracking-widest text-gray-500 hover:text-red-400 hover:bg-surface-3 transition-all duration-200"
           title="Clear canvas"
         >
           CLEAR

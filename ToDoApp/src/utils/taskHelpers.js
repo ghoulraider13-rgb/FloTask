@@ -1,4 +1,21 @@
 /**
+ * Safe UUID: crypto.randomUUID() only exists in SECURE contexts (https / localhost).
+ * Pages served over plain http (LAN IP from a phone, http://172.x…) would crash on it.
+ * Falls back to crypto.getRandomValues, then to Math.random.
+ */
+export const safeUuid = () => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+      (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
+    );
+  }
+  return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
+/**
  * Task & timer utility helpers.
  * Task factory includes priority, category, intensity, and full datetime reminder.
  */
@@ -15,7 +32,7 @@ export const INTENSITY_COLORS = {
  * Create a new task — extensible with priority / category.
  */
 export const createTask = (title, options = {}) => ({
-  id: crypto.randomUUID(),
+  id: safeUuid(),
   title: String(title).trim(),
   completed: false,
   createdAt: new Date().toISOString(),
@@ -30,7 +47,7 @@ export const createTask = (title, options = {}) => ({
  * Create a standalone alarm.
  */
 export const createAlarm = (label, dateTime, intensity = 'medium', isAgentCreated = false) => ({
-  id: crypto.randomUUID(),
+  id: safeUuid(),
   label: String(label).trim() || 'Alarm',
   dateTime,           // ISO string
   intensity,

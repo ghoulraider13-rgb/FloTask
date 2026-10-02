@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "chrono-node": "^2.10.1",
+    "embla-carousel-auto-scroll": "^8.6.0",
+    "embla-carousel-react": "^8.6.0",
     "prismjs": "^1.30.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
@@ -25,6 +28,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
+    "playwright": "^1.63.0",
     "postcss": "^8.5.8",
     "puppeteer-core": "^25.9.0",
     "tailwindcss": "^3.4.19",

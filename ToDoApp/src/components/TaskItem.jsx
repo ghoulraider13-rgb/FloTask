@@ -78,7 +78,7 @@ export default function TaskItem({ task, onToggle, onDelete }) {
       {/* Delete — always visible (mobile has no hover) */}
       <button
         onClick={handleDelete}
-        className="p-1.5 -mr-1 text-gray-600 hover:text-red-400 transition-all duration-200"
+        className="touch-44 p-1.5 -mr-1 text-gray-600 hover:text-red-400 transition-all duration-200"
         title="Delete"
         aria-label={`Delete "${task.title}"`}
       >
