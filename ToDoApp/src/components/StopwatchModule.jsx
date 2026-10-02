@@ -127,7 +127,7 @@ export default function StopwatchModule() {
       <div className="flex items-center gap-3">
         <button
           onClick={isRunning ? handleStop : handleStart}
-          className={`btn-pill font-dotmatrix text-[10px] px-5 py-2 transition-all duration-200 ${
+          className={`btn-pill toolbar-btn font-dotmatrix text-[10px] px-5 transition-all duration-200 ${
             isRunning
               ? 'border-red-500 text-red-400 hover:bg-red-500 hover:text-white shadow-[0_0_8px_rgba(239,68,68,0.4)]'
               : 'border-gray-700 text-white hover:border-white hover:bg-white hover:text-black'
@@ -137,7 +137,7 @@ export default function StopwatchModule() {
         </button>
         <button
           onClick={handleReset}
-          className="btn-pill font-dotmatrix text-[10px] px-5 py-2 border-gray-800 text-gray-600 hover:border-gray-500 hover:text-white"
+          className="btn-pill toolbar-btn font-dotmatrix text-[10px] px-5 border-gray-800 text-gray-600 hover:border-gray-500 hover:text-white"
         >
           RESET ↺
         </button>

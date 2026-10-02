@@ -9,6 +9,7 @@ import SavedNotes from './SavedNotes';
 
 import { playMechanicalClick } from '../utils/audioHelpers';
 import { parseActions } from '../utils/nlm';
+import { safeUuid } from '../utils/taskHelpers';
 import DrawPad from './DrawPad';
 
 export default function RichScratchpad({ onNlmActions }) {
@@ -216,7 +217,7 @@ export default function RichScratchpad({ onNlmActions }) {
     setIsShrinking(true);
     setTimeout(() => {
       setNotes((prev) => [{
-        id: crypto.randomUUID(),
+        id: safeUuid(),
         content,
         preview: textPreview || '(Image / Code)',
         createdAt: new Date().toISOString(),
@@ -268,16 +269,16 @@ export default function RichScratchpad({ onNlmActions }) {
               key={cmd}
               type="button"
               onClick={() => { playMechanicalClick(); exec(cmd); }}
-              className={`w-8 h-8 rounded-md text-xs text-gray-500 hover:text-white hover:bg-surface-3 transition-all duration-200 flex items-center justify-center ${cls}`}
+              className={`toolbar-btn w-8 h-8 rounded-md text-xs text-gray-500 hover:text-white hover:bg-surface-3 transition-all duration-200 flex items-center justify-center ${cls}`}
               title={cmd}
             >
               {label}
             </button>
           ))}
           <div className="w-px h-5 bg-gray-800 mx-1" />
-          <button type="button" onClick={() => { playMechanicalClick(); exec('formatBlock', '<h3>'); }} className="w-8 h-8 rounded-md text-[10px] font-bold text-gray-500 hover:text-white hover:bg-surface-3 transition-all">H</button>
-          <button type="button" onClick={() => { playMechanicalClick(); insertCodeBlock(); }} className="px-2 h-8 rounded-md text-[10px] font-mono text-gray-500 hover:text-white hover:bg-surface-3 transition-all">{'</>'}</button>
-          <button type="button" onClick={() => { playMechanicalClick(); fileInputRef.current?.click(); }} className="w-8 h-8 rounded-md text-gray-500 hover:text-white hover:bg-surface-3 flex items-center justify-center">
+          <button type="button" onClick={() => { playMechanicalClick(); exec('formatBlock', '<h3>'); }} className="toolbar-btn w-8 h-8 rounded-md text-[10px] font-bold text-gray-500 hover:text-white hover:bg-surface-3 transition-all">H</button>
+          <button type="button" onClick={() => { playMechanicalClick(); insertCodeBlock(); }} className="toolbar-btn px-2 h-8 rounded-md text-[10px] font-mono text-gray-500 hover:text-white hover:bg-surface-3 transition-all">{'</>'}</button>
+          <button type="button" onClick={() => { playMechanicalClick(); fileInputRef.current?.click(); }} className="toolbar-btn w-8 h-8 rounded-md text-gray-500 hover:text-white hover:bg-surface-3 flex items-center justify-center">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V5.25a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v14.25a1.5 1.5 0 001.5 1.5z" /></svg>
           </button>
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
@@ -285,7 +286,7 @@ export default function RichScratchpad({ onNlmActions }) {
             type="button"
             id="scratchpad-draw-button"
             onClick={() => { playMechanicalClick(); setDrawing((v) => !v); }}
-            className={`w-8 h-8 rounded-md flex items-center justify-center transition-all duration-200 ${
+            className={`toolbar-btn w-8 h-8 rounded-md flex items-center justify-center transition-all duration-200 ${
               drawing
                 ? 'bg-white text-black'
                 : 'text-gray-500 hover:text-white hover:bg-surface-3'

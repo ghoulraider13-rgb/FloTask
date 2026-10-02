@@ -61,7 +61,7 @@ export default function EnforcerModal({ title, subtext, onDismiss }) {
           <h2 className="text-3xl font-dotmatrix text-red-500 text-center mb-1 tracking-[0.15em] uppercase drop-shadow-[0_0_5px_rgba(255,0,0,0.8)]">
             THE ENFORCER
           </h2>
-          <h3 className="text-md font-dotmatrix text-white text-center mb-1 tracking-widest uppercase">{title}</h3>
+          <h3 className="text-base font-dotmatrix text-white text-center mb-1 tracking-widest uppercase">{title}</h3>
           {subtext && <p className="text-xs text-red-300/60 font-mono text-center mb-8">{subtext}</p>}
 
           <div className="border shadow-[inset_0_0_20px_rgba(255,0,0,0.1)] border-red-900 rounded-none p-5 mb-8 bg-black">

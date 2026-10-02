@@ -14,6 +14,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
   const {
     isListening, supported: voiceSupported, error: voiceError,
     interimTranscript, finalTranscript, startListening, stopListening,
+    setTranscript,
   } = useVoiceInput();
   // Updated API: use isListening, startListening, stopListening, toggleListening
 
@@ -31,26 +32,39 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
   };
 
   const submitText = async (text) => {
-    const trimmed = text.trim();
-    if (!trimmed || parsing) return;
-    playMechanicalClick();
-
-    // Manual reminder options were explicitly set → create directly (no NLM)
-    const manualOptions = showOptions && (reminderDateTime || intensity !== 'low');
-    if (manualOptions) {
-      onAddTask(trimmed, {
-        reminderDateTime: reminderDateTime ? new Date(reminderDateTime).toISOString() : null,
-        intensity,
-      });
-    } else if (onNlmText) {
-      // Natural language: "walk the dog tomorrow at 6pm" → parsed by the NLM
-      setParsing(true);
-      try { await onNlmText(trimmed); } finally { setParsing(false); }
-    } else {
-      onAddTask(trimmed, {});
-    }
-    resetFields();
-  };
+      const trimmed = text.trim();
+      if (!trimmed || parsing) return;
+      playMechanicalClick();
+    
+      // Manual reminder options were explicitly set → create directly (no NLM)
+      const manualOptions = showOptions && (reminderDateTime || intensity !== 'low');
+      if (manualOptions) {
+        onAddTask(trimmed, {
+          reminderDateTime: reminderDateTime ? new Date(reminderDateTime).toISOString() : null,
+          intensity,
+        });
+        navigator.vibrate([50]); // Haptic feedback for manual task creation
+      } else if (onNlmText) {
+        // Natural language: "walk dog at 6am" → parsed by the NLM.
+        // Route through onNlmText (App.handleNlmText → actionToTaskOrAlarm)
+        // so reminders map to reminderDateTime and alarms materialize.
+        // If parsing throws, keep the user's words as a plain task — never
+        // drop the input silently.
+        setParsing(true);
+        try {
+          await onNlmText(trimmed, { silent: true });
+          navigator.vibrate([50]); // Haptic feedback on successful parsing
+        } catch (e) {
+          console.error("NLM parsing failed:", e);
+          onAddTask(trimmed, {}); // fallback: plain task, no silent drop
+          navigator.vibrate([50]);
+        } finally { setParsing(false); }
+      } else {
+        onAddTask(trimmed, {});
+        navigator.vibrate([50]); // Haptic feedback for direct task creation
+      }
+      resetFields();
+    };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -59,24 +73,32 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
 
   // Spoken input → auto-create the task once recognition finalizes
   const lastVoiceSubmitRef = useRef('');
-  useEffect(() => {
-    if (!finalTranscript) return;
-    const t = finalTranscript.trim();
-    if (!t || lastVoiceSubmitRef.current === t) return;
-    lastVoiceSubmitRef.current = t;
-    playMechanicalClick();
-    (async () => {
-      if (onNlmText) {
-        setParsing(true);
-        try { await onNlmText(t); } finally { setParsing(false); }
-      } else {
-        onAddTask(t, {});
-      }
-      setTitle('');
-      setTranscript('');
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [finalTranscript]);
+    useEffect(() => {
+      if (!finalTranscript) return;
+      const t = finalTranscript.trim();
+      if (!t || lastVoiceSubmitRef.current === t) return;
+      lastVoiceSubmitRef.current = t;
+      playMechanicalClick();
+      (async () => {
+        if (onNlmText) {
+          setParsing(true);
+          try {
+            await onNlmText(t);
+            navigator.vibrate([50]); // Haptic feedback on voice parsing
+          } catch (e) {
+            console.error("Voice NLM parsing failed:", e);
+            onAddTask(t, {}); // fallback: plain task, no silent drop
+            navigator.vibrate([50]);
+          } finally { setParsing(false); }
+        } else {
+          onAddTask(t, {});
+          navigator.vibrate([50]); // Haptic feedback for voice-created task
+        }
+        setTitle('');
+        setTranscript('');
+      })();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [finalTranscript]);
 
   const toggleVoice = () => {
     playMechanicalClick();
@@ -97,7 +119,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
             value={isListening ? (title || 'Listening…') : title}
             onChange={(e) => setTitle(e.target.value)}
             disabled={parsing}
-            placeholder={parsing ? 'NLM parsing…' : "What needs to be done? e.g. walk the dog tomorrow 6pm"}
+            placeholder={parsing ? 'Parsing…' : "What needs to be done? e.g. walk the dog tomorrow 6pm"}
             className="nothing-input flex-1 border-none min-w-0"
             autoComplete="off"
           />
@@ -107,7 +129,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
             id="voice-add-button"
             onClick={toggleVoice}
             disabled={!voiceSupported}
-            className={`p-2.5 rounded-full transition-all duration-200 flex-shrink-0 ${
+            className={`touch-44 p-2.5 rounded-full transition-all duration-200 flex-shrink-0 ${
               isListening
                 ? 'bg-white text-black animate-pulse'
                 : 'text-gray-600 hover:text-gray-400'
@@ -124,7 +146,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
           <button
             type="button"
             onClick={() => { playMechanicalClick(); setShowOptions(!showOptions); }}
-            className={`p-2.5 rounded-full transition-all duration-200 flex-shrink-0 ${
+            className={`touch-44 p-2.5 rounded-full transition-all duration-200 flex-shrink-0 ${
               showOptions
                 ? 'bg-white text-black'
                 : 'text-gray-600 hover:text-gray-400'
