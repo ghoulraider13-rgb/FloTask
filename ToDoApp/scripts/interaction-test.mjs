@@ -23,15 +23,43 @@ async function screenshotName(page, name) {
   await page.screenshot({ path: `${OUT_DIR}/interact-${safe}.png` });
 }
 
+// Real-touch swipe via CDP — the same channel as a physical screen.
+// FB-008: synthetic PointerEvents are a harness artifact — Embla 8 binds
+// touchstart/touchmove/touchend + mouse events, never pointer events.
+async function touchSwipe(page, fromX, toX, y, steps = 12) {
+  const client = await page.createCDPSession();
+  await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: fromX, y }] });
+  for (let i = 1; i <= steps; i++) {
+    const x = fromX + ((toX - fromX) * i) / steps;
+    await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y }] });
+    await new Promise(r => setTimeout(r, 16));
+  }
+  await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await client.detach();
+}
+
+// Real-touch tap via CDP — fires the full touchstart→pointerdown→click chain
+// like a physical user. HTMLElement.click() alone dispatches ONLY a click
+// event; after a swipe, Embla's viewport click-guard (preventClick, which
+// down() resets at every pointerdown) would eat a pointerless click.
+async function touchTap(page, x, y) {
+  const client = await page.createCDPSession();
+  await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] });
+  await new Promise(r => setTimeout(r, 60));
+  await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await client.detach();
+}
+
 const results = [];
 const browser = await puppeteer.launch({
   executablePath: CHROME_PATH,
   headless: true,
   args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--mute-audio'],
 });
-
 try {
   const page = await browser.newPage();
+  page.on('console', (msg) => { if (msg.type() === 'error' || msg.type() === 'warning') console.log(`[console.${msg.type()}]`, msg.text().slice(0, 250)); });
+  page.on('pageerror', (err) => console.log('[PAGEERROR]', String(err).slice(0, 350)));
   await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
   await page.goto(BASE_URL, { waitUntil: 'networkidle2', timeout: 30000 });
   await page.waitForFunction(() => document.getElementById('root')?.children.length > 0, { timeout: 15000 });
@@ -64,20 +92,7 @@ try {
   });
   await new Promise(r => setTimeout(r, 600));
 
-  await page.evaluate(() => new Promise(resolve => {
-    const el = document.elementFromPoint(195, 500);
-    const target = el || document.body;
-    const opts = { bubbles: true, cancelable: true, pointerId: 1 };
-    target.dispatchEvent(new PointerEvent('pointerdown', { ...opts, clientX: 300, clientY: 500 }));
-    setTimeout(() => {
-      target.dispatchEvent(new PointerEvent('pointermove', { ...opts, clientX: 200, clientY: 500 }));
-      setTimeout(() => {
-        target.dispatchEvent(new PointerEvent('pointermove', { ...opts, clientX: 60, clientY: 500 }));
-        target.dispatchEvent(new PointerEvent('pointerup', { ...opts, clientX: 60, clientY: 500 }));
-        resolve();
-      }, 80);
-    }, 80);
-  }));
+  await touchSwipe(page, 300, 60, 500);
   await new Promise(r => setTimeout(r, 800));
   const afterSwipe = await activeTabLabel(page);
   const swipeOk = afterSwipe && afterSwipe.toUpperCase().includes('ALARMS');
@@ -94,20 +109,15 @@ try {
   });
   await new Promise(r => setTimeout(r, 700));
   const editorExists = await page.evaluate(() => !!document.querySelector('[contenteditable="true"]'));
-  await page.evaluate(() => new Promise(resolve => {
+  const editorBox = await page.evaluate(() => {
     const ed = document.querySelector('[contenteditable="true"]');
-    if (!ed) return resolve();
+    if (!ed) return null;
     const r = ed.getBoundingClientRect();
-    const opts = { bubbles: true, cancelable: true, pointerId: 1 };
-    ed.dispatchEvent(new PointerEvent('pointerdown', { ...opts, clientX: r.x + 150, clientY: r.y + 60 }));
-    setTimeout(() => {
-      ed.dispatchEvent(new PointerEvent('pointermove', { ...opts, clientX: r.x + 60, clientY: r.y + 60 }));
-      setTimeout(() => {
-        ed.dispatchEvent(new PointerEvent('pointerup', { ...opts, clientX: r.x + 60, clientY: r.y + 60 }));
-        resolve();
-      }, 80);
-    }, 80);
-  }));
+    return { x: r.x + r.width / 2, y: r.y + Math.min(100, r.height / 2) };
+  });
+  if (editorBox) {
+    await touchSwipe(page, editorBox.x + 120, editorBox.x - 120, editorBox.y);
+  }
   await new Promise(r => setTimeout(r, 800));
   const stillNotes = await activeTabLabel(page);
   const lockOk = editorExists && stillNotes && stillNotes.toUpperCase().includes('NOTES');
@@ -129,11 +139,27 @@ try {
     input.dispatchEvent(new Event('input', { bubbles: true }));
   });
   await new Promise(r => setTimeout(r, 300));
-  await page.evaluate(() => document.getElementById('add-task-button')?.click());
-  await new Promise(r => setTimeout(r, 4000)); // NLM parse attempt (Ollama fetch has its own timeout)
+  // Real-touch tap on the ADD button (center) — like a physical user
+  const addBtnBox = await page.evaluate(() => {
+    const b = document.getElementById('add-task-button');
+    const r = b.getBoundingClientRect();
+    return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+  });
+  await touchTap(page, addBtnBox.x, addBtnBox.y);
+  await new Promise(r => setTimeout(r, 4000)); // parser is synchronous now; UI settle
   const taskAdded = await page.evaluate(() => document.body.innerText.includes('Buy milk'));
   results.push({ test: 'add-task', pass: taskAdded, detail: `visible=${taskAdded}` });
   console.log(`  ${taskAdded ? 'PASS' : 'FAIL'} task added & visible`);
+  if (!taskAdded) {
+    const diag = await page.evaluate(() => ({
+      activeTab: document.querySelector('nav[role="tablist"] button[aria-current="page"]')?.textContent?.trim(),
+      inputValue: document.getElementById('add-task-input')?.value,
+      inputExists: !!document.getElementById('add-task-input'),
+      todoTasks: JSON.parse(localStorage.getItem('todo-tasks') || '[]').map(t => t.title),
+      transform: getComputedStyle(document.querySelector('[class*="overflow-hidden"]')?.firstElementChild || document.body).transform,
+    }));
+    console.log('  DIAG:', JSON.stringify(diag));
+  }
   await screenshotName(page, 'task-added');
 
 } finally {

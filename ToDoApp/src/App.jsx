@@ -46,7 +46,7 @@ const TabButton = ({ screen, isActive, onClick }) => (
   </button>
 );
 
-function MobileTabBar({ selectedIndex, onSelect, scrollProgress }) {
+function MobileTabBar({ selectedIndex, onSelect }) {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 bg-surface-1/95 backdrop-blur-md border-t border-surface-5"
@@ -152,26 +152,40 @@ export default function App() {
     inViewThreshold: 0.5,
     skipSnaps: false,
     containScroll: 'trimSnaps',
-    watchDrag: true,
+    watchDrag: (api, evt) => {
+      // Block drags starting in the scratchpad editor (contenteditable) —
+      // Embla's built-in focusNodes skip-list only covers INPUT/SELECT/TEXTAREA.
+      // Event-channel note (FB-008): Embla 8 binds touch+mouse events, never
+      // pointer events; guards must work for touchstart/mousedown targets.
+      const t = evt?.target;
+      return !(t && t.closest && (t.closest('[contenteditable="true"]') || t.closest('[data-swipe-delete="true"]')));
+    },
     watchResize: true,
     watchSlides: true,
   });
 
-  const scrollProgress = emblaApi?.scrollProgress() ?? 0;
-  const snapIndex = emblaApi?.selectedScrollSnap() ?? 0;
-
-  // Sync carousel with tab bar
+  // Tab bar → carousel sync (tab click scrolls the carousel)…
   useEffect(() => {
     if (emblaApi && emblaApi.selectedScrollSnap() !== selectedIndex) {
       emblaApi.scrollTo(selectedIndex);
     }
   }, [selectedIndex, emblaApi]);
 
+  // …and carousel → tab bar sync: Embla emits 'select' after every drag/scroll.
+  // This is the only reliable signal in the drag direction — reading
+  // selectedScrollSnap() at render time never re-fires, because nothing
+  // re-renders App while Embla animates its transform (FB-008: swipe moved
+  // the carousel but the tab stayed put).
   useEffect(() => {
-    if (emblaApi) {
-      setSelectedIndex(emblaApi.selectedScrollSnap());
-    }
-  }, [snapIndex, emblaApi]);
+    if (!emblaApi) return;
+    const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap());
+    emblaApi.on('select', onSelect);
+    emblaApi.on('reInit', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+      emblaApi.off('reInit', onSelect);
+    };
+  }, [emblaApi]);
 
   // Detect mobile viewport
   useEffect(() => {
@@ -322,26 +336,6 @@ export default function App() {
     <ScratchpadScreen key="scratchpad" onNlmActions={handleNlmActions} />,
   ];
 
-  // Disable swipe on contenteditable and swipe-to-delete rows
-  const handleDragStart = useCallback((e) => {
-    const target = e.target;
-    const isEditable = target.closest('[contenteditable="true"]');
-    const isSwipeDelete = target.closest('[data-swipe-delete="true"]');
-    const isInput = target.closest('input, textarea, select');
-    if (isEditable || isSwipeDelete || isInput) {
-      e.preventDefault();
-      emblaApi?.plugins()?.forEach(p => p.name === 'drag' && p.stop?.());
-    }
-  }, [emblaApi]);
-
-  useEffect(() => {
-    const container = emblaRef?.current?.parentElement;
-    if (container) {
-      container.addEventListener('pointerdown', handleDragStart, { passive: false });
-      return () => container.removeEventListener('pointerdown', handleDragStart);
-    }
-  }, [emblaRef, handleDragStart]);
-
   // Android back button handling
   useEffect(() => {
     const handleBackButton = (e) => {
@@ -427,7 +421,6 @@ export default function App() {
       <MobileTabBar
         selectedIndex={selectedIndex}
         onSelect={setSelectedIndex}
-        scrollProgress={scrollProgress}
       />
     </div>
   );
