@@ -102,9 +102,13 @@ export default async function handler(req, res) {
   }
 
   // ── Call NLM (system prompt set server-side only) ──────────────
+  // meta carries the user's raw text + clock so normalizeActions can
+  // cross-check the model's date/time with chrono-node and fall back
+  // to chrono (run on the USER'S wall-clock) when fields are bad.
   try {
     const actions = await callNemotron(
-      buildPrompt(text, { currentTime: body.currentTime, timezone: body.timezone })
+      buildPrompt(text, { currentTime: body.currentTime, timezone: body.timezone }),
+      { text, timezone: body.timezone, currentTime: body.currentTime }
     );
     res.setHeader('Content-Type', 'application/json');
     return res.status(200).json({ actions });

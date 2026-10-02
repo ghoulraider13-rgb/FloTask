@@ -63,7 +63,8 @@ function attach(middlewares) {
 
     try {
       const actions = await callNemotron(
-        buildPrompt(text, { currentTime: body.currentTime, timezone: body.timezone })
+        buildPrompt(text, { currentTime: body.currentTime, timezone: body.timezone }),
+        { text, timezone: body.timezone, currentTime: body.currentTime }
       )
       res.setHeader('Content-Type', 'application/json')
       res.end(JSON.stringify({ actions }))

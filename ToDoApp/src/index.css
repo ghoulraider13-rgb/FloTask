@@ -43,6 +43,12 @@
   --glow-recording: 0 0 14px rgba(239, 68, 68, 0.35);
   --glow-glass: 0 0 8px rgba(255, 255, 255, 0.04);
   --glow-danger: 0 0 20px rgba(255, 0, 0, 0.5);
+  --glow-danger-md: 0 0 15px rgba(255, 0, 0, 0.5);
+  --glow-danger-glow: 0 0 10px rgba(255, 0, 0, 0.8);
+  --glow-danger-focus: 0 5px 15px -5px rgba(255, 0, 0, 0.3);
+  --glow-danger-inset: inset 0 0 20px rgba(255, 0, 0, 0.1);
+  --glow-danger-soft: 0 0 10px rgba(255, 0, 0, 0.1);
+  --glow-danger-text: 0 0 5px rgba(255, 0, 0, 0.8);
 
   /* Touch target */
   --touch-target: 44px;

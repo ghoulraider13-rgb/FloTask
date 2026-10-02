@@ -48,6 +48,11 @@ export default {
         recording: '0 0 14px rgba(239, 68, 68, 0.35)',
         glass: '0 0 8px rgba(255, 255, 255, 0.04)',
         danger: '0 0 20px rgba(255, 0, 0, 0.5)',
+        'danger-md': '0 0 15px rgba(255, 0, 0, 0.5)',
+        'danger-glow': '0 0 10px rgba(255, 0, 0, 0.8)',
+        'danger-focus': '0 5px 15px -5px rgba(255, 0, 0, 0.3)',
+        'danger-inset': 'inset 0 0 20px rgba(255, 0, 0, 0.1)',
+        'danger-soft': '0 0 10px rgba(255, 0, 0, 0.1)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',

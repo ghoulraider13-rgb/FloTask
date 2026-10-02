@@ -37,18 +37,20 @@ const INTENSITY_HIGH = /\b(enforcer|captcha)\b/i;
 const EXPLICIT_TITLE = /\b(?:titled|called|named)\s+["']([^"'\n]+)["']/i;
 const LEADING_ALARM_PREFIX = /^\s*alarms?\s*[:\-–—]\s*/i; // "alarm: gym" → "gym"
 const STRIP_PATTERNS = [
-  /\b(?:remind me to|remind me|set an alarm for|set alarm for|wake me up|wake me|add a task (?:to|for)|add task|todo|reminder)\b/gi,
+  /\b(?:set an alarm|set alarm|set up an alarm|remind me to|remind me|wake me up|wake me|add a task (?:to|for)|add task|todo|reminder)\b/gi,
   /\b(?:urgent|asap|critical|important|high[- ]priority|low[- ]priority|no rush|enforcer|captcha)\b/gi,
-  /\b(?:at|on|by|for)\s*$/gi, // trailing preposition left behind by the time strip
+  /\b(?:at|on|by|for|to)\s*$/gi, // trailing preposition left behind by the time strip
 ];
 const LIST_MARKER = /^[\s]*[-*•>\d.)\]+]+\s*/;
 
 function cleanTitle(raw) {
-  let t = raw.replace(EXPLICIT_TITLE, ' ');
-  t = t.replace(LEADING_ALARM_PREFIX, ' ');
+  const explicit = raw.match(EXPLICIT_TITLE);
+  if (explicit) return explicit[1].trim(); // 'titled "X"' → X verbatim
+  let t = raw.replace(LEADING_ALARM_PREFIX, ' ');
   STRIP_PATTERNS.forEach((p) => { t = t.replace(p, ' '); });
   t = t
     .replace(LIST_MARKER, '')
+    .replace(/^\s*to\s+/i, '') // purpose connector: "set an alarm … to walk dog" → "walk dog"
     .replace(/\s+/g, ' ')
     .replace(/^[\s:;\-–—,]+/, '')
     .replace(/[\s:;\-–—,]+$/, '')
