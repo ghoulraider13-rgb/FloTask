@@ -124,24 +124,37 @@ export default function StopwatchModule() {
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={isRunning ? handleStop : handleStart}
-          className={`btn-pill toolbar-btn font-dotmatrix text-[10px] px-5 transition-all duration-200 ${
-            isRunning
-              ? 'border-red-500 text-red-400 hover:bg-red-500 hover:text-white shadow-[0_0_8px_rgba(239,68,68,0.4)]'
-              : 'border-gray-700 text-white hover:border-white hover:bg-white hover:text-black'
-          }`}
-        >
-          {isRunning ? 'STOP ⏹' : 'START ⏵'}
-        </button>
-        <button
-          onClick={handleReset}
-          className="btn-pill toolbar-btn font-dotmatrix text-[10px] px-5 border-gray-800 text-gray-600 hover:border-gray-500 hover:text-white"
-        >
-          RESET ↺
-        </button>
-      </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={isRunning ? handleStop : handleStart}
+                className={`btn-pill toolbar-btn font-dotmatrix text-[10px] px-5 transition-all duration-200 flex items-center gap-2 ${
+                  isRunning
+                    ? 'border-red-500 text-red-400 hover:bg-red-500 hover:text-white shadow-[0_0_8px_rgba(239,68,68,0.4)]'
+                    : 'border-gray-700 text-white hover:border-white hover:bg-white hover:text-black'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  {isRunning ? (
+                    <>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </>
+                  ) : (
+                    <>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </>
+                  )}
+                </svg>
+                {isRunning ? 'STOP' : 'START'}
+              </button>
+              <button
+                onClick={handleReset}
+                className="btn-pill toolbar-btn font-dotmatrix text-[10px] px-5 border-gray-800 text-gray-600 hover:border-gray-500 hover:text-white flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                RESET
+              </button>
+            </div>
     </div>
   );
 }

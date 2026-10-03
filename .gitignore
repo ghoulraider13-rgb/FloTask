@@ -1,2 +1,5 @@
 .vercel/
 dev-dist/
+
+# Design reference screenshots (local knowledge only, never commit)
+design-reference/

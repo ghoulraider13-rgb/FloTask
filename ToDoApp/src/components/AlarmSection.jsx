@@ -166,7 +166,7 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
       )}
 
       {/* Mini Calendar */}
-      <div className="mt-auto pt-4 border border-gray-800 rounded-xl p-4 bg-[#050505] lg:max-w-[280px]">
+            <div className="mt-auto pt-4 pb-20 border border-gray-800 rounded-xl p-4 bg-[#050505] lg:max-w-[280px]">
         <div className="flex items-center justify-between mb-4">
           <span className="text-xs font-bold text-white uppercase tracking-widest font-mono">
             {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}

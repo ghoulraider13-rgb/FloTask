@@ -1,10 +1,11 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
+import { motion } from 'framer-motion';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useReminders, fireBrowserNotification } from './hooks/useReminders';
-import { createTask, actionToTaskOrAlarm, safeUuid } from './utils/taskHelpers';
+import { createTask, actionToTaskOrAlarm, safeUuid, partitionTasks, formatTime, formatTimeLong, toLocalInputValue } from './utils/taskHelpers';
 import { parseActions } from './utils/nlm';
-import { playGentleChime, playStandardAlarm, playEnforcerAlarm } from './utils/audioHelpers';
+import { playGentleChime, playStandardAlarm, playEnforcerAlarm, playMechanicalClick } from './utils/audioHelpers';
 
 import ReactiveGrid from './components/ReactiveGrid';
 import TimerHub from './components/TimerHub';
@@ -16,6 +17,8 @@ import NotificationToast from './components/NotificationToast';
 import PwaUpdateToast from './components/PwaUpdateToast';
 import AlarmModal from './components/AlarmModal';
 import EnforcerModal from './components/EnforcerModal';
+import AddTaskForm from './components/AddTaskForm';
+import TaskItem from './components/TaskItem';
 
 // Screen components for mobile
 const screens = [
@@ -46,7 +49,7 @@ const TabButton = ({ screen, isActive, onClick }) => (
   </button>
 );
 
-function MobileTabBar({ selectedIndex, onSelect }) {
+function MobileTabBar({ selectedIndex, onSelect, scrollProgress }) {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 bg-surface-1/95 backdrop-blur-md border-t border-surface-5"
@@ -58,7 +61,14 @@ function MobileTabBar({ selectedIndex, onSelect }) {
       role="tablist"
       aria-label="Main navigation"
     >
-      <div className="flex items-center justify-around h-[64px]">
+      <div className="flex items-center justify-around h-[64px] relative">
+        {/* Sliding active indicator — tracks carousel scroll progress */}
+        <motion.div
+          className="absolute bottom-0 h-0.5 bg-white rounded-full"
+          style={{ width: `${100 / screens.length}%` }}
+          animate={{ left: `${selectedIndex * (100 / screens.length)}%` }}
+          transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+        />
         {screens.map((screen, index) => (
           <TabButton
             key={screen.id}
@@ -72,63 +82,206 @@ function MobileTabBar({ selectedIndex, onSelect }) {
   );
 }
 
-// Screen wrappers that adapt existing components for full-height mobile
+// Mobile screen wrapper with proper layout
+function MobileScreen({ title, children, actionBar, emptyState, scrollable = true }) {
+  return (
+    <div className="flex flex-col h-dvh overflow-hidden bg-surface-0 relative">
+      {/* Page header */}
+      <header className="flex-shrink-0 px-5 py-4 border-b border-surface-5 bg-surface-1/50 backdrop-blur-sm">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-[0.15em] uppercase font-dotmatrix text-white">
+          {title}
+        </h1>
+      </header>
+
+      {/* Content area */}
+      <main className={`flex-1 overflow-hidden ${scrollable ? 'overflow-y-auto' : ''} pb-24`}>
+        <div className="px-5 pt-4 pb-4 max-w-xl mx-auto w-full">
+          {children}
+        </div>
+      </main>
+
+      {/* Action bar — anchored at the bottom of THIS slide (absolute, not fixed:
+          fixed inside an Embla slide escapes the slide and overlays other screens) */}
+      {actionBar && (
+        <div className="absolute bottom-0 left-0 right-0 px-5 pb-[calc(72px+env(safe-area-inset-bottom,0px))] pt-3 z-40 bg-gradient-to-t from-surface-0 via-surface-0/95 to-transparent">
+          <div className="w-full max-w-xl mx-auto">
+            {actionBar}
+          </div>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {emptyState && (
+        <div className="flex-1 flex flex-col items-center justify-center px-5 text-center">
+          {emptyState}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Tasks Screen
 function TasksScreen({ tasks, onAddTask, onToggleTask, onDeleteTask, onSetReminder, onNlmText }) {
+  const { active } = useMemo(() => partitionTasks(tasks), [tasks]);
+  
   return (
-    <div className="flex flex-col h-full h-dvh pb-[80px]">
-      <div className="nothing-card flex-1 flex flex-col m-4 rounded-xl overflow-hidden">
-        <TaskList
-          tasks={tasks}
-          onAddTask={onAddTask}
-          onToggleTask={onToggleTask}
-          onDeleteTask={onDeleteTask}
-          onSetReminder={onSetReminder}
-          onNlmText={onNlmText}
-        />
+    <MobileScreen
+      title="TASKS"
+      actionBar={
+        <AddTaskForm onAddTask={onAddTask} onNlmText={onNlmText} />
+      }
+      emptyState={
+        <div className="flex flex-col items-center justify-center py-16 text-center w-full">
+          <div className="w-16 h-16 rounded-full border border-surface-5 flex items-center justify-center mb-4">
+            <svg className="w-7 h-7 text-gray-600" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p className="text-base text-gray-500 font-mono tracking-wider uppercase">All clear</p>
+          <p className="text-sm text-gray-600 mt-1">Type or speak a task to get started</p>
+        </div>
+      }
+    >
+      <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
+        {active.map((task) => (
+          <TaskItem
+            key={task.id} task={task}
+            onToggle={onToggleTask} onDelete={onDeleteTask}
+          />
+        ))}
       </div>
-    </div>
+    </MobileScreen>
   );
 }
 
+// Alarms Screen
 function AlarmsScreen({ alarms, onAdd, onDelete }) {
+  const activeAlarms = alarms.filter((a) => !a.fired);
+  
+  const formatAlarmTime = (iso) => {
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase();
+  };
+
+  const formatAlarmDate = (iso) => {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' });
+  };
+
+  const intensityColor = {
+    low: 'border-gray-700',
+    medium: 'border-gray-600',
+    high: 'border-red-500/50',
+  };
+  
   return (
-    <div className="flex flex-col h-full h-dvh pb-[80px]">
-      <div className="nothing-card flex-1 flex flex-col m-4 rounded-xl">
-        <AlarmsHub alarms={alarms} onAdd={onAdd} onDelete={onDelete} />
+    <MobileScreen
+      title="ALARMS"
+      actionBar={
+        <div className="flex justify-end">
+          <button
+            onClick={() => { playMechanicalClick(); /* open bottom sheet */ }}
+            className="btn-pill-primary w-14 h-14 rounded-full flex items-center justify-center text-2xl"
+            aria-label="Add alarm"
+          >
+            +
+          </button>
+        </div>
+      }
+      emptyState={
+        <div className="flex flex-col items-center justify-center py-16 text-center w-full">
+          <div className="w-16 h-16 rounded-full border border-surface-5 flex items-center justify-center mb-4">
+            <svg className="w-7 h-7 text-gray-600" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p className="text-base text-gray-500 font-mono tracking-wider uppercase">No alarms</p>
+          <p className="text-sm text-gray-600 mt-1">Tap + to create your first alarm</p>
+        </div>
+      }
+    >
+      <div className="flex flex-col gap-3">
+        {activeAlarms.map((alarm) => (
+          <div
+            key={alarm.id}
+            className={`flex items-center gap-3 px-4 py-4 rounded-2xl bg-surface-3 border ${intensityColor[alarm.intensity]} flex-shrink-0 ${alarm.isAgentCreated ? 'animate-agent-pulse' : ''}`}
+          >
+            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${alarm.intensity === 'high' ? 'bg-red-500 animate-pulse-slow' : alarm.intensity === 'medium' ? 'bg-gray-400' : 'bg-gray-600'}`} />
+            <span className="text-2xl font-bold text-white font-dotmatrix tracking-[0.05em]">
+              {formatAlarmTime(alarm.dateTime)}
+            </span>
+            <span className="text-sm text-gray-500 font-dotmatrix uppercase truncate max-w-[180px] flex items-baseline ml-auto">
+              {alarm.label && alarm.label !== 'Alarm' ? alarm.label : ''}
+              <span className="text-xs opacity-60 ml-2 font-mono tracking-widest">- {formatAlarmDate(alarm.dateTime)}</span>
+            </span>
+            <button
+              onClick={() => { playMechanicalClick(); onDelete(alarm.id); }}
+              className="touch-44 text-gray-600 hover:text-red-500 transition-all ml-1 p-1"
+              title="Remove"
+              aria-label="Remove alarm"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        ))}
       </div>
-    </div>
+    </MobileScreen>
   );
 }
 
+// Timer Screen
 function TimerScreen() {
   return (
-    <div className="flex flex-col h-full h-dvh pb-[80px]">
-      <div className="nothing-card flex-1 flex flex-col m-4 rounded-xl">
-        <TimerHub />
-      </div>
-    </div>
+    <MobileScreen
+      title="TIMER"
+      scrollable={false}
+    >
+      <TimerHub />
+    </MobileScreen>
   );
 }
 
+// Stopwatch Screen
 function StopwatchScreen() {
   return (
-    <div className="flex flex-col h-full h-dvh pb-[80px]">
-      <div className="nothing-card flex-1 flex flex-col m-4 rounded-xl">
-        <StopwatchModule />
-      </div>
-    </div>
+    <MobileScreen
+      title="STOPWATCH"
+      scrollable={false}
+    >
+      <StopwatchModule />
+    </MobileScreen>
   );
 }
 
+// Scratchpad Screen
 function ScratchpadScreen({ onNlmActions }) {
   return (
-    <div className="flex flex-col h-full h-dvh pb-[80px]">
-      <div className="nothing-card flex-1 flex flex-col m-4 rounded-xl">
-        <RichScratchpad onNlmActions={onNlmActions} />
-      </div>
-    </div>
+    <MobileScreen
+      title="NOTES"
+      scrollable={true}
+    >
+      <RichScratchpad onNlmActions={onNlmActions} />
+    </MobileScreen>
   );
 }
+
+const intensityColor = {
+  low: 'border-gray-700',
+  medium: 'border-gray-600',
+  high: 'border-red-500/50',
+};
+
+const formatAlarmTime = (iso) => {
+  const d = new Date(iso);
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toUpperCase();
+};
+
+const formatAlarmDate = (iso) => {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' });
+};
 
 export default function App() {
   const [tasks, setTasks] = useLocalStorage('todo-tasks', []);
@@ -153,10 +306,6 @@ export default function App() {
     skipSnaps: false,
     containScroll: 'trimSnaps',
     watchDrag: (api, evt) => {
-      // Block drags starting in the scratchpad editor (contenteditable) —
-      // Embla's built-in focusNodes skip-list only covers INPUT/SELECT/TEXTAREA.
-      // Event-channel note (FB-008): Embla 8 binds touch+mouse events, never
-      // pointer events; guards must work for touchstart/mousedown targets.
       const t = evt?.target;
       return !(t && t.closest && (t.closest('[contenteditable="true"]') || t.closest('[data-swipe-delete="true"]')));
     },
@@ -164,18 +313,16 @@ export default function App() {
     watchSlides: true,
   });
 
-  // Tab bar → carousel sync (tab click scrolls the carousel)…
+  const scrollProgress = emblaApi?.scrollProgress() ?? 0;
+
+  // Tab bar → carousel sync (tab click scrolls the carousel)
   useEffect(() => {
     if (emblaApi && emblaApi.selectedScrollSnap() !== selectedIndex) {
       emblaApi.scrollTo(selectedIndex);
     }
   }, [selectedIndex, emblaApi]);
 
-  // …and carousel → tab bar sync: Embla emits 'select' after every drag/scroll.
-  // This is the only reliable signal in the drag direction — reading
-  // selectedScrollSnap() at render time never re-fires, because nothing
-  // re-renders App while Embla animates its transform (FB-008: swipe moved
-  // the carousel but the tab stayed put).
+  // Carousel → tab bar sync: Embla emits 'select' after every drag/scroll.
   useEffect(() => {
     if (!emblaApi) return;
     const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap());
@@ -421,6 +568,7 @@ export default function App() {
       <MobileTabBar
         selectedIndex={selectedIndex}
         onSelect={setSelectedIndex}
+        scrollProgress={scrollProgress}
       />
     </div>
   );

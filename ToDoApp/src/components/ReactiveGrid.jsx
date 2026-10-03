@@ -21,26 +21,31 @@ export default function ReactiveGrid() {
     const ctx = canvas.getContext('2d');
 
     const initDots = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      canvas.width = w * window.devicePixelRatio;
-      canvas.height = h * window.devicePixelRatio;
-      canvas.style.width = w + 'px';
-      canvas.style.height = h + 'px';
-      ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+          const w = window.innerWidth;
+          const h = window.innerHeight;
+          canvas.width = w * window.devicePixelRatio;
+          canvas.height = h * window.devicePixelRatio;
+          canvas.style.width = w + 'px';
+          canvas.style.height = h + 'px';
+          ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
 
-      const cols = Math.ceil(w / GRID_SPACING) + 1;
-      const rows = Math.ceil(h / GRID_SPACING) + 1;
-      const dots = [];
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const ox = c * GRID_SPACING;
-          const oy = r * GRID_SPACING;
-          dots.push({ ox, oy, x: ox, y: oy, vx: 0, vy: 0 });
-        }
-      }
-      dotsRef.current = dots;
-    };
+          const cols = Math.ceil(w / GRID_SPACING) + 1;
+          const rows = Math.ceil(h / GRID_SPACING) + 1;
+          const dots = [];
+          // Start grid with half-spacing offset to avoid edge clipping
+          const offsetX = GRID_SPACING / 2;
+          const offsetY = GRID_SPACING / 2;
+          for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+              const ox = offsetX + c * GRID_SPACING;
+              const oy = offsetY + r * GRID_SPACING;
+              // Skip dots that would be too close to viewport edges (clipping zone)
+              if (ox < DOT_RADIUS * 4 || ox > w - DOT_RADIUS * 4 || oy < DOT_RADIUS * 4 || oy > h - DOT_RADIUS * 4) continue;
+              dots.push({ ox, oy, x: ox, y: oy, vx: 0, vy: 0 });
+            }
+          }
+          dotsRef.current = dots;
+        };
 
     initDots();
 
