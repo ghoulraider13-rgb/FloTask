@@ -160,11 +160,13 @@ function TasksScreen({ tasks, onAddTask, onToggleTask, onDeleteTask, onSetRemind
       }
     >
       <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
-        {active.map((task) => (
-          <TaskItem
-            key={task.id} task={task}
-            onToggle={onToggleTask} onDelete={onDeleteTask}
-          />
+        {active.map((task, i) => (
+          <div key={task.id} className="animate-stagger-in" style={{ '--stagger-i': Math.min(i, 8) }}>
+            <TaskItem
+              task={task}
+              onToggle={onToggleTask} onDelete={onDeleteTask}
+            />
+          </div>
         ))}
       </div>
     </MobileScreen>
@@ -219,29 +221,32 @@ function AlarmsScreen({ alarms, onAdd, onDelete }) {
       }
     >
       <div className="flex flex-col gap-3">
-        {activeAlarms.map((alarm) => (
+        {activeAlarms.map((alarm, i) => (
           <div
             key={alarm.id}
-            className={`flex items-center gap-3 px-4 py-4 rounded-2xl bg-surface-3 border ${intensityColor[alarm.intensity]} flex-shrink-0 ${alarm.isAgentCreated ? 'animate-agent-pulse' : ''}`}
+            className={`animate-stagger-in ${alarm.isAgentCreated ? 'animate-agent-pulse' : ''}`}
+            style={{ '--stagger-i': Math.min(i, 8) }}
           >
-            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${alarm.intensity === 'high' ? 'bg-red-500 animate-pulse-slow' : alarm.intensity === 'medium' ? 'bg-gray-400' : 'bg-gray-600'}`} />
-            <span className="text-2xl font-bold text-white font-dotmatrix tracking-[0.05em]">
-              {formatAlarmTime(alarm.dateTime)}
-            </span>
-            <span className="text-sm text-gray-500 font-dotmatrix uppercase truncate max-w-[180px] flex items-baseline ml-auto">
-              {alarm.label && alarm.label !== 'Alarm' ? alarm.label : ''}
-              <span className="text-xs opacity-60 ml-2 font-mono tracking-widest">- {formatAlarmDate(alarm.dateTime)}</span>
-            </span>
-            <button
-              onClick={() => { playMechanicalClick(); onDelete(alarm.id); }}
-              className="touch-44 text-gray-600 hover:text-red-500 transition-all ml-1 p-1"
-              title="Remove"
-              aria-label="Remove alarm"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <div className={`flex items-center gap-3 px-4 py-4 rounded-2xl bg-surface-3 border ${intensityColor[alarm.intensity]} flex-shrink-0`}>
+              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${alarm.intensity === 'high' ? 'bg-red-500 animate-pulse-slow' : alarm.intensity === 'medium' ? 'bg-gray-400' : 'bg-gray-600'}`} />
+              <span className="text-2xl font-bold text-white font-dotmatrix tracking-[0.05em]">
+                {formatAlarmTime(alarm.dateTime)}
+              </span>
+              <span className="text-sm text-gray-500 font-dotmatrix uppercase truncate max-w-[180px] flex items-baseline ml-auto">
+                {alarm.label && alarm.label !== 'Alarm' ? alarm.label : ''}
+                <span className="text-xs opacity-60 ml-2 font-mono tracking-widest">- {formatAlarmDate(alarm.dateTime)}</span>
+              </span>
+              <button
+                onClick={() => { playMechanicalClick(); onDelete(alarm.id); }}
+                className="touch-44 text-gray-600 hover:text-red-500 transition-all ml-1 p-1"
+                title="Remove"
+                aria-label="Remove alarm"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
         ))}
       </div>

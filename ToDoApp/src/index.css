@@ -139,6 +139,39 @@ body {
   display: none;
 }
 
+/* ─── Life & Motion (C) — transform/opacity only, 60fps ───────────── */
+/* Staggered entrance for list items (delay set per-item via --stagger-i) */
+.animate-stagger-in {
+  animation: staggerIn 0.35s ease-out both;
+  animation-delay: calc(var(--stagger-i, 0) * 45ms);
+}
+
+@keyframes staggerIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Spring press feedback on buttons — scale 0.96 (spec) */
+.btn-pill:active,
+.btn-pill-primary:active,
+.touch-44:active {
+  transform: scale(0.96);
+  transition: transform 0.08s ease-out;
+}
+
+/* Animated toggle knob (toggle-switch already transitions; ensure motion-safe) */
+@media (prefers-reduced-motion: reduce) {
+  .animate-stagger-in,
+  .animate-ping {
+    animation: none !important;
+  }
+  .btn-pill:active,
+  .btn-pill-primary:active,
+  .touch-44:active {
+    transform: none;
+  }
+}
+
 /* ─── Touch Target Hit-Slop (≥44px tappable area without inflating visuals) ── */
 .touch-44 {
   position: relative;
