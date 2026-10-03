@@ -6,6 +6,7 @@ import { useReminders, fireBrowserNotification } from './hooks/useReminders';
 import { createTask, actionToTaskOrAlarm, safeUuid, partitionTasks, formatTime, formatTimeLong, toLocalInputValue } from './utils/taskHelpers';
 import { parseActions } from './utils/nlm';
 import { playGentleChime, playStandardAlarm, playEnforcerAlarm, playMechanicalClick } from './utils/audioHelpers';
+import { hapticImpact } from './utils/haptics';
 
 import ReactiveGrid from './components/ReactiveGrid';
 import TimerHub from './components/TimerHub';
@@ -445,20 +446,80 @@ export default function App() {
   }, [setAlarms]);
 
   // NLM
-  const handleNlmActions = useCallback((actions, { silent = false } = {}) => {
-    let created = 0;
-    actions.forEach((action) => {
-      const parsed = actionToTaskOrAlarm(action);
-      if (!parsed) return;
-      created++;
-      if (parsed.kind === 'alarm') handleAddAlarm(parsed.alarm);
-      else handleAddTask(parsed.task.title, parsed.task);
-    });
-    if (created > 0 && !silent) {
-      fireBrowserNotification('🤖 FloTask Agent', `${created} item${created > 1 ? 's' : ''} created from your note`);
-    }
-    return created;
-  }, [handleAddAlarm, handleAddTask]);
+    // Feature 1: auto-navigate after a scratchpad NLP add. Hold this exact
+    // dwell before switching to the Alarms screen (letting the user see the
+    // highlighted task) — a NAMED constant per spec.
+    const ALARM_SWITCH_DELAY_MS = 3870;
+    const autoNavTimeoutRef = useRef(null);
+    const cancelAutoNav = useCallback(() => {
+      if (autoNavTimeoutRef.current) {
+        clearTimeout(autoNavTimeoutRef.current);
+        autoNavTimeoutRef.current = null;
+      }
+    }, []);
+
+    const navigateTo = useCallback((index) => {
+      setSelectedIndex((prev) => {
+        if (prev !== index) {
+          emblaApi?.scrollTo(index);
+          return index;
+        }
+        return prev;
+      });
+    }, [emblaApi]);
+
+    const highlightItem = useCallback((id, type) => {
+      // Pulse the freshly created row for ~1.2s (TaskItem/AlarmsHub render
+      // data-highlight until the timestamp passes).
+      window.__highlightUntil = { ...(window.__highlightUntil || {}), [`${type}:${id}`]: Date.now() + 1200 };
+      window.dispatchEvent(new CustomEvent('flotask-highlight', { detail: { id, type } }));
+    }, []);
+
+    const handleNlmActions = useCallback((actions, { silent = false } = {}) => {
+      let created = 0;
+      const createdTasks = [];
+      const createdAlarms = [];
+      actions.forEach((action) => {
+        const parsed = actionToTaskOrAlarm(action);
+        if (!parsed) return;
+        created++;
+        if (parsed.kind === 'alarm') {
+          handleAddAlarm(parsed.alarm);
+          createdAlarms.push(parsed.alarm);
+        } else {
+          handleAddTask(parsed.task.title, parsed.task);
+          createdTasks.push(parsed.task);
+        }
+      });
+      if (created > 0 && !silent) {
+        fireBrowserNotification('🤖 FloTask Agent', `${created} item${created > 1 ? 's' : ''} created from your note`);
+      }
+      if (created > 0) {
+        // Feature 2: haptic on every scratchpad creation
+        hapticImpact();
+
+        // Feature 1: auto-navigate + highlight choreography.
+        // Only-task → stay on Tasks. Only-alarm → straight to Alarms.
+        // Both → Tasks first (highlight), hold ALARM_SWITCH_DELAY_MS, then
+        // Alarms (highlight). Cancelled if the user interacts during the hold.
+        if (createdAlarms.length > 0 && createdTasks.length === 0) {
+          navigateTo(1); // Alarms
+          setTimeout(() => createdAlarms.forEach((a) => highlightItem(a.id, 'alarm')), 450);
+        } else if (createdTasks.length > 0) {
+          navigateTo(0); // Tasks
+          setTimeout(() => createdTasks.forEach((t) => highlightItem(t.id, 'task')), 450);
+          if (createdAlarms.length > 0) {
+            cancelAutoNav();
+            autoNavTimeoutRef.current = setTimeout(() => {
+              navigateTo(1);
+              setTimeout(() => createdAlarms.forEach((a) => highlightItem(a.id, 'alarm')), 450);
+              autoNavTimeoutRef.current = null;
+            }, ALARM_SWITCH_DELAY_MS);
+          }
+        }
+      }
+      return created;
+    }, [handleAddAlarm, handleAddTask, navigateTo, highlightItem, cancelAutoNav]);
 
   const handleNlmText = useCallback(async (text, opts = {}) => {
     const actions = await parseActions(text);
@@ -489,6 +550,27 @@ export default function App() {
     <StopwatchScreen key="stopwatch" />,
     <ScratchpadScreen key="scratchpad" onNlmActions={handleNlmActions} />,
   ];
+
+  // Cancel the Feature-1 auto-navigation whenever the user interacts:
+  // touch/swipe anywhere on the carousel content or taps a tab during the hold.
+  useEffect(() => {
+    if (isMobile) {
+      const cancel = () => cancelAutoNav();
+      const container = emblaRef?.current;
+      container?.addEventListener('touchstart', cancel, { passive: true });
+      container?.addEventListener('mousedown', cancel, { passive: true });
+      return () => {
+        container?.removeEventListener('touchstart', cancel);
+        container?.removeEventListener('mousedown', cancel);
+      };
+    }
+  }, [isMobile, emblaRef, cancelAutoNav]);
+
+  // Tab taps also cancel (MobileTabBar onSelect routes through here on mobile)
+  const handleTabSelect = useCallback((index) => {
+    cancelAutoNav();
+    setSelectedIndex(index);
+  }, [cancelAutoNav]);
 
   // Android back button handling
   useEffect(() => {
@@ -574,7 +656,7 @@ export default function App() {
       {/* Bottom Tab Bar */}
       <MobileTabBar
         selectedIndex={selectedIndex}
-        onSelect={setSelectedIndex}
+        onSelect={handleTabSelect}
         scrollProgress={scrollProgress}
       />
     </div>

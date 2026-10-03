@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import IntensitySelector from './IntensitySelector';
 import { playMechanicalClick } from '../utils/audioHelpers';
+import { hapticImpact } from '../utils/haptics';
 import { toLocalInputValue } from '../utils/taskHelpers';
 import useVoiceInput from '../hooks/useVoiceInput';
 
@@ -43,7 +44,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
           reminderDateTime: reminderDateTime ? new Date(reminderDateTime).toISOString() : null,
           intensity,
         });
-        navigator.vibrate([50]); // Haptic feedback for manual task creation
+        hapticImpact(); // Feature 2: haptic for manual task creation
       } else if (onNlmText) {
         // Natural language: "walk dog at 6am" → parsed by the NLM.
         // Route through onNlmText (App.handleNlmText → actionToTaskOrAlarm)
@@ -53,15 +54,15 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
         setParsing(true);
         try {
           await onNlmText(trimmed, { silent: true });
-          navigator.vibrate([50]); // Haptic feedback on successful parsing
+          hapticImpact(); // Feature 2: haptic on successful parsing
         } catch (e) {
           console.error("NLM parsing failed:", e);
           onAddTask(trimmed, {}); // fallback: plain task, no silent drop
-          navigator.vibrate([50]);
+          hapticImpact();
         } finally { setParsing(false); }
       } else {
         onAddTask(trimmed, {});
-        navigator.vibrate([50]); // Haptic feedback for direct task creation
+        hapticImpact(); // Feature 2: haptic for direct task creation
       }
       resetFields();
     };
@@ -84,15 +85,15 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
           setParsing(true);
           try {
             await onNlmText(t);
-            navigator.vibrate([50]); // Haptic feedback on voice parsing
+            hapticImpact(); // Feature 2: haptic on voice parsing
           } catch (e) {
             console.error("Voice NLM parsing failed:", e);
             onAddTask(t, {}); // fallback: plain task, no silent drop
-            navigator.vibrate([50]);
+            hapticImpact();
           } finally { setParsing(false); }
         } else {
           onAddTask(t, {});
-          navigator.vibrate([50]); // Haptic feedback for voice-created task
+          hapticImpact(); // Feature 2: haptic for voice-created task
         }
         setTitle('');
         setTranscript('');
