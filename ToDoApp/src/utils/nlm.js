@@ -113,7 +113,39 @@ function parseLine(line, skipUntagged) {
  * Single-line input (task form): always yields at least one action — the
  * user typed it into a task field, never drop it. Multi-line (scratchpad):
  * only lines with a time or intent/priority keyword become items.
+ *
+ * Mic/voice extension (Feature 3): one utterance can produce MULTIPLE items —
+ *   "wake me at 6, 6:15 and 6:30"      → 3 alarms (same intent, repeated times)
+ *   "add tasks: milk, eggs, bread"     → 3 tasks
+ *   "grocery list: milk, eggs, bread"  → checklist note handled by the
+ *                                         caller (see parseChecklistNote);
+ *                                         least invasive: NOT split into tasks
+ * Multi-item splitting applies only to single-line spoken input, and only
+ * when the text carries an explicit list prefix ("add tasks:", "alarms at",
+ * "remind me to… and…") — prose stays one item.
  */
+const LIST_TASKS_PREFIX = /^\s*(?:add\s+(?:a\s+)?tasks?|tasks?)\s*:\s*/i;
+const CHECKLIST_PREFIX = /^\s*(?:[a-z\s]{0,30}?)\s*list\s*:\s*(.+)$/i;
+
+/** Split "wake me at 6, 6:15 and 6:30" style utterances into per-time items.
+ * Returns null when the text isn't a repeated-time utterance. */
+function splitRepeatedTimes(text) {
+  const times = [...text.matchAll(/\b(?:at\s*)?(\d{1,2}(?::\d{2})?)\s*(a\.?m\.?|p\.?m\.?)?/gi)]
+    .filter((m) => /^\d/.test(m[1]))
+    .map((m) => m[0]);
+  if (times.length < 2) return null;
+  // Everything before the first time is the shared intent; build one
+  // utterance per time, preserving the am/pm of that time (or the last one).
+  const firstIdx = text.indexOf(times[0]);
+  const intent = text.slice(0, firstIdx).trim();
+  const globalAmpm = (text.match(/(a\.?m\.?|p\.?m\.?)/i) || [])[0];
+  return times.map((t) => {
+    const hasOwnAmpm = /(a\.?m\.?|p\.?m\.?)/i.test(t);
+    const phrase = `${intent} ${t}${!hasOwnAmpm && globalAmpm ? ` ${globalAmpm}` : ''}`.trim();
+    return phrase;
+  });
+}
+
 export async function parseActions(text) {
   const input = String(text ?? '').trim();
   if (!input) return [];
@@ -125,10 +157,44 @@ export async function parseActions(text) {
       .flatMap((line) => parseLine(line, true));
   }
 
+  // Multi-item utterance (mic): explicit task-list prefix
+  if (LIST_TASKS_PREFIX.test(input)) {
+    const body = input.replace(LIST_TASKS_PREFIX, '');
+    const parts = body.split(/,| and /i).map((p) => p.trim()).filter(Boolean);
+    if (parts.length > 1) {
+      return parts.map((p) => ({ type: 'task', title: cleanTitle(p), dueDateTime: null, priority: 'normal', intensity: 'low', isAgentCreated: true }));
+    }
+  }
+
+  // Multi-item utterance (mic): repeated times — "wake me at 6, 6:15 and 6:30"
+  const repeated = splitRepeatedTimes(input);
+  if (repeated) {
+    const perTime = await Promise.all(repeated.map((phrase) => parseLine(phrase, false)));
+    const flat = perTime.flatMap((x) => x);
+    if (flat.length > 0) return flat;
+  }
+
   const actions = parseLine(input, false);
   if (actions.length === 0) {
     // Time phrase only ("tomorrow 6pm") or unparseable → keep raw words.
     return [{ type: 'task', title: input, dueDateTime: null, priority: 'normal', intensity: 'low', isAgentCreated: true }];
   }
   return actions;
+}
+
+/**
+ * Feature 3: detect a "grocery list: milk, eggs, bread" checklist note.
+ * Least invasive option for lists: a checklist NOTE (one SavedNotes-style
+ * entry), NOT several tasks — the caller decides where to store it.
+ * Returns the list title + items, or null when the text isn't a list.
+ */
+export function parseChecklistNote(text) {
+  const m = String(text ?? '').trim().match(CHECKLIST_PREFIX);
+  if (!m) return null;
+  const items = m[1].split(/,| and /i).map((p) => p.trim()).filter(Boolean);
+  if (items.length < 2) return null;
+  // Title = the words before the colon ("grocery list: milk, eggs" → "Grocery list")
+  const titleRaw = String(text ?? '').trim().split(':')[0].trim();
+  if (!titleRaw) return null;
+  return { title: titleRaw.charAt(0).toUpperCase() + titleRaw.slice(1), items };
 }

@@ -16,10 +16,23 @@ export default function useVoiceInput() {
   const [interimTranscript, setInterimTranscript] = useState('');
   const [error, setError] = useState(null);
 
-  // Detect support once
+  // Detect support once — Web Speech API on web; @capacitor-community/
+  // speech-recognition when running native (Feature 3). The native plugin
+  // is accessed via the Capacitor bridge at runtime (no npm import — a
+  // literal import() fails Rolldown static resolution in web-only builds).
   const [supported] = useState(() =>
-    Boolean(typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition))
+    Boolean(
+      (typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition)) ||
+      (typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.())
+    )
   );
+
+  // Feature 3: visible notice — browser speech recognition may send audio
+  // to the browser vendor's servers. Native plugin uses on-device models
+  // where available.
+  const recognitionNotice = typeof window !== 'undefined' && window.Capacitor?.isNativePlatform?.()
+    ? null
+    : 'Browser speech recognition may send audio to the browser vendor\'s servers.';
 
   const recognitionRef = useRef(null);
 
@@ -128,6 +141,7 @@ export default function useVoiceInput() {
     listening: isListening,
     supported,
     error,
+    recognitionNotice,
     interimTranscript,
     finalTranscript,
     transcript: finalTranscript + interimTranscript,

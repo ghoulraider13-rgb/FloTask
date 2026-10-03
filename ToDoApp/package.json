@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor-community/speech-recognition": "^7.0.1",
+    "@capacitor/haptics": "^8.0.2",
     "@google/generative-ai": "^0.24.1",
     "@use-gesture/react": "^10.3.1",
     "chrono-node": "^2.10.1",

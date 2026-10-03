@@ -21,6 +21,9 @@ import EnforcerModal from './components/EnforcerModal';
 import AddTaskForm from './components/AddTaskForm';
 import TaskItem from './components/TaskItem';
 import AlarmBottomSheet from './components/AlarmBottomSheet';
+import MicConfirmationSheet from './components/MicConfirmationSheet';
+import { parseChecklistNote } from './utils/nlm';
+import useVoiceInput from './hooks/useVoiceInput';
 
 // Screen components for mobile
 const screens = [
@@ -123,14 +126,26 @@ function MobileScreen({ title, children, actionBar, emptyState, scrollable = tru
 }
 
 // Tasks Screen
-function TasksScreen({ tasks, onAddTask, onToggleTask, onDeleteTask, onSetReminder, onNlmText }) {
+function TasksScreen({ tasks, onAddTask, onToggleTask, onDeleteTask, onSetReminder, onNlmText, mic }) {
   const { active } = useMemo(() => partitionTasks(tasks), [tasks]);
   
   return (
     <MobileScreen
       title="TASKS"
       actionBar={
-        <AddTaskForm onAddTask={onAddTask} onNlmText={onNlmText} />
+        <div className="flex items-end gap-3">
+          <div className="flex-1 min-w-0">
+            <AddTaskForm onAddTask={onAddTask} onNlmText={onNlmText} />
+          </div>
+          <MicButton
+            isListening={mic.isListening}
+            supported={mic.supported}
+            error={mic.error}
+            interimTranscript={mic.interimTranscript}
+            onToggle={mic.toggle}
+            notice={mic.notice}
+          />
+        </div>
       }
       emptyState={
         <div className="flex flex-col items-center justify-center py-16 text-center w-full">
@@ -239,6 +254,45 @@ function AlarmsScreen({ alarms, onAdd, onDelete }) {
   );
 }
 
+// Feature 3: mic button with listening state (pulsing ring + live transcript).
+// Tap to start, tap to stop. Handles permission denied / no support /
+// no-speech with a visible message.
+function MicButton({ isListening, supported, error, interimTranscript, onToggle, notice }) {
+  return (
+    <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
+      <button
+        type="button"
+        id="voice-add-button"
+        onClick={onToggle}
+        disabled={!supported}
+        aria-pressed={isListening}
+        title={supported
+          ? (isListening ? 'Stop — review parsed items' : 'Speak — tasks, alarms, lists')
+          : 'Voice input not supported in this browser'}
+        className={`relative w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 border ${
+          isListening
+            ? 'bg-white text-black border-white'
+            : 'bg-transparent text-gray-500 border-surface-5 hover:text-white hover:border-gray-400'
+        } ${!supported ? 'opacity-30 cursor-not-allowed' : ''}`}
+      >
+        {/* Pulsing listening ring */}
+        {isListening && (
+          <span className="absolute inset-0 rounded-full border-2 border-white animate-ping" />
+        )}
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+        </svg>
+      </button>
+      <span className="text-[9px] text-gray-600 font-mono uppercase tracking-wider max-w-[110px] text-center leading-tight">
+        {isListening ? (interimTranscript ? interimTranscript.slice(0, 40) : 'LISTENING…') : (error ? `MIC: ${error}` : 'TAP TO SPEAK')}
+      </span>
+      {notice && !isListening && (
+        <span className="text-[8px] text-gray-700 font-mono max-w-[110px] text-center leading-tight">{notice}</span>
+      )}
+    </div>
+  );
+}
+
 // Timer Screen
 function TimerScreen() {
   return (
@@ -264,13 +318,25 @@ function StopwatchScreen() {
 }
 
 // Scratchpad Screen
-function ScratchpadScreen({ onNlmActions }) {
+function ScratchpadScreen({ onNlmActions, mic, onMicTranscript }) {
   return (
     <MobileScreen
       title="NOTES"
       scrollable={true}
+      actionBar={
+        <div className="flex justify-center">
+          <MicButton
+            isListening={mic.isListening}
+            supported={mic.supported}
+            error={mic.error}
+            interimTranscript={mic.interimTranscript}
+            onToggle={mic.toggle}
+            notice={mic.notice}
+          />
+        </div>
+      }
     >
-      <RichScratchpad onNlmActions={onNlmActions} />
+      <RichScratchpad onNlmActions={onNlmActions} micTranscript={mic.isListening ? mic.interimTranscript : mic.lastTranscript} onMicTranscript={onMicTranscript} />
     </MobileScreen>
   );
 }
@@ -424,6 +490,30 @@ export default function App() {
     setTasks((prev) => [createTask(title, options), ...prev]);
   }, [setTasks]);
 
+  // ── Feature 3: mic + confirmation flow ──────────────────────────
+  const voice = useVoiceInput();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmItems, setConfirmItems] = useState([]);
+  const lastVoiceParseRef = useRef('');
+  const micSourceRef = useRef('tasks'); // which screen the utterance came from
+
+  // Mic toggle + notice for the screen props
+  const mic = useMemo(() => ({
+    isListening: voice.isListening,
+    supported: voice.supported,
+    error: voice.error,
+    interimTranscript: voice.interimTranscript,
+    lastTranscript: voice.finalTranscript,
+    notice: voice.recognitionNotice,
+    toggle: () => {
+      playMechanicalClick();
+      if (!voice.supported) return;
+      micSourceRef.current = 'tasks';
+      if (voice.isListening) voice.stopListening();
+      else voice.startListening();
+    },
+  }), [voice]);
+
   const handleToggleTask = useCallback((id) => {
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
   }, [setTasks]);
@@ -530,6 +620,58 @@ export default function App() {
     return handleNlmActions(actions, opts);
   }, [handleAddTask, handleNlmActions]);
 
+  // ── Feature 3: voice → parse → confirm → materialize ────────────
+  // Voice transcript finalized → parse → open the confirmation sheet.
+  // Save happens ONLY after the user confirms (MicConfirmationSheet).
+  useEffect(() => {
+    if (!voice.finalTranscript || voice.isListening) return;
+    const t = voice.finalTranscript.trim();
+    if (!t || lastVoiceParseRef.current === t) return;
+    lastVoiceParseRef.current = t;
+
+    (async () => {
+      try {
+        // Checklist note ("grocery list: milk, eggs, bread") → one note item
+        const checklist = parseChecklistNote(t);
+        let parsed = [];
+        if (checklist) {
+          parsed = [{ type: 'note', title: checklist.title, items: checklist.items, dueDateTime: null, priority: 'normal', intensity: 'low' }];
+        } else {
+          parsed = await parseActions(t);
+        }
+        if (!parsed || parsed.length === 0) {
+          parsed = [{ type: 'task', title: t, dueDateTime: null, priority: 'normal', intensity: 'low' }];
+        }
+        setConfirmItems(parsed);
+        setConfirmOpen(true);
+      } catch (e) {
+        console.error('Voice parsing failed:', e);
+        fireBrowserNotification('🎤 FloTask', 'Could not parse that — try again');
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [voice.finalTranscript, voice.isListening]);
+
+  // User confirmed the sheet → materialize items (non-silent → Feature 1
+  // navigation + Feature 2 haptic run inside handleNlmActions).
+  const handleMicConfirm = useCallback((items) => {
+    voice.setTranscript('');
+    lastVoiceParseRef.current = '';
+    const actions = items.filter((i) => i.type !== 'note');
+    const notes = items.filter((i) => i.type === 'note');
+    if (actions.length > 0) handleNlmActions(actions, { silent: false });
+    if (notes.length > 0) {
+      notes.forEach((n) => {
+        // Least invasive list storage: a checklist note in saved-notes
+        const saved = JSON.parse(localStorage.getItem('saved-notes') || '[]');
+        const listContent = `<h3>${n.title}</h3><ul>${n.items.map((it) => `<li>${it}</li>`).join('')}</ul>`;
+        saved.unshift({ id: safeUuid(), content: listContent, preview: `${n.title}: ${n.items.join(', ')}`.slice(0, 120), createdAt: new Date().toISOString(), checklist: n.items });
+        localStorage.setItem('saved-notes', JSON.stringify(saved));
+      });
+      navigateTo(4); // Notes — show the new checklist
+    }
+  }, [handleNlmActions, voice, navigateTo]);
+
   const screenComponents = [
     <TasksScreen
       key="tasks"
@@ -539,6 +681,7 @@ export default function App() {
       onDeleteTask={handleDeleteTask}
       onSetReminder={handleSetReminder}
       onNlmText={handleNlmText}
+      mic={mic}
     />,
     <AlarmsScreen
       key="alarms"
@@ -548,7 +691,7 @@ export default function App() {
     />,
     <TimerScreen key="timer" />,
     <StopwatchScreen key="stopwatch" />,
-    <ScratchpadScreen key="scratchpad" onNlmActions={handleNlmActions} />,
+    <ScratchpadScreen key="scratchpad" onNlmActions={handleNlmActions} mic={mic} />,
   ];
 
   // Cancel the Feature-1 auto-navigation whenever the user interacts:
@@ -631,6 +774,14 @@ export default function App() {
       {enforcerAlert && (
         <EnforcerModal title={enforcerAlert.title} subtext={enforcerAlert.subtext} onDismiss={dismissEnforcer} />
       )}
+
+      {/* Feature 3: mic confirmation sheet — save only after user confirms */}
+      <MicConfirmationSheet
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        items={confirmItems}
+        onConfirm={handleMicConfirm}
+      />
 
       {/* Carousel — Embla viewport (overflow hidden) > container (flex) > slides */}
       <div
