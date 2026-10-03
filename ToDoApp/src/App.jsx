@@ -19,6 +19,7 @@ import AlarmModal from './components/AlarmModal';
 import EnforcerModal from './components/EnforcerModal';
 import AddTaskForm from './components/AddTaskForm';
 import TaskItem from './components/TaskItem';
+import AlarmBottomSheet from './components/AlarmBottomSheet';
 
 // Screen components for mobile
 const screens = [
@@ -156,6 +157,7 @@ function TasksScreen({ tasks, onAddTask, onToggleTask, onDeleteTask, onSetRemind
 
 // Alarms Screen
 function AlarmsScreen({ alarms, onAdd, onDelete }) {
+  const [sheetOpen, setSheetOpen] = useState(false);
   const activeAlarms = alarms.filter((a) => !a.fired);
   
   const formatAlarmTime = (iso) => {
@@ -180,7 +182,7 @@ function AlarmsScreen({ alarms, onAdd, onDelete }) {
       actionBar={
         <div className="flex justify-end">
           <button
-            onClick={() => { playMechanicalClick(); /* open bottom sheet */ }}
+            onClick={() => { playMechanicalClick(); setSheetOpen(true); }}
             className="btn-pill-primary w-14 h-14 rounded-full flex items-center justify-center text-2xl"
             aria-label="Add alarm"
           >
@@ -227,6 +229,11 @@ function AlarmsScreen({ alarms, onAdd, onDelete }) {
           </div>
         ))}
       </div>
+
+      {/* Bottom sheet with wheel picker + optional date — portal-rendered
+          OUTSIDE the carousel, so it never fights Embla and never clips
+          under the tab bar (the old inline calendar's bug) */}
+      <AlarmBottomSheet open={sheetOpen} onOpenChange={setSheetOpen} onAdd={onAdd} />
     </MobileScreen>
   );
 }
