@@ -89,6 +89,8 @@ function MobileTabBar({ selectedIndex, onSelect, scrollProgress }) {
 
 // Mobile screen wrapper with proper layout
 function MobileScreen({ title, children, actionBar, emptyState, scrollable = true }) {
+  const hasContent = children !== undefined && children !== null && children !== false &&
+    (!Array.isArray(children) || children.length > 0);
   return (
     <div className="flex flex-col h-dvh overflow-hidden bg-surface-0 relative">
       {/* Page header */}
@@ -98,11 +100,18 @@ function MobileScreen({ title, children, actionBar, emptyState, scrollable = tru
         </h1>
       </header>
 
-      {/* Content area */}
-      <main className={`flex-1 overflow-hidden ${scrollable ? 'overflow-y-auto' : ''} pb-24`}>
-        <div className="px-5 pt-4 pb-4 max-w-xl mx-auto w-full">
-          {children}
-        </div>
+      {/* Content area — empty state replaces content (never a sibling: the
+          old sibling layout overlapped the action bar and left a dead void) */}
+      <main className={`flex-1 min-h-0 ${scrollable && hasContent ? 'overflow-y-auto' : ''} pb-4`}>
+        {hasContent ? (
+          <div className="px-5 pt-4 pb-4 max-w-xl mx-auto w-full">
+            {children}
+          </div>
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center px-5 text-center animate-stagger-in">
+            {emptyState}
+          </div>
+        )}
       </main>
 
       {/* Action bar — anchored at the bottom of THIS slide (absolute, not fixed:
@@ -112,13 +121,6 @@ function MobileScreen({ title, children, actionBar, emptyState, scrollable = tru
           <div className="w-full max-w-xl mx-auto">
             {actionBar}
           </div>
-        </div>
-      )}
-
-      {/* Empty state */}
-      {emptyState && (
-        <div className="flex-1 flex flex-col items-center justify-center px-5 text-center">
-          {emptyState}
         </div>
       )}
     </div>
@@ -159,16 +161,18 @@ function TasksScreen({ tasks, onAddTask, onToggleTask, onDeleteTask, onSetRemind
         </div>
       }
     >
-      <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
-        {active.map((task, i) => (
-          <div key={task.id} className="animate-stagger-in" style={{ '--stagger-i': Math.min(i, 8) }}>
-            <TaskItem
-              task={task}
-              onToggle={onToggleTask} onDelete={onDeleteTask}
-            />
-          </div>
-        ))}
-      </div>
+      {active.length > 0 ? (
+        <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
+          {active.map((task, i) => (
+            <div key={task.id} className="animate-stagger-in" style={{ '--stagger-i': Math.min(i, 8) }}>
+              <TaskItem
+                task={task}
+                onToggle={onToggleTask} onDelete={onDeleteTask}
+              />
+            </div>
+          ))}
+        </div>
+      ) : null}
     </MobileScreen>
   );
 }
@@ -220,36 +224,38 @@ function AlarmsScreen({ alarms, onAdd, onDelete }) {
         </div>
       }
     >
-      <div className="flex flex-col gap-3">
-        {activeAlarms.map((alarm, i) => (
-          <div
-            key={alarm.id}
-            className={`animate-stagger-in ${alarm.isAgentCreated ? 'animate-agent-pulse' : ''}`}
-            style={{ '--stagger-i': Math.min(i, 8) }}
-          >
-            <div className={`flex items-center gap-3 px-4 py-4 rounded-2xl bg-surface-3 border ${intensityColor[alarm.intensity]} flex-shrink-0`}>
-              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${alarm.intensity === 'high' ? 'bg-red-500 animate-pulse-slow' : alarm.intensity === 'medium' ? 'bg-gray-400' : 'bg-gray-600'}`} />
-              <span className="text-2xl font-bold text-white font-dotmatrix tracking-[0.05em]">
-                {formatAlarmTime(alarm.dateTime)}
-              </span>
-              <span className="text-sm text-gray-500 font-dotmatrix uppercase truncate max-w-[180px] flex items-baseline ml-auto">
-                {alarm.label && alarm.label !== 'Alarm' ? alarm.label : ''}
-                <span className="text-xs opacity-60 ml-2 font-mono tracking-widest">- {formatAlarmDate(alarm.dateTime)}</span>
-              </span>
-              <button
-                onClick={() => { playMechanicalClick(); onDelete(alarm.id); }}
-                className="touch-44 text-gray-600 hover:text-red-500 transition-all ml-1 p-1"
-                title="Remove"
-                aria-label="Remove alarm"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+      {activeAlarms.length > 0 ? (
+        <div className="flex flex-col gap-3">
+          {activeAlarms.map((alarm, i) => (
+            <div
+              key={alarm.id}
+              className={`animate-stagger-in ${alarm.isAgentCreated ? 'animate-agent-pulse' : ''}`}
+              style={{ '--stagger-i': Math.min(i, 8) }}
+            >
+              <div className={`flex items-center gap-3 px-4 py-4 rounded-2xl bg-surface-3 border ${intensityColor[alarm.intensity]} flex-shrink-0`}>
+                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${alarm.intensity === 'high' ? 'bg-red-500 animate-pulse-slow' : alarm.intensity === 'medium' ? 'bg-gray-400' : 'bg-gray-600'}`} />
+                <span className="text-2xl font-bold text-white font-dotmatrix tracking-[0.05em]">
+                  {formatAlarmTime(alarm.dateTime)}
+                </span>
+                <span className="text-sm text-gray-500 font-dotmatrix uppercase truncate max-w-[180px] flex items-baseline ml-auto">
+                  {alarm.label && alarm.label !== 'Alarm' ? alarm.label : ''}
+                  <span className="text-xs opacity-60 ml-2 font-mono tracking-widest">- {formatAlarmDate(alarm.dateTime)}</span>
+                </span>
+                <button
+                  onClick={() => { playMechanicalClick(); onDelete(alarm.id); }}
+                  className="touch-44 text-gray-600 hover:text-red-500 transition-all ml-1 p-1"
+                  title="Remove"
+                  aria-label="Remove alarm"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : null}
 
       {/* Bottom sheet with wheel picker + optional date — portal-rendered
           OUTSIDE the carousel, so it never fights Embla and never clips
