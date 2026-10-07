@@ -37,7 +37,31 @@ The Gemini API key (`GEMINI_API_KEY`) is set as a Vercel environment variable an
 only (`api/_nlm.js`); the client (`src/utils/nlm.js`) calls the `/api/chat` and `/api/transform`
 endpoints.
 
-## 🧱 Structure
+|## 📥 Download Desktop App
+
+Native desktop apps are available for **Windows**, **Linux**, and **macOS**. Each release is tagged on GitHub and triggers the CI/CD pipeline to build and sign installers.
+
+| Platform | Installer | Size |
+|----------|-----------|------|
+| Windows 11/10 | `FloTask_0.1.0_x64-setup.exe` | ~4.2 MB |
+| Linux (Ubuntu/Debian) | `FloTask_0.1.0_amd64.deb` | ~4 MB |
+| Linux (Fedora/RHEL) | `FloTask-0.1.0-1.x86_64.rpm` | ~4 MB |
+| Linux (Any distribution) | `FloTask_0.1.0_amd64.AppImage` | ~83 MB |
+| macOS | `FloTask_0.1.0_x64.dmg` | — |
+
+**Latest release:** [v0.1.0](https://github.com/ghoulraider13-rgb/FloTask/releases/latest)
+
+### Build from source
+
+```bash
+# Desktop (requires Rust toolchain)
+cd ToDoApp
+npm install
+npx tauri build --target x86_64-pc-windows-msvc  # Windows
+npx tauri build                                   # Linux/macOS native target
+```
+
+|
 
 ```
 ToDoApp/
