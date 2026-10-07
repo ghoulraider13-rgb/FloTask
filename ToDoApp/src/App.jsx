@@ -7,6 +7,11 @@ import { playGentleChime, playStandardAlarm, playEnforcerAlarm } from './utils/a
 
 import ReactiveGrid from './components/ReactiveGrid';
 import MobileShell from './components/MobileShell';
+import TimerHub from './components/TimerHub';
+import TaskList from './components/TaskList';
+import StopwatchModule from './components/StopwatchModule';
+import RichScratchpad from './components/RichScratchpad';
+import AlarmsHub from './components/AlarmSection';
 import NotificationToast from './components/NotificationToast';
 import PwaUpdateToast from './components/PwaUpdateToast';
 import AlarmModal from './components/AlarmModal';

@@ -1,0 +1,518 @@
+[
+  {
+    "label": "dark-320-tasks",
+    "issues": [
+      "offscreen elements: <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=640 left=320> | <div class=\"flex items-center justify-between\" right=640 left=320> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=382 left=320> | <div class=\"flex flex-col gap-3 pb-1 w-full lg:max-w-[280px]\" right=640 left=320> | <div class=\"mt-1\" right=640 left=320> | <button class=\"px-4 py-2 text-xs font-dotmatrix tracking-wider rounded-full\" right=384 left=320> | <div class=\"mt-auto pt-4 border border-gray-800 rounded-xl p-4 bg-[#0505\" right=640 left=320> | <div class=\"flex items-center justify-between mb-4\" right=623 left=337>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 320,
+    "scrollW": 320
+  },
+  {
+    "label": "dark-320-alarms",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=0 left=-320> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=0 left=-320> | <div class=\"flex items-center justify-between\" right=-21 left=-299> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-247 left=-299> | <div class=\"flex items-center gap-4\" right=-21 left=-69> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-21 left=-69> | <form class=\"space-y-3\" right=-21 left=-299> | <div class=\"flex items-end gap-3\" right=-21 left=-299>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 320,
+    "scrollW": 320
+  },
+  {
+    "label": "dark-320-timer",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-320 left=-640> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-320 left=-640> | <div class=\"flex items-center justify-between\" right=-341 left=-619> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-567 left=-619> | <div class=\"flex items-center gap-4\" right=-341 left=-389> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-341 left=-389> | <form class=\"space-y-3\" right=-341 left=-619> | <div class=\"flex items-end gap-3\" right=-341 left=-619>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 320,
+    "scrollW": 320
+  },
+  {
+    "label": "dark-320-stopwatch",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-640 left=-960> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-640 left=-960> | <div class=\"flex items-center justify-between\" right=-661 left=-939> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-887 left=-939> | <div class=\"flex items-center gap-4\" right=-661 left=-709> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-661 left=-709> | <form class=\"space-y-3\" right=-661 left=-939> | <div class=\"flex items-end gap-3\" right=-661 left=-939>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 320,
+    "scrollW": 320
+  },
+  {
+    "label": "dark-320-scratchpad",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-960 left=-1280> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-960 left=-1280> | <div class=\"flex items-center justify-between\" right=-981 left=-1259> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1207 left=-1259> | <div class=\"flex items-center gap-4\" right=-981 left=-1029> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-981 left=-1029> | <form class=\"space-y-3\" right=-981 left=-1259> | <div class=\"flex items-end gap-3\" right=-981 left=-1259>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 320,
+    "scrollW": 320
+  },
+  {
+    "label": "dark-360-tasks",
+    "issues": [
+      "offscreen elements: <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=720 left=360> | <div class=\"flex items-center justify-between\" right=720 left=360> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=422 left=360> | <div class=\"flex flex-col gap-3 pb-1 w-full lg:max-w-[280px]\" right=720 left=360> | <div class=\"mt-1\" right=720 left=360> | <button class=\"px-4 py-2 text-xs font-dotmatrix tracking-wider rounded-full\" right=424 left=360> | <div class=\"mt-auto pt-4 border border-gray-800 rounded-xl p-4 bg-[#0505\" right=720 left=360> | <div class=\"flex items-center justify-between mb-4\" right=703 left=377>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 360,
+    "scrollW": 360
+  },
+  {
+    "label": "dark-360-alarms",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=0 left=-360> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=0 left=-360> | <div class=\"flex items-center justify-between\" right=-21 left=-339> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-287 left=-339> | <div class=\"flex items-center gap-4\" right=-21 left=-69> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-21 left=-69> | <form class=\"space-y-3\" right=-21 left=-339> | <div class=\"flex items-end gap-3\" right=-21 left=-339>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 360,
+    "scrollW": 360
+  },
+  {
+    "label": "dark-360-timer",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-360 left=-720> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-360 left=-720> | <div class=\"flex items-center justify-between\" right=-381 left=-699> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-647 left=-699> | <div class=\"flex items-center gap-4\" right=-381 left=-429> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-381 left=-429> | <form class=\"space-y-3\" right=-381 left=-699> | <div class=\"flex items-end gap-3\" right=-381 left=-699>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 360,
+    "scrollW": 360
+  },
+  {
+    "label": "dark-360-stopwatch",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-720 left=-1080> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-720 left=-1080> | <div class=\"flex items-center justify-between\" right=-741 left=-1059> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1007 left=-1059> | <div class=\"flex items-center gap-4\" right=-741 left=-789> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-741 left=-789> | <form class=\"space-y-3\" right=-741 left=-1059> | <div class=\"flex items-end gap-3\" right=-741 left=-1059>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 360,
+    "scrollW": 360
+  },
+  {
+    "label": "dark-360-scratchpad",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-1080 left=-1440> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-1080 left=-1440> | <div class=\"flex items-center justify-between\" right=-1101 left=-1419> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1367 left=-1419> | <div class=\"flex items-center gap-4\" right=-1101 left=-1149> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-1101 left=-1149> | <form class=\"space-y-3\" right=-1101 left=-1419> | <div class=\"flex items-end gap-3\" right=-1101 left=-1419>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 360,
+    "scrollW": 360
+  },
+  {
+    "label": "dark-390-tasks",
+    "issues": [
+      "offscreen elements: <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=780 left=390> | <div class=\"flex items-center justify-between\" right=780 left=390> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=452 left=390> | <div class=\"flex flex-col gap-3 pb-1 w-full lg:max-w-[280px]\" right=780 left=390> | <div class=\"mt-1\" right=780 left=390> | <button class=\"px-4 py-2 text-xs font-dotmatrix tracking-wider rounded-full\" right=454 left=390> | <div class=\"mt-auto pt-4 border border-gray-800 rounded-xl p-4 bg-[#0505\" right=780 left=390> | <div class=\"flex items-center justify-between mb-4\" right=763 left=407>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 390,
+    "scrollW": 390
+  },
+  {
+    "label": "dark-390-alarms",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=0 left=-390> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=0 left=-390> | <div class=\"flex items-center justify-between\" right=-21 left=-369> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-317 left=-369> | <div class=\"flex items-center gap-4\" right=-21 left=-69> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-21 left=-69> | <form class=\"space-y-3\" right=-21 left=-369> | <div class=\"flex items-end gap-3\" right=-21 left=-369>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 390,
+    "scrollW": 390
+  },
+  {
+    "label": "dark-390-timer",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-390 left=-780> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-390 left=-780> | <div class=\"flex items-center justify-between\" right=-411 left=-759> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-707 left=-759> | <div class=\"flex items-center gap-4\" right=-411 left=-459> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-411 left=-459> | <form class=\"space-y-3\" right=-411 left=-759> | <div class=\"flex items-end gap-3\" right=-411 left=-759>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 390,
+    "scrollW": 390
+  },
+  {
+    "label": "dark-390-stopwatch",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-780 left=-1170> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-780 left=-1170> | <div class=\"flex items-center justify-between\" right=-801 left=-1149> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1097 left=-1149> | <div class=\"flex items-center gap-4\" right=-801 left=-849> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-801 left=-849> | <form class=\"space-y-3\" right=-801 left=-1149> | <div class=\"flex items-end gap-3\" right=-801 left=-1149>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 390,
+    "scrollW": 390
+  },
+  {
+    "label": "dark-390-scratchpad",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-1170 left=-1560> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-1170 left=-1560> | <div class=\"flex items-center justify-between\" right=-1191 left=-1539> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1487 left=-1539> | <div class=\"flex items-center gap-4\" right=-1191 left=-1239> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-1191 left=-1239> | <form class=\"space-y-3\" right=-1191 left=-1539> | <div class=\"flex items-end gap-3\" right=-1191 left=-1539>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 390,
+    "scrollW": 390
+  },
+  {
+    "label": "dark-412-tasks",
+    "issues": [
+      "offscreen elements: <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=824 left=412> | <div class=\"flex items-center justify-between\" right=824 left=412> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=474 left=412> | <div class=\"flex flex-col gap-3 pb-1 w-full lg:max-w-[280px]\" right=824 left=412> | <div class=\"mt-1\" right=824 left=412> | <button class=\"px-4 py-2 text-xs font-dotmatrix tracking-wider rounded-full\" right=476 left=412> | <div class=\"mt-auto pt-4 border border-gray-800 rounded-xl p-4 bg-[#0505\" right=824 left=412> | <div class=\"flex items-center justify-between mb-4\" right=807 left=429>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 412,
+    "scrollW": 412
+  },
+  {
+    "label": "dark-412-alarms",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=0 left=-412> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=0 left=-412> | <div class=\"flex items-center justify-between\" right=-21 left=-391> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-339 left=-391> | <div class=\"flex items-center gap-4\" right=-21 left=-69> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-21 left=-69> | <form class=\"space-y-3\" right=-21 left=-391> | <div class=\"flex items-end gap-3\" right=-21 left=-391>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 412,
+    "scrollW": 412
+  },
+  {
+    "label": "dark-412-timer",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-412 left=-824> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-412 left=-824> | <div class=\"flex items-center justify-between\" right=-433 left=-803> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-751 left=-803> | <div class=\"flex items-center gap-4\" right=-433 left=-481> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-433 left=-481> | <form class=\"space-y-3\" right=-433 left=-803> | <div class=\"flex items-end gap-3\" right=-433 left=-803>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 412,
+    "scrollW": 412
+  },
+  {
+    "label": "dark-412-stopwatch",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-824 left=-1236> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-824 left=-1236> | <div class=\"flex items-center justify-between\" right=-845 left=-1215> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1163 left=-1215> | <div class=\"flex items-center gap-4\" right=-845 left=-893> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-845 left=-893> | <form class=\"space-y-3\" right=-845 left=-1215> | <div class=\"flex items-end gap-3\" right=-845 left=-1215>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 412,
+    "scrollW": 412
+  },
+  {
+    "label": "dark-412-scratchpad",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-1236 left=-1648> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-1236 left=-1648> | <div class=\"flex items-center justify-between\" right=-1257 left=-1627> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1575 left=-1627> | <div class=\"flex items-center gap-4\" right=-1257 left=-1305> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-1257 left=-1305> | <form class=\"space-y-3\" right=-1257 left=-1627> | <div class=\"flex items-end gap-3\" right=-1257 left=-1627>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 412,
+    "scrollW": 412
+  },
+  {
+    "label": "dark-430-tasks",
+    "issues": [
+      "offscreen elements: <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=860 left=430> | <div class=\"flex items-center justify-between\" right=860 left=430> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=492 left=430> | <div class=\"flex flex-col gap-3 pb-1 w-full lg:max-w-[280px]\" right=860 left=430> | <div class=\"mt-1\" right=860 left=430> | <button class=\"px-4 py-2 text-xs font-dotmatrix tracking-wider rounded-full\" right=494 left=430> | <div class=\"mt-auto pt-4 border border-gray-800 rounded-xl p-4 bg-[#0505\" right=860 left=430> | <div class=\"flex items-center justify-between mb-4\" right=843 left=447>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 430,
+    "scrollW": 430
+  },
+  {
+    "label": "dark-430-alarms",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=0 left=-430> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=0 left=-430> | <div class=\"flex items-center justify-between\" right=-21 left=-409> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-357 left=-409> | <div class=\"flex items-center gap-4\" right=-21 left=-69> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-21 left=-69> | <form class=\"space-y-3\" right=-21 left=-409> | <div class=\"flex items-end gap-3\" right=-21 left=-409>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 430,
+    "scrollW": 430
+  },
+  {
+    "label": "dark-430-timer",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-430 left=-860> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-430 left=-860> | <div class=\"flex items-center justify-between\" right=-451 left=-839> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-787 left=-839> | <div class=\"flex items-center gap-4\" right=-451 left=-499> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-451 left=-499> | <form class=\"space-y-3\" right=-451 left=-839> | <div class=\"flex items-end gap-3\" right=-451 left=-839>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 430,
+    "scrollW": 430
+  },
+  {
+    "label": "dark-430-stopwatch",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-860 left=-1290> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-860 left=-1290> | <div class=\"flex items-center justify-between\" right=-881 left=-1269> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1217 left=-1269> | <div class=\"flex items-center gap-4\" right=-881 left=-929> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-881 left=-929> | <form class=\"space-y-3\" right=-881 left=-1269> | <div class=\"flex items-end gap-3\" right=-881 left=-1269>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 430,
+    "scrollW": 430
+  },
+  {
+    "label": "dark-430-scratchpad",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-1290 left=-1720> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-1290 left=-1720> | <div class=\"flex items-center justify-between\" right=-1311 left=-1699> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1647 left=-1699> | <div class=\"flex items-center gap-4\" right=-1311 left=-1359> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-1311 left=-1359> | <form class=\"space-y-3\" right=-1311 left=-1699> | <div class=\"flex items-end gap-3\" right=-1311 left=-1699>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 430,
+    "scrollW": 430
+  },
+  {
+    "label": "dark-768-desktop",
+    "issues": [
+      "clipped text: <h1 class=\"text-4xl sm:text-5xl font-bold tracking-[0.35em] t\" \"FLOTASK\" sh=59 ch=48> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>"
+    ],
+    "vw": 768,
+    "scrollW": 768
+  },
+  {
+    "label": "light-320-tasks",
+    "issues": [
+      "offscreen elements: <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=640 left=320> | <div class=\"flex items-center justify-between\" right=640 left=320> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=382 left=320> | <div class=\"flex flex-col gap-3 pb-1 w-full lg:max-w-[280px]\" right=640 left=320> | <div class=\"mt-1\" right=640 left=320> | <button class=\"px-4 py-2 text-xs font-dotmatrix tracking-wider rounded-full\" right=384 left=320> | <div class=\"mt-auto pt-4 border border-gray-800 rounded-xl p-4 bg-[#0505\" right=640 left=320> | <div class=\"flex items-center justify-between mb-4\" right=623 left=337>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 320,
+    "scrollW": 320
+  },
+  {
+    "label": "light-320-alarms",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=0 left=-320> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=0 left=-320> | <div class=\"flex items-center justify-between\" right=-21 left=-299> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-247 left=-299> | <div class=\"flex items-center gap-4\" right=-21 left=-69> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-21 left=-69> | <form class=\"space-y-3\" right=-21 left=-299> | <div class=\"flex items-end gap-3\" right=-21 left=-299>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 320,
+    "scrollW": 320
+  },
+  {
+    "label": "light-320-timer",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-320 left=-640> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-320 left=-640> | <div class=\"flex items-center justify-between\" right=-341 left=-619> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-567 left=-619> | <div class=\"flex items-center gap-4\" right=-341 left=-389> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-341 left=-389> | <form class=\"space-y-3\" right=-341 left=-619> | <div class=\"flex items-end gap-3\" right=-341 left=-619>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 320,
+    "scrollW": 320
+  },
+  {
+    "label": "light-320-stopwatch",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-640 left=-960> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-640 left=-960> | <div class=\"flex items-center justify-between\" right=-661 left=-939> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-887 left=-939> | <div class=\"flex items-center gap-4\" right=-661 left=-709> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-661 left=-709> | <form class=\"space-y-3\" right=-661 left=-939> | <div class=\"flex items-end gap-3\" right=-661 left=-939>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 320,
+    "scrollW": 320
+  },
+  {
+    "label": "light-320-scratchpad",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-960 left=-1280> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-960 left=-1280> | <div class=\"flex items-center justify-between\" right=-981 left=-1259> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1207 left=-1259> | <div class=\"flex items-center gap-4\" right=-981 left=-1029> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-981 left=-1029> | <form class=\"space-y-3\" right=-981 left=-1259> | <div class=\"flex items-end gap-3\" right=-981 left=-1259>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 320,
+    "scrollW": 320
+  },
+  {
+    "label": "light-360-tasks",
+    "issues": [
+      "offscreen elements: <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=720 left=360> | <div class=\"flex items-center justify-between\" right=720 left=360> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=422 left=360> | <div class=\"flex flex-col gap-3 pb-1 w-full lg:max-w-[280px]\" right=720 left=360> | <div class=\"mt-1\" right=720 left=360> | <button class=\"px-4 py-2 text-xs font-dotmatrix tracking-wider rounded-full\" right=424 left=360> | <div class=\"mt-auto pt-4 border border-gray-800 rounded-xl p-4 bg-[#0505\" right=720 left=360> | <div class=\"flex items-center justify-between mb-4\" right=703 left=377>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 360,
+    "scrollW": 360
+  },
+  {
+    "label": "light-360-alarms",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=0 left=-360> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=0 left=-360> | <div class=\"flex items-center justify-between\" right=-21 left=-339> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-287 left=-339> | <div class=\"flex items-center gap-4\" right=-21 left=-69> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-21 left=-69> | <form class=\"space-y-3\" right=-21 left=-339> | <div class=\"flex items-end gap-3\" right=-21 left=-339>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 360,
+    "scrollW": 360
+  },
+  {
+    "label": "light-360-timer",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-360 left=-720> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-360 left=-720> | <div class=\"flex items-center justify-between\" right=-381 left=-699> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-647 left=-699> | <div class=\"flex items-center gap-4\" right=-381 left=-429> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-381 left=-429> | <form class=\"space-y-3\" right=-381 left=-699> | <div class=\"flex items-end gap-3\" right=-381 left=-699>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 360,
+    "scrollW": 360
+  },
+  {
+    "label": "light-360-stopwatch",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-720 left=-1080> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-720 left=-1080> | <div class=\"flex items-center justify-between\" right=-741 left=-1059> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1007 left=-1059> | <div class=\"flex items-center gap-4\" right=-741 left=-789> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-741 left=-789> | <form class=\"space-y-3\" right=-741 left=-1059> | <div class=\"flex items-end gap-3\" right=-741 left=-1059>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 360,
+    "scrollW": 360
+  },
+  {
+    "label": "light-360-scratchpad",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-1080 left=-1440> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-1080 left=-1440> | <div class=\"flex items-center justify-between\" right=-1101 left=-1419> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1367 left=-1419> | <div class=\"flex items-center gap-4\" right=-1101 left=-1149> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-1101 left=-1149> | <form class=\"space-y-3\" right=-1101 left=-1419> | <div class=\"flex items-end gap-3\" right=-1101 left=-1419>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 360,
+    "scrollW": 360
+  },
+  {
+    "label": "light-390-tasks",
+    "issues": [
+      "offscreen elements: <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=780 left=390> | <div class=\"flex items-center justify-between\" right=780 left=390> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=452 left=390> | <div class=\"flex flex-col gap-3 pb-1 w-full lg:max-w-[280px]\" right=780 left=390> | <div class=\"mt-1\" right=780 left=390> | <button class=\"px-4 py-2 text-xs font-dotmatrix tracking-wider rounded-full\" right=454 left=390> | <div class=\"mt-auto pt-4 border border-gray-800 rounded-xl p-4 bg-[#0505\" right=780 left=390> | <div class=\"flex items-center justify-between mb-4\" right=763 left=407>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 390,
+    "scrollW": 390
+  },
+  {
+    "label": "light-390-alarms",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=0 left=-390> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=0 left=-390> | <div class=\"flex items-center justify-between\" right=-21 left=-369> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-317 left=-369> | <div class=\"flex items-center gap-4\" right=-21 left=-69> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-21 left=-69> | <form class=\"space-y-3\" right=-21 left=-369> | <div class=\"flex items-end gap-3\" right=-21 left=-369>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 390,
+    "scrollW": 390
+  },
+  {
+    "label": "light-390-timer",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-390 left=-780> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-390 left=-780> | <div class=\"flex items-center justify-between\" right=-411 left=-759> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-707 left=-759> | <div class=\"flex items-center gap-4\" right=-411 left=-459> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-411 left=-459> | <form class=\"space-y-3\" right=-411 left=-759> | <div class=\"flex items-end gap-3\" right=-411 left=-759>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 390,
+    "scrollW": 390
+  },
+  {
+    "label": "light-390-stopwatch",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-780 left=-1170> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-780 left=-1170> | <div class=\"flex items-center justify-between\" right=-801 left=-1149> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1097 left=-1149> | <div class=\"flex items-center gap-4\" right=-801 left=-849> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-801 left=-849> | <form class=\"space-y-3\" right=-801 left=-1149> | <div class=\"flex items-end gap-3\" right=-801 left=-1149>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 390,
+    "scrollW": 390
+  },
+  {
+    "label": "light-390-scratchpad",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-1170 left=-1560> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-1170 left=-1560> | <div class=\"flex items-center justify-between\" right=-1191 left=-1539> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1487 left=-1539> | <div class=\"flex items-center gap-4\" right=-1191 left=-1239> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-1191 left=-1239> | <form class=\"space-y-3\" right=-1191 left=-1539> | <div class=\"flex items-end gap-3\" right=-1191 left=-1539>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 390,
+    "scrollW": 390
+  },
+  {
+    "label": "light-412-tasks",
+    "issues": [
+      "offscreen elements: <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=824 left=412> | <div class=\"flex items-center justify-between\" right=824 left=412> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=474 left=412> | <div class=\"flex flex-col gap-3 pb-1 w-full lg:max-w-[280px]\" right=824 left=412> | <div class=\"mt-1\" right=824 left=412> | <button class=\"px-4 py-2 text-xs font-dotmatrix tracking-wider rounded-full\" right=476 left=412> | <div class=\"mt-auto pt-4 border border-gray-800 rounded-xl p-4 bg-[#0505\" right=824 left=412> | <div class=\"flex items-center justify-between mb-4\" right=807 left=429>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 412,
+    "scrollW": 412
+  },
+  {
+    "label": "light-412-alarms",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=0 left=-412> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=0 left=-412> | <div class=\"flex items-center justify-between\" right=-21 left=-391> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-339 left=-391> | <div class=\"flex items-center gap-4\" right=-21 left=-69> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-21 left=-69> | <form class=\"space-y-3\" right=-21 left=-391> | <div class=\"flex items-end gap-3\" right=-21 left=-391>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 412,
+    "scrollW": 412
+  },
+  {
+    "label": "light-412-timer",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-412 left=-824> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-412 left=-824> | <div class=\"flex items-center justify-between\" right=-433 left=-803> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-751 left=-803> | <div class=\"flex items-center gap-4\" right=-433 left=-481> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-433 left=-481> | <form class=\"space-y-3\" right=-433 left=-803> | <div class=\"flex items-end gap-3\" right=-433 left=-803>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 412,
+    "scrollW": 412
+  },
+  {
+    "label": "light-412-stopwatch",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-824 left=-1236> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-824 left=-1236> | <div class=\"flex items-center justify-between\" right=-845 left=-1215> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1163 left=-1215> | <div class=\"flex items-center gap-4\" right=-845 left=-893> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-845 left=-893> | <form class=\"space-y-3\" right=-845 left=-1215> | <div class=\"flex items-end gap-3\" right=-845 left=-1215>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 412,
+    "scrollW": 412
+  },
+  {
+    "label": "light-412-scratchpad",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-1236 left=-1648> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-1236 left=-1648> | <div class=\"flex items-center justify-between\" right=-1257 left=-1627> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1575 left=-1627> | <div class=\"flex items-center gap-4\" right=-1257 left=-1305> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-1257 left=-1305> | <form class=\"space-y-3\" right=-1257 left=-1627> | <div class=\"flex items-end gap-3\" right=-1257 left=-1627>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 412,
+    "scrollW": 412
+  },
+  {
+    "label": "light-430-tasks",
+    "issues": [
+      "offscreen elements: <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=860 left=430> | <div class=\"flex items-center justify-between\" right=860 left=430> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=492 left=430> | <div class=\"flex flex-col gap-3 pb-1 w-full lg:max-w-[280px]\" right=860 left=430> | <div class=\"mt-1\" right=860 left=430> | <button class=\"px-4 py-2 text-xs font-dotmatrix tracking-wider rounded-full\" right=494 left=430> | <div class=\"mt-auto pt-4 border border-gray-800 rounded-xl p-4 bg-[#0505\" right=860 left=430> | <div class=\"flex items-center justify-between mb-4\" right=843 left=447>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 430,
+    "scrollW": 430
+  },
+  {
+    "label": "light-430-alarms",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=0 left=-430> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=0 left=-430> | <div class=\"flex items-center justify-between\" right=-21 left=-409> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-357 left=-409> | <div class=\"flex items-center gap-4\" right=-21 left=-69> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-21 left=-69> | <form class=\"space-y-3\" right=-21 left=-409> | <div class=\"flex items-end gap-3\" right=-21 left=-409>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 430,
+    "scrollW": 430
+  },
+  {
+    "label": "light-430-timer",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-430 left=-860> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-430 left=-860> | <div class=\"flex items-center justify-between\" right=-451 left=-839> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-787 left=-839> | <div class=\"flex items-center gap-4\" right=-451 left=-499> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-451 left=-499> | <form class=\"space-y-3\" right=-451 left=-839> | <div class=\"flex items-end gap-3\" right=-451 left=-839>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 430,
+    "scrollW": 430
+  },
+  {
+    "label": "light-430-stopwatch",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-860 left=-1290> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-860 left=-1290> | <div class=\"flex items-center justify-between\" right=-881 left=-1269> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1217 left=-1269> | <div class=\"flex items-center gap-4\" right=-881 left=-929> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-881 left=-929> | <form class=\"space-y-3\" right=-881 left=-1269> | <div class=\"flex items-end gap-3\" right=-881 left=-1269>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 430,
+    "scrollW": 430
+  },
+  {
+    "label": "light-430-scratchpad",
+    "issues": [
+      "offscreen elements: <div class=\"flex h-full touch-pan-y\" right=-1290 left=-1720> | <div class=\"flex-[0_0_100%] min-w-0 h-full overflow-y-auto overscroll-co\" right=-1290 left=-1720> | <div class=\"flex items-center justify-between\" right=-1311 left=-1699> | <h3 class=\"text-[11px] font-bold text-gray-500 tracking-[0.3em] upperca\" right=-1647 left=-1699> | <div class=\"flex items-center gap-4\" right=-1311 left=-1359> | <span class=\"text-[10px] text-gray-600 font-mono\" right=-1311 left=-1359> | <form class=\"space-y-3\" right=-1311 left=-1699> | <div class=\"flex items-end gap-3\" right=-1311 left=-1699>",
+      "clipped text: <h1 class=\"text-2xl font-bold tracking-hero text-ink-primary \" \"FLOTASK\" sh=30 ch=24> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>",
+      "small touch targets (<40px): <button \"\" 34x34> | <button \"\" 34x34> | <button \"+ ADD\" 64x34> | <button \"◀\" 10x24> | <button \"▶\" 10x24> | <button \"1\" 24x24> | <button \"2\" 24x24> | <button \"3\" 24x24>"
+    ],
+    "vw": 430,
+    "scrollW": 430
+  },
+  {
+    "label": "light-768-desktop",
+    "issues": [
+      "clipped text: <h1 class=\"text-4xl sm:text-5xl font-bold tracking-[0.35em] t\" \"FLOTASK\" sh=59 ch=48> | <span class=\"text-4xl font-mono tracking-widest text-white lead\" \"25:00\" sh=44 ch=36> | <span class=\"text-3xl font-dotmatrix tracking-widest leading-no\" \"00:00\" sh=37 ch=30>"
+    ],
+    "vw": 768,
+    "scrollW": 768
+  }
+]
