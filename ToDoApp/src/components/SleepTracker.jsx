@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { playGentleChime, playMechanicalClick } from '../utils/audioHelpers';
+import { playGentleChime } from '../utils/audioHelpers';
+import { safeUuid } from '../utils/taskHelpers';
 
 /**
  * SleepTracker — SomnaFlow-inspired sleep session tool.
@@ -16,19 +17,18 @@ const PRESET_MIN = [15, 30, 45, 60, 90, 120];
 const MOVEMENT_THRESHOLD = 1.5;
 const SAMPLE_INTERVAL = 2000;
 
-// Color tokens (SomnaFlow palette)
+// Color tokens (SomnaFlow palette — dulled for Nothing-OS harmony)
 const COLORS = {
-  // Primary: Dream Lavender / Circadian Violet
+  // Primary: Muted Dream Lavender / Circadian Violet
   sleepPrimary: '#8B5CF6',
-  sleepPrimaryGlow: 'rgba(139, 92, 246, 0.35)',
-  sleepPrimaryBorder: 'rgba(139, 92, 246, 0.25)',
+  sleepPrimaryDim: '#7C48D0',
+  sleepPrimaryGlow: 'rgba(139, 92, 246, 0.15)',
+  sleepPrimaryBorder: 'rgba(139, 92, 246, 0.18)',
   sleepContainer: '#571BC1',
   sleepOnContainer: '#C4ABFF',
-  sleepFixed: '#6FFBBE',
-  sleepFixedDim: '#4EDAA3',
   // Tertiary: Emerald Vitality (for quality scores)
   vitality: '#10B981',
-  vitalityGlow: 'rgba(16, 185, 129, 0.35)',
+  vitalityGlow: 'rgba(16, 185, 129, 0.15)',
   vitalityContainer: '#065F46',
   // Surface tiers
   surface0: '#0F131D',
@@ -42,7 +42,7 @@ const COLORS = {
   textMuted: '#64748B',
   // Border
   borderSubtle: 'rgba(255,255,255,0.08)',
-  borderActive: 'rgba(139,92,246,0.25)',
+  borderActive: 'rgba(139,92,246,0.18)',
 };
 
 function fmtMs(ms) {
@@ -295,7 +295,7 @@ export default function SleepTracker() {
     setPhase('results');
     playGentleChime();
     setSessions((prev) => [{
-      id: crypto.randomUUID?.() || `sms_${Date.now()}`,
+      id: safeUuid ? safeUuid() : `sms_${Date.now()}`,
       createdAt: new Date().toISOString(),
       durationSec,
       motionEvents: finalEvents || 0,
@@ -337,6 +337,7 @@ export default function SleepTracker() {
           motionEventsRef.current
         );
       }
+      // tick comment — interval updated every second
     };
     intervalRef.current = setInterval(tick, 1000);
     startMotion();
@@ -361,7 +362,7 @@ export default function SleepTracker() {
   };
 
   const handleStart = () => {
-    playMechanicalClick();
+    playGentleChime();
     setTimerDuration(effectiveDuration());
     setPhase('tracking');
     setQuality(null);
@@ -369,7 +370,7 @@ export default function SleepTracker() {
   };
 
   const handleStop = () => {
-    playMechanicalClick();
+    playGentleChime();
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = null;
     completeSessionRef.current(
@@ -380,7 +381,7 @@ export default function SleepTracker() {
   };
 
   const handleReset = () => {
-    playMechanicalClick();
+    playGentleChime();
     setPhase('setup');
     setTimeLeft(0);
     setElapsed(0);
@@ -446,11 +447,11 @@ export default function SleepTracker() {
                     <button
                       key={m}
                       type="button"
-                      onClick={() => { playMechanicalClick(); setTimerDuration(m * 60); }}
-                      className={`px-5 py-2.5 text-xs font-semibold rounded-full transition-all duration-200 ${
+                      onClick={() => { playGentleChime(); setTimerDuration(m * 60); }}
+                      className={`px-5 py-2.5 min-w-[64px] text-xs font-semibold rounded-full transition-colors duration-200 ${
                         timerDuration === m * 60
-                          ? `text-white shadow-[0_0_16px_${COLORS.sleepPrimaryGlow}]`
-                          : `text-slate-400 hover:text-white hover:bg-white/5`
+                          ? 'text-white shadow-[0_0_12px_rgba(139,92,246,0.15)]'
+                          : 'text-slate-400 hover:text-white hover:bg-white/5'
                       }`}
                       style={{
                         background: timerDuration === m * 60
@@ -485,7 +486,7 @@ export default function SleepTracker() {
 
               <button
                 onClick={handleStart}
-                className="w-full py-4 rounded-xl font-semibold text-lg tracking-wide transition-all duration-200 relative overflow-hidden"
+                className="w-full py-4 rounded-xl font-semibold text-lg tracking-wide transition-colors duration-200"
                 style={{
                   background: `linear-gradient(135deg, ${COLORS.sleepPrimary}, ${COLORS.sleepContainer})`,
                   color: '#0F131D',
@@ -502,8 +503,8 @@ export default function SleepTracker() {
                 </p>
               ) : (
                 <button
-                  onClick={() => setPhase('history')}
-                  className="w-full py-3 rounded-xl font-medium transition-all"
+                  onClick={() => { playGentleChime(); setPhase('history'); }}
+                  className="w-full py-3 rounded-xl font-medium transition-colors"
                   style={{
                     background: 'rgba(255,255,255,0.03)',
                     border: `1px solid ${COLORS.borderSubtle}`,
@@ -528,7 +529,7 @@ export default function SleepTracker() {
                 strokeWidth={10}
                 color={COLORS.sleepPrimary}
                 trackColor={COLORS.borderSubtle}
-                className="filter drop-shadow-[0_0_32px_rgba(139,92,246,0.2)]"
+                className="filter drop-shadow-[0_0_24px_rgba(139,92,246,0.12)]"
               >
                 <div className="text-center">
                   <div className="font-mono tabular-nums" style={{
@@ -536,8 +537,7 @@ export default function SleepTracker() {
                     fontWeight: 700,
                     lineHeight: 1,
                     color: COLORS.textPrimary,
-                    fontFamily: 'Plus Jakarta Sans, sans-serif',
-                    textShadow: `0 0 24px ${COLORS.sleepPrimaryGlow}`,
+                    textShadow: `0 0 12px ${COLORS.sleepPrimaryGlow}`,
                   }}>
                     {fmtMs(timeLeft)}
                   </div>
@@ -578,7 +578,7 @@ export default function SleepTracker() {
             {/* Stop Button */}
             <button
               onClick={handleStop}
-              className="w-full max-w-xs px-8 py-3.5 rounded-xl font-semibold tracking-wide transition-all"
+              className="w-full max-w-xs px-8 py-3.5 rounded-xl font-semibold tracking-wide transition-colors"
               style={{
                 background: 'rgba(255,255,255,0.04)',
                 border: `1px solid ${COLORS.borderSubtle}`,
@@ -635,7 +635,7 @@ export default function SleepTracker() {
                   value={stages.light}
                   total={stages.light + stages.deep + stages.rem}
                   color="#F59E0B"
-                  glowColor="rgba(245,158,11,0.4)"
+                  glowColor="rgba(245,158,11,0.15)"
                 />
                 <StageBar
                   label="DEEP"
@@ -649,7 +649,7 @@ export default function SleepTracker() {
                   value={stages.rem}
                   total={stages.light + stages.deep + stages.rem}
                   color="#A78BFA"
-                  glowColor="rgba(167,139,250,0.4)"
+                  glowColor="rgba(167,139,250,0.15)"
                 />
               </div>
             </GlassCard>
@@ -687,7 +687,7 @@ export default function SleepTracker() {
                               rx="4"
                               fill={seg.color}
                               style={{
-                                filter: `drop-shadow(0 0 8px ${seg.color})`,
+                                filter: `drop-shadow(0 0 5px ${seg.color})`,
                                 transition: 'all 0.5s ease-out',
                               }}
                             />
@@ -708,7 +708,7 @@ export default function SleepTracker() {
             <div className="flex gap-3">
               <button
                 onClick={handleReset}
-                className="flex-1 py-3.5 rounded-xl font-semibold tracking-wide transition-all"
+                className="flex-1 py-3.5 rounded-xl font-semibold tracking-wide transition-colors"
                 style={{
                   background: 'rgba(255,255,255,0.04)',
                   border: `1px solid ${COLORS.borderSubtle}`,
@@ -718,12 +718,12 @@ export default function SleepTracker() {
                 NEW SESSION
               </button>
               <button
-                onClick={() => setPhase('history')}
-                className="flex-1 py-3.5 rounded-xl font-semibold tracking-wide transition-all"
+                onClick={() => { playGentleChime(); setPhase('history'); }}
+                className="flex-1 py-3.5 rounded-xl font-semibold tracking-wide transition-colors"
                 style={{
                   background: `linear-gradient(135deg, ${COLORS.sleepPrimary}, ${COLORS.sleepContainer})`,
                   color: '#0F131D',
-                  boxShadow: `0 0 16px ${COLORS.sleepPrimaryGlow}`,
+                  boxShadow: `0 0 12px ${COLORS.sleepPrimaryGlow}`,
                 }}
               >
                 HISTORY
@@ -741,8 +741,8 @@ export default function SleepTracker() {
                   Sleep History
                 </h3>
                 <button
-                  onClick={() => setPhase('setup')}
-                  className="text-xs font-mono px-3 py-1.5 rounded-full transition-all"
+                  onClick={() => { playGentleChime(); setPhase('setup'); }}
+                  className="text-xs font-mono px-3 py-1.5 rounded-full transition-colors"
                   style={{
                     background: 'rgba(255,255,255,0.03)',
                     border: `1px solid ${COLORS.borderSubtle}`,
@@ -762,7 +762,7 @@ export default function SleepTracker() {
                   {sessions.map((s) => (
                     <div
                       key={s.id}
-                      className="flex items-center justify-between p-4 rounded-xl transition-all"
+                      className="flex items-center justify-between p-4 rounded-xl transition-colors"
                       style={{
                         background: 'rgba(255,255,255,0.02)',
                         border: `1px solid ${COLORS.borderSubtle}`,

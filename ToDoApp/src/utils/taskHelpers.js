@@ -12,10 +12,23 @@ export const INTENSITY_COLORS = {
 };
 
 /**
+ * Safe UUID generator — uses crypto.randomUUID when available (secure context),
+ * falls back to timestamp-based UUID for plain-http pages (FB-007).
+ */
+export const safeUuid = () => {
+  try {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+  } catch { /* ignore */ }
+  return `uuid_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+};
+
+/**
  * Create a new task — extensible with priority / category.
  */
 export const createTask = (title, options = {}) => ({
-  id: crypto.randomUUID(),
+  id: safeUuid(),
   title: String(title).trim(),
   completed: false,
   createdAt: new Date().toISOString(),
@@ -30,7 +43,7 @@ export const createTask = (title, options = {}) => ({
  * Create a standalone alarm.
  */
 export const createAlarm = (label, dateTime, intensity = 'medium', isAgentCreated = false) => ({
-  id: crypto.randomUUID(),
+  id: safeUuid(),
   label: String(label).trim() || 'Alarm',
   dateTime,           // ISO string
   intensity,
