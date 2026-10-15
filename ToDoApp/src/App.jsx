@@ -12,6 +12,8 @@ import TaskList from './components/TaskList';
 import StopwatchModule from './components/StopwatchModule';
 import RichScratchpad from './components/RichScratchpad';
 import AlarmsHub from './components/AlarmSection';
+import SleepTracker from './components/SleepTracker';
+import HydrationTracker from './components/HydrationTracker';
 import NotificationToast from './components/NotificationToast';
 import PwaUpdateToast from './components/PwaUpdateToast';
 import AlarmModal from './components/AlarmModal';
@@ -231,7 +233,7 @@ export default function App() {
             />
           </aside>
 
-          {/* Center — Tasks + Stopwatch */}
+          {/* Center — Tasks + Stopwatch + Sleep + Hydration */}
           <main className="min-h-[60vh] flex flex-col gap-5">
             <TaskList
               tasks={tasks}
@@ -242,6 +244,8 @@ export default function App() {
               onNlmText={handleNlmText}
             />
             <StopwatchModule />
+            <SleepTracker />
+            <HydrationTracker />
           </main>
 
           {/* Right — Scratchpad */}

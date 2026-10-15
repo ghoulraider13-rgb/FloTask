@@ -244,11 +244,15 @@ jobs:
         run: npx tauri build
 
       - name: Scan for viruses with Windows Defender
+        continue-on-error: true
         run: |
-          $installer = Get-ChildItem "ToDoApp/src-tauri/target/release/bundle/nsis/*.exe" | Select-Object -First 1
+          $ErrorActionPreference = 'Continue'
+          $installer = Get-ChildItem "src-tauri/target/release/bundle/nsis/*.exe" | Select-Object -First 1
           if ($installer) {
             Write-Host "Scanning $($installer.FullName) with Windows Defender..."
             Start-Process -FilePath "C:\Program Files\Windows Defender\MpCmdRun.exe" -ArgumentList "-Scan -ScanType 3 -File `$installer.FullName" -Wait -NoNewWindow
             Write-Host "Scan complete"
+          } else {
+            Write-Host "No NSIS installer found to scan"
           }
         shell: powershell

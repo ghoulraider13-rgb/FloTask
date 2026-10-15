@@ -59,6 +59,7 @@ export default function RichScratchpad({ onNlmActions }) {
     if (text.length < 5) return;
     try {
       const actions = await parseActions(text);
+      if (!actions || actions.length === 0) return;
       const fresh = [];
       actions.forEach((a) => {
         const hash = `${a.type}:${a.title.toLowerCase().trim()}`;

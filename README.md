@@ -13,9 +13,11 @@ and Gemini Flash parses it into a task with date, time, and priority — no form
 
 ## 🎤 Continuous Voice Input
 
-The app now includes a **continuous dictation** hook matching Windows Voice Typing behavior. SpeechRecognition runs with `continuous=true` and `interimResults=true`, auto‑restarts on `onend`, and exposes `isListening`, `transcript`, `startListening`, `stopListening`, `toggleListening`, and `setTranscript`. This powers real‑time voice entry in the Add‑Task form.
+The app includes a **continuous dictation** hook matching Windows Voice Typing behavior. SpeechRecognition runs with `continuous=true` and `interimResults=true`, auto‑restarts on `onend`, and emits each finalized phrase exactly once — one task per spoken sentence, no duplicates.
 
 
+- **😴 Sleep Tracker** — a sleep-timer that rings gently when it ends, live motion tracking via DeviceMotion, and a post-session breakdown of estimated sleep stages (light/deep/REM) + a quality score.
+- **💧 Hydration Tracker** — a quick water-intake logger with daily history and goals.
 - **🧠 Natural-language task entry** — Google Gemini Flash parses free text into structured tasks
   (title, date/time, priority) via the Rich Scratchpad
 - **⏰ Alarms with enforcer mode** — dismissals require action (captcha), not just a click
@@ -48,13 +50,13 @@ Native desktop apps are available for **Windows**, **Linux**, and **macOS**. Eac
 
 | Platform | Installer | Size |
 |----------|-----------|------|
-| Windows 11/10 | `FloTask_0.1.0_x64-setup.exe` | ~4.2 MB |
-| Linux (Ubuntu/Debian) | `FloTask_0.1.0_amd64.deb` | ~4 MB |
-| Linux (Fedora/RHEL) | `FloTask-0.1.0-1.x86_64.rpm` | ~4 MB |
-| Linux (Any distribution) | `FloTask_0.1.0_amd64.AppImage` | ~83 MB |
-| macOS | `FloTask_0.1.0_x64.dmg` | — |
+| Windows 11/10 | `FloTask_0.1.2_x64-setup.exe` | ~4.2 MB |
+| Linux (Ubuntu/Debian) | `FloTask_0.1.2_amd64.deb` | ~4 MB |
+| Linux (Fedora/RHEL) | `FloTask-0.1.2-1.x86_64.rpm` | ~4 MB |
+| Linux (Any distribution) | `FloTask_0.1.2_amd64.AppImage` | ~83 MB |
+| macOS | `FloTask_0.1.2_x64.dmg` | — |
 
-**Latest release:** [v0.1.0](https://github.com/ghoulraider13-rgb/FloTask/releases/latest)
+**Latest release:** [v0.1.2](https://github.com/ghoulraider13-rgb/FloTask/releases/latest)
 
 ### Build from source (Desktop)
 ```bash
@@ -84,7 +86,7 @@ endpoints.
 ToDoApp/
 ├── src/
 │   ├── App.jsx                  # state hub: tasks, alarms, enforcer, toasts
-│   ├── components/              # AddTaskForm, TaskList, AlarmSection, TimerHub, RichScratchpad, DrawPad, ...
+│   ├── components/              # AddTaskForm, TaskList, AlarmSection, TimerHub, RichScratchpad, SleepTracker, HydrationTracker, ...
 │   ├── hooks/                   # useLocalStorage, useReminders, useVoiceInput
 │   └── utils/                   # audioHelpers (WebAudio chimes), captchaHelpers, taskHelpers
 └── package.json
