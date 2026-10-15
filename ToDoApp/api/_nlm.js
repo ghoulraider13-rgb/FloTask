@@ -5,11 +5,18 @@
  * in dev and production. The underscore prefix keeps Vercel from exposing
  * this file as its own endpoint.
  *
- * Uses the NVIDIA API with model fallback chain, structured JSON output, and strict normalization.
+ * Uses the NVIDIA API with model fallback chain, then falls back to
+ * Google Gemini Flash, structured JSON output, and strict normalization.
  */
 
 export const NEMOTRON_MODELS = [
   'nvidia/nemotron-3.5-lightning-30b-a3b',  // Primary: confirmed working model
+];
+
+export const GEMINI_MODELS = [
+  'gemini-flash-latest',       // Latest stable flash model
+  'gemini-2.5-flash',          // Specific version fallback
+  'gemini-1.5-flash',          // Older but reliable
 ];
 
 const RESPONSE_SCHEMA = {
@@ -97,10 +104,8 @@ export function normalizeActions(data) {
     .filter((a) => a.title && a.title !== 'Untitled');
 }
 
-/** Call NVIDIA API with the model fallback chain.
- * Returns a normalized action list. Throws on total failure.
- */
-export async function callNemotron(prompt) {
+/** Call NVIDIA API with the model fallback chain. */
+async function callNemotronInternal(prompt) {
   const apiKey = process.env.NVIDIA_API_KEY;
   if (!apiKey) {
     throw new Error('NO_KEY: NVIDIA_API_KEY not set in environment');
@@ -124,19 +129,16 @@ export async function callNemotron(prompt) {
       if (!res.ok) {
         const body = await res.text().catch(() => '');
         lastError = new Error(`${model}: HTTP ${res.status} ${body.slice(0, 200)}`);
-        continue; // try next model in the chain
+        continue;
       }
 
       const data = await res.json();
-      // NVIDIA API returns structured output
       const textOut = data?.generated_text || JSON.stringify(data);
       if (!textOut) {
         lastError = new Error(`${model}: empty response`);
         continue;
       }
 
-      // responseMimeType: application/json guarantees parseable JSON,
-      // but be tolerant of stray fences anyway.
       const cleaned = textOut.replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim();
       const parsed = JSON.parse(cleaned);
       return normalizeActions(parsed);
@@ -146,4 +148,70 @@ export async function callNemotron(prompt) {
   }
 
   throw lastError || new Error('All NVIDIA models failed');
+}
+
+/** Call Google Gemini API with fallback chain. */
+async function callGeminiInternal(prompt) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error('NO_KEY: GEMINI_API_KEY not set in environment');
+  }
+
+  let lastError = null;
+  for (const model of GEMINI_MODELS) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              responseMimeType: 'application/json',
+              responseSchema: RESPONSE_SCHEMA,
+              temperature: 0.1,
+              maxOutputTokens: 512,
+            },
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        lastError = new Error(`${model}: HTTP ${res.status} ${body.slice(0, 200)}`);
+        continue;
+      }
+
+      const data = await res.json();
+      const textOut = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!textOut) {
+        lastError = new Error(`${model}: empty response`);
+        continue;
+      }
+
+      const cleaned = textOut.replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim();
+      const parsed = JSON.parse(cleaned);
+      return normalizeActions(parsed);
+    } catch (e) {
+      lastError = e;
+    }
+  }
+
+  throw lastError || new Error('All Gemini models failed');
+}
+
+/** Main entry point: try NVIDIA first, then fall back to Gemini. */
+export async function callNemotron(prompt) {
+  try {
+    return await callNemotronInternal(prompt);
+  } catch (nvidiaError) {
+    console.warn('[NLM] NVIDIA failed, falling back to Gemini:', nvidiaError?.message);
+    try {
+      return await callGeminiInternal(prompt);
+    } catch (geminiError) {
+      console.error('[NLM] Both NVIDIA and Gemini failed:', geminiError?.message);
+      throw geminiError;
+    }
+  }
 }
