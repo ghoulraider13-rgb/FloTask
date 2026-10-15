@@ -50,13 +50,13 @@ Native desktop apps are available for **Windows**, **Linux**, and **macOS**. Eac
 
 | Platform | Installer | Size |
 |----------|-----------|------|
-| Windows 11/10 | `FloTask_0.1.2_x64-setup.exe` | ~4.2 MB |
-| Linux (Ubuntu/Debian) | `FloTask_0.1.2_amd64.deb` | ~4 MB |
-| Linux (Fedora/RHEL) | `FloTask-0.1.2-1.x86_64.rpm` | ~4 MB |
-| Linux (Any distribution) | `FloTask_0.1.2_amd64.AppImage` | ~83 MB |
-| macOS | `FloTask_0.1.2_x64.dmg` | — |
+| Windows 11/10 | `FloTask_0.1.3_x64-setup.exe` | ~4.2 MB |
+| Linux (Ubuntu/Debian) | `FloTask_0.1.3_amd64.deb` | ~4 MB |
+| Linux (Fedora/RHEL) | `FloTask-0.1.3-1.x86_64.rpm` | ~4 MB |
+| Linux (Any distribution) | `FloTask_0.1.3_amd64.AppImage` | ~83 MB |
+| macOS | `FloTask_0.1.3_x64.dmg` | — |
 
-**Latest release:** [v0.1.2](https://github.com/ghoulraider13-rgb/FloTask/releases/latest)
+**Latest release:** [v0.1.3](https://github.com/ghoulraider13-rgb/FloTask/releases/latest)
 
 ### Build from source (Desktop)
 ```bash
