@@ -1,11 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 
 /**
  * Swipeable full-height screens for phone widths (Embla Carousel).
  * Kept in sync with the bottom tab bar:
- *  - tab click  → emblaApi.scrollTo(index, immediate)
- *  - swipe      → 'select' event reports the active index upward
+ *  - tab click  -> emblaApi.scrollTo(index, immediate)
+ *  - swipe      -> 'select' event reports the active index upward
  *
  * `suppressSwipeOnSelectors` — gestures starting on elements matched by
  * these selectors are never claimed by the carousel (Embla watchDrag
@@ -14,9 +14,9 @@ import useEmblaCarousel from 'embla-carousel-react';
  * horizontal gesture. On those rows, switch screens via the tab bar or
  * by swiping on non-row areas.
  *
- * The options object is created once per mount: Embla re-inits when the
- * options identity changes, and watchDrag reads the live selectors from
- * a ref, so suppression stays current without re-initializing.
+ * The options object is created once via useMemo so its identity is stable
+ * across renders (Embla re-inits when the options identity changes), while
+ * watchDrag reads the live selectors from a ref.
  */
 export default function SwipeCarousel({
   screens,
@@ -25,7 +25,8 @@ export default function SwipeCarousel({
   suppressSwipeOnSelectors = [],
 }) {
   const suppressRef = useRef(suppressSwipeOnSelectors.join(','));
-  const optionsRef = useRef({
+
+  const options = useMemo(() => ({
     loop: false,
     align: 'start',
     containScroll: 'trimSnaps',
@@ -36,14 +37,18 @@ export default function SwipeCarousel({
       if (!sel || !target) return true;
       return !target.closest(sel);
     },
-  }).current;
+  }), []);
 
-  const [emblaRef, emblaApi] = useEmblaCarousel(optionsRef);
+  const [emblaRef, emblaApi] = useEmblaCarousel(options);
 
   const onChangeRef = useRef(onActiveIndexChange);
-  onChangeRef.current = onActiveIndexChange;
+  // Keep the callback ref fresh without re-registering listeners.
+  useEffect(() => {
+    onChangeRef.current = onActiveIndexChange;
+    suppressRef.current = suppressSwipeOnSelectors.join(',');
+  }, [onActiveIndexChange, suppressSwipeOnSelectors]);
 
-  // Tab click → carousel (immediate jump, no tween).
+  // Tab click -> carousel (immediate jump, no tween).
   useEffect(() => {
     if (!emblaApi) return;
     if (emblaApi.selectedScrollSnap() !== activeIndex) {
@@ -51,7 +56,7 @@ export default function SwipeCarousel({
     }
   }, [emblaApi, activeIndex]);
 
-  // Swipe → tabs.
+  // Swipe -> tabs.
   useEffect(() => {
     if (!emblaApi) return;
     const onSelect = () => onChangeRef.current?.(emblaApi.selectedScrollSnap());

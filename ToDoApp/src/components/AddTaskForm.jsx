@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import IntensitySelector from './IntensitySelector';
 import { playMechanicalClick } from '../utils/audioHelpers';
-import { parseActions } from '../utils/nlm';
 import { toLocalInputValue } from '../utils/taskHelpers';
 import useVoiceInput from '../hooks/useVoiceInput';
 
@@ -12,14 +11,50 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
   const [intensity, setIntensity] = useState('low');
   const [parsing, setParsing] = useState(false);
 
+  // Guards against double-processing the same utterance — e.g. a duplicate
+  // onresult event or a recognizer restart that re-fires the same final.
+  const lastVoiceIdRef = useRef('');
+  const processingRef = useRef(false);
+
+  /**
+   * One discrete callback per finalized spoken phrase — NOT a growing
+   * accumulated string. This is the fix for "multiple tasks created when
+   * speaking": each finalized utterance yields exactly one task.
+   */
+  const handleVoiceResult = useCallback((text) => {
+    const trimmed = text.trim();
+    if (!trimmed || processingRef.current || lastVoiceIdRef.current === trimmed) return;
+    lastVoiceIdRef.current = trimmed;
+    processingRef.current = true;
+    playMechanicalClick();
+    setParsing(true);
+
+    Promise.resolve().then(async () => {
+      try {
+        if (onNlmText) {
+          // Routes through App.handleNlmText → /api/chat (NLM parse + fallback).
+          await onNlmText(trimmed);
+        } else {
+          onAddTask(trimmed, {});
+          navigator.vibrate?.([50]);
+        }
+      } catch (e) {
+        console.error('Voice task creation failed:', e?.message || e);
+      } finally {
+        setParsing(false);
+        setTitle('');
+        processingRef.current = false;
+        lastVoiceIdRef.current = null;
+      }
+    });
+  }, [onNlmText, onAddTask]);
+
   const {
     isListening, supported: voiceSupported, error: voiceError,
-    interimTranscript, finalTranscript, startListening, stopListening,
-  } = useVoiceInput();
-  // Updated API: use isListening, startListening, stopListening, toggleListening
+    interimTranscript, startListening, stopListening,
+  } = useVoiceInput(handleVoiceResult);
 
-
-  // Live partial transcript feedback in the input while speaking
+  // Live partial-transcript feedback in the input while speaking
   useEffect(() => {
     if (isListening && interimTranscript) setTitle(interimTranscript);
   }, [isListening, interimTranscript]);
@@ -32,85 +67,51 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
   };
 
   const submitText = async (text) => {
-      const trimmed = text.trim();
-      if (!trimmed || parsing) return;
-      playMechanicalClick();
-    
-      // Manual reminder options were explicitly set → create directly (no NLM)
-      const manualOptions = showOptions && (reminderDateTime || intensity !== 'low');
-      if (manualOptions) {
-        onAddTask(trimmed, {
-          reminderDateTime: reminderDateTime ? new Date(reminderDateTime).toISOString() : null,
-          intensity,
-        });
-        navigator.vibrate([50]); // Haptic feedback for manual task creation
-      } else if (onNlmText) {
-        // Natural language: "walk the dog tomorrow at 6pm" → parsed by the NLM
-        setParsing(true);
-        try {
-          const parsed = await parseActions(trimmed);
-          if (parsed) {
-            navigator.vibrate([50]); // Haptic feedback on successful parsing
-            onAddTask(parsed.title, {
-              dueDateTime: parsed.dueDateTime,
-              priority: parsed.priority,
-              intensity: parsed.intensity,
-            });
-          }
-        } catch (e) {
-          console.error("NLM parsing failed:", e);
-        } finally { setParsing(false); }
-      } else {
-        onAddTask(trimmed, {});
-        navigator.vibrate([50]); // Haptic feedback for direct task creation
+    const trimmed = text.trim();
+    if (!trimmed || parsing) return;
+    playMechanicalClick();
+
+    // Manual reminder options were explicitly set → create directly (no NLM)
+    const manualOptions = showOptions && (reminderDateTime || intensity !== 'low');
+    if (manualOptions) {
+      onAddTask(trimmed, {
+        reminderDateTime: reminderDateTime ? new Date(reminderDateTime).toISOString() : null,
+        intensity,
+      });
+      navigator.vibrate?.([50]);
+    } else if (onNlmText) {
+      // Natural language: "walk the dog tomorrow at 6pm" → parsed server-side.
+      // onNlmText falls back to a plain task when parsing is unavailable.
+      setParsing(true);
+      try {
+        await onNlmText(trimmed);
+      } catch (e) {
+        console.error('NLM parsing failed:', e);
+      } finally {
+        setParsing(false);
       }
-      resetFields();
-    };
+    } else {
+      onAddTask(trimmed, {});
+      navigator.vibrate?.([50]);
+    }
+    resetFields();
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     submitText(title);
   };
 
-  // Spoken input → auto-create the task once recognition finalizes
-  const lastVoiceSubmitRef = useRef('');
-    useEffect(() => {
-      if (!finalTranscript) return;
-      const t = finalTranscript.trim();
-      if (!t || lastVoiceSubmitRef.current === t) return;
-      lastVoiceSubmitRef.current = t;
-      playMechanicalClick();
-      (async () => {
-        if (onNlmText) {
-          setParsing(true);
-          try {
-            const parsed = await parseActions(t);
-            if (parsed) {
-              navigator.vibrate([50]); // Haptic feedback on voice parsing
-              onAddTask(parsed.title, {
-                dueDateTime: parsed.dueDateTime,
-                priority: parsed.priority,
-                intensity: parsed.intensity,
-              });
-            }
-          } catch (e) {
-            console.error("Voice NLM parsing failed:", e);
-          } finally { setParsing(false); }
-        } else {
-          onAddTask(t, {});
-          navigator.vibrate([50]); // Haptic feedback for voice-created task
-        }
-        setTitle('');
-        setTranscript('');
-      })();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [finalTranscript]);
-
   const toggleVoice = () => {
     playMechanicalClick();
     if (!voiceSupported) return;
     if (isListening) stopListening();
-    else startListening();
+    else {
+      // Reset dedup guards so the same phrase can be spoken in a new session.
+      lastVoiceIdRef.current = '';
+      processingRef.current = false;
+      startListening();
+    }
   };
 
   const minDateTime = toLocalInputValue(new Date());
@@ -126,7 +127,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
             onChange={(e) => setTitle(e.target.value)}
             disabled={parsing}
             placeholder={parsing ? 'NLM parsing…' : "What needs to be done? e.g. walk the dog tomorrow 6pm"}
-            className="nothing-input flex-1 border-none min-w-0"
+            className="nothing-input flex-1 min-w-0"
             autoComplete="off"
           />
           {/* Voice input */}
@@ -145,7 +146,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
               : 'Voice input not supported in this browser'}
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 11-3-3V4.5a3 3 0 016 0v8.25a3 3 0 11-3 3z" />
             </svg>
           </button>
           {/* Reminder toggle (manual override) */}

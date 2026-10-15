@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useIsMobile } from '../hooks/useIsMobile';
 import BottomTabBar from './BottomTabBar';
 import SwipeCarousel from './SwipeCarousel';
@@ -7,13 +7,15 @@ import AlarmSection from './AlarmSection';
 import TimerHub from './TimerHub';
 import StopwatchModule from './StopwatchModule';
 import RichScratchpad from './RichScratchpad';
+import SleepTracker from './SleepTracker';
+import HydrationTracker from './HydrationTracker';
 
 /**
  * Mobile shell — phone-width layout for the SAME components as desktop
  * (no UI fork). Structure:
  *   - compact header (FLOTASK + tagline)
  *   - swipeable full-height screens: Tasks, Alarms, Timer, Stopwatch,
- *     Scratchpad (Embla Carousel, kept in sync with the tab bar)
+ *     Notes, Sleep, Hydration (Embla Carousel, kept in sync with the tab bar)
  *   - bottom tab bar (primary navigation) with safe-area padding
  *
  * Tablet/desktop widths (≥641px) never render this — App keeps the
@@ -60,6 +62,16 @@ const TABS = [
     id: 'scratchpad',
     label: 'Notes',
     icon: icon('M16.862 4.487l1.687-1.688a1.875 1.875 0 112.65 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125'),
+  },
+  {
+    id: 'sleep',
+    label: 'Sleep',
+    icon: icon('M20.354 7.354A9 9 0 0116.646 3.354 9.003 9.003 0 0012 21a9 9 0 008.354-5.646z'),
+  },
+  {
+    id: 'hydration',
+    label: 'Water',
+    icon: icon('M12 2.66l.66.66c2.34 2.3 6.34 5.87 6.34 8.68 0 3.32-2.68 6-6 6s-6-2.68-6-6c0-2.81 4-6.38 6-8.68l.66-.66z'),
   },
 ];
 
@@ -112,6 +124,8 @@ export default function MobileShell({
       id: 'scratchpad',
       content: <RichScratchpad onNlmActions={onNlmActions} />,
     },
+    { id: 'sleep', content: <SleepTracker /> },
+    { id: 'hydration', content: <HydrationTracker /> },
   ];
 
   return (

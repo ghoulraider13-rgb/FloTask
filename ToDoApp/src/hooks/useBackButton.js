@@ -15,12 +15,19 @@ import { useEffect, useRef } from 'react';
  */
 export default function useBackButton(active, close, { unclosable = false } = {}) {
   const closeRef = useRef(close);
-  closeRef.current = close;
   const activeRef = useRef(active);
-  activeRef.current = active;
   const unclosableRef = useRef(unclosable);
-  unclosableRef.current = unclosable;
   const pushedRef = useRef(false);
+
+  // Sync the latest props into refs inside an effect (never during render,
+  // which the react-hooks/refs rule forbids). The popstate handler below
+  // reads these refs, and since user-driven events always fire after the
+  // most recent commit, the refs are always current when invoked.
+  useEffect(() => {
+    closeRef.current = close;
+    activeRef.current = active;
+    unclosableRef.current = unclosable;
+  }, [close, active, unclosable]);
 
   useEffect(() => {
     const onPop = () => {
