@@ -539,8 +539,24 @@ body {
   }
 }
 
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .animate-glitch {
   animation: screenGlitch 0.3s cubic-bezier(.25, .46, .45, .94) both;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 @keyframes agentPulse {
