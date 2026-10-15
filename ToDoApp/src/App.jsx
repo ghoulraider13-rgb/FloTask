@@ -244,8 +244,11 @@ export default function App() {
               onNlmText={handleNlmText}
             />
             <StopwatchModule />
-            <SleepTracker />
-            <HydrationTracker />
+            {/* Sleep & Hydration: side-by-side on desktop, stacked on mobile */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <SleepTracker />
+              <HydrationTracker />
+            </div>
           </main>
 
           {/* Right — Scratchpad */}

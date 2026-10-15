@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { playMechanicalClick } from '../utils/audioHelpers';
+import { playGentleChime } from '../utils/audioHelpers';
+import { safeUuid } from '../utils/taskHelpers';
 
 /**
  * HydrationTracker — SomnaFlow-inspired hydration tracking.
@@ -15,18 +16,18 @@ import { playMechanicalClick } from '../utils/audioHelpers';
 const QUICK_AMOUNTS = [250, 500, 750, 1000]; // ml
 const DEFAULT_GOAL = 2000; // ml
 
-// Color tokens (SomnaFlow palette - Hydration)
+// Color tokens (SomnaFlow palette — Hydration, dulled for Nothing-OS harmony)
 const COLORS = {
-  // Primary: Bioluminescent Aqua
+  // Primary: Muted Bioluminescent Aqua
   hydroPrimary: '#00F2FE',
-  hydroPrimaryGlow: 'rgba(0, 242, 254, 0.35)',
-  hydroPrimaryBorder: 'rgba(0, 242, 254, 0.25)',
+  hydroPrimaryGlow: 'rgba(0, 242, 254, 0.15)',
+  hydroPrimaryBorder: 'rgba(0, 242, 254, 0.18)',
   hydroPrimaryDim: '#00C4D6',
   hydroContainer: '#006A70',
   hydroOnContainer: '#002022',
   // Tertiary: Emerald Vitality (for achieved goals)
   vitality: '#10B981',
-  vitalityGlow: 'rgba(16, 185, 129, 0.35)',
+  vitalityGlow: 'rgba(16, 185, 129, 0.15)',
   // Surface tiers
   surface0: '#0F131D',
   surface1: '#131E35',
@@ -39,7 +40,7 @@ const COLORS = {
   textMuted: '#64748B',
   // Border
   borderSubtle: 'rgba(255,255,255,0.08)',
-  borderActive: 'rgba(0,242,254,0.25)',
+  borderActive: 'rgba(0,242,254,0.18)',
 };
 
 function todayKey() {
@@ -114,9 +115,9 @@ function GlassCard({ children, className = '', variant = 'default', glow = false
     border: `1px solid ${glow ? COLORS.hydroPrimaryBorder : COLORS.borderSubtle}`,
     borderRadius: '1.5rem',
     boxShadow: glow
-      ? `0 0 32px -4px ${COLORS.hydroPrimaryGlow}, 0 8px 32px -4px rgba(0,0,0,0.5)`
-      : '0 8px 32px -4px rgba(0,0,0,0.5)',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      ? `0 0 20px -4px ${COLORS.hydroPrimaryGlow}, 0 8px 28px -4px rgba(0,0,0,0.5)`
+      : '0 8px 28px -4px rgba(0,0,0,0.5)',
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease',
   };
   return (
     <div
@@ -140,26 +141,29 @@ function QuickDosePill({ amount, isSelected, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="px-6 py-3 rounded-full font-semibold text-sm tracking-wide transition-all duration-200 flex items-center gap-2"
+      className="px-6 py-3 rounded-full font-semibold text-sm tracking-wide flex items-center gap-2 transition-all duration-300"
       style={{
         background: isActive
-          ? `rgba(0, 242, 254, 0.15)`
+          ? 'rgba(0, 242, 254, 0.12)'
           : 'rgba(255,255,255,0.03)',
         border: `1px solid ${isActive ? COLORS.hydroPrimaryBorder : COLORS.borderSubtle}`,
         color: isActive ? COLORS.hydroPrimary : COLORS.textSecondary,
-        boxShadow: isActive ? `0 0 16px ${COLORS.hydroPrimaryGlow}` : 'none',
+        boxShadow: isActive ? `0 0 12px ${COLORS.hydroPrimaryGlow}` : 'none',
         minWidth: '90px',
       }}
     >
       <span className="text-xs font-mono" style={{ color: isActive ? COLORS.hydroPrimary : COLORS.textMuted }}>
         +{amount}ml
       </span>
-      {isActive && (
-        <span className="w-1.5 h-1.5 rounded-full" style={{
-          background: COLORS.hydroPrimary,
-          boxShadow: `0 0 8px ${COLORS.hydroPrimaryGlow}`,
-        }} />
-      )}
+      {/* Always reserve space for the indicator to prevent layout shift */}
+      <span
+        className="w-1.5 h-1.5 rounded-full"
+        style={{
+          background: isActive ? COLORS.hydroPrimary : 'transparent',
+          boxShadow: isActive ? `0 0 6px ${COLORS.hydroPrimaryGlow}` : 'none',
+          opacity: isActive ? 1 : 0,
+        }}
+      />
     </button>
   );
 }
@@ -168,11 +172,13 @@ function QuickDosePill({ amount, isSelected, onClick }) {
 function HistoryEntry({ entry, onDelete, index }) {
   return (
     <div
-      className="flex items-center justify-between p-3 rounded-xl transition-all animate-slide-in"
+      className="flex items-center justify-between p-3 rounded-xl transition-all"
       style={{
         background: 'rgba(255,255,255,0.02)',
         border: `1px solid ${COLORS.borderSubtle}`,
-        animationDelay: `${index * 50}ms`,
+        animation: 'smoothFadeIn 0.2s ease-out forwards',
+        animationDelay: `${index * 30}ms`,
+        opacity: 0,
       }}
     >
       <div className="flex items-center gap-3">
@@ -230,9 +236,9 @@ export default function HydrationTracker() {
 
   const addIntake = useCallback((amount) => {
     if (!amount || amount <= 0) return;
-    playMechanicalClick();
+    playGentleChime();
     const entry = {
-      id: crypto.randomUUID?.() || `h_${Date.now()}`,
+      id: safeUuid ? safeUuid() : `h_${Date.now()}`,
       amount,
       date: today,
       time: new Date().toISOString(),
@@ -254,7 +260,7 @@ export default function HydrationTracker() {
   };
 
   const handleDelete = (id) => {
-    playMechanicalClick();
+    playGentleChime();
     setIntake((prev) => prev.filter((e) => e.id !== id));
   };
 
@@ -268,7 +274,7 @@ export default function HydrationTracker() {
   };
 
   const resetGoal = () => {
-    playMechanicalClick();
+    playGentleChime();
     setGoal(DEFAULT_GOAL);
     setShowGoalForm(false);
     setGoalDraft('');
@@ -315,11 +321,11 @@ export default function HydrationTracker() {
           <button
             type="button"
             onClick={() => {
-              playMechanicalClick();
+              playGentleChime();
               setShowGoalForm((v) => !v);
               setGoalDraft(String(goal));
             }}
-            className="text-xs font-mono px-3 py-1.5 rounded-full transition-all"
+            className="text-xs font-mono px-3 py-1.5 rounded-full transition-colors"
             style={{
               background: 'rgba(255,255,255,0.03)',
               border: `1px solid ${COLORS.borderSubtle}`,
@@ -333,7 +339,7 @@ export default function HydrationTracker() {
 
         {/* Goal form (inline, toggles open) */}
         {showGoalForm && (
-          <form onSubmit={handleGoalSave} className="flex flex-col sm:flex-row items-end gap-3 animate-slide-in">
+          <form onSubmit={handleGoalSave} className="flex flex-col sm:flex-row items-end gap-3 transition-all duration-300" style={{ maxHeight: showGoalForm ? '200px' : '0' }}>
             <div className="flex-1">
               <label className="text-xs font-medium tracking-wider uppercase mb-1.5 block" style={{ color: COLORS.textSecondary }}>
                 Daily Goal (ml)
@@ -359,11 +365,11 @@ export default function HydrationTracker() {
               <button
                 type="submit"
                 disabled={!goalDraft}
-                className="px-6 py-3 rounded-xl font-semibold tracking-wide transition-all"
+                className="px-6 py-3 rounded-xl font-semibold tracking-wide transition-colors"
                 style={{
                   background: `linear-gradient(135deg, ${COLORS.hydroPrimary}, ${COLORS.hydroPrimaryDim})`,
                   color: '#0F131D',
-                  boxShadow: `0 0 16px ${COLORS.hydroPrimaryGlow}`,
+                  boxShadow: `0 0 12px ${COLORS.hydroPrimaryGlow}`,
                 }}
               >
                 SET
@@ -371,7 +377,7 @@ export default function HydrationTracker() {
               <button
                 type="button"
                 onClick={resetGoal}
-                className="px-6 py-3 rounded-xl font-medium transition-all"
+                className="px-6 py-3 rounded-xl font-medium transition-colors"
                 style={{
                   background: 'rgba(255,255,255,0.03)',
                   border: `1px solid ${COLORS.borderSubtle}`,
@@ -403,10 +409,9 @@ export default function HydrationTracker() {
                   fontWeight: 700,
                   lineHeight: 1,
                   color: COLORS.textPrimary,
-                  fontFamily: 'Plus Jakarta Sans, sans-serif',
                   textShadow: progress >= 100
-                    ? `0 0 24px ${COLORS.vitalityGlow}`
-                    : `0 0 24px ${COLORS.hydroPrimaryGlow}`,
+                    ? `0 0 12px ${COLORS.vitalityGlow}`
+                    : `0 0 12px ${COLORS.hydroPrimaryGlow}`,
                 }}>
                   {Math.round(progress)}%
                 </div>
@@ -416,11 +421,12 @@ export default function HydrationTracker() {
               </div>
             </CircularProgress>
 
-            {/* Goal met animation */}
+            {/* Goal met animation — smooth glow, no jarring pulse */}
             {progress >= 100 && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-40 h-40 rounded-full animate-pulse" style={{
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-60">
+                <div className="w-32 h-32 rounded-full" style={{
                   background: `radial-gradient(circle, ${COLORS.vitalityGlow} 0%, transparent 70%)`,
+                  animation: 'smoothPulse 1.5s ease-in-out infinite',
                 }} />
               </div>
             )}
@@ -437,7 +443,14 @@ export default function HydrationTracker() {
             </div>
             <div className="w-px h-8" style={{ background: `linear-gradient(180deg, transparent, ${COLORS.borderSubtle}, transparent)` }} />
             <div>
-              <div className="text-2xl font-mono tabular-nums" style={{ color: progress >= 100 ? COLORS.vitality : COLORS.hydroPrimary }}>
+              <div className={`text-2xl font-mono tabular-nums transition-all duration-500 ${
+                progress >= 100 ? 'text-green-400' : 'text-cyan-400'
+              }`} style={{
+                color: progress >= 100 ? COLORS.vitality : COLORS.hydroPrimary,
+                textShadow: progress >= 100
+                  ? `0 0 12px ${COLORS.vitalityGlow}`
+                  : `0 0 12px ${COLORS.hydroPrimaryGlow}`,
+              }}>
                 {progress >= 100 ? '✓' : remaining.toLocaleString()}
               </div>
               <div className="text-xs tracking-wider uppercase" style={{ color: COLORS.textMuted }}>
@@ -490,11 +503,11 @@ export default function HydrationTracker() {
           <button
             type="submit"
             disabled={!customAmount}
-            className="px-8 py-3 rounded-xl font-semibold tracking-wide transition-all self-end"
+            className="px-8 py-3 rounded-xl font-semibold tracking-wide transition-colors self-end"
             style={{
               background: `linear-gradient(135deg, ${COLORS.hydroPrimary}, ${COLORS.hydroPrimaryDim})`,
               color: '#0F131D',
-              boxShadow: `0 0 16px ${COLORS.hydroPrimaryGlow}`,
+              boxShadow: `0 0 12px ${COLORS.hydroPrimaryGlow}`,
               opacity: customAmount ? 1 : 0.5,
             }}
           >
@@ -556,8 +569,8 @@ export default function HydrationTracker() {
                 Daily average
               </div>
             </div>
-            <div className="p-4 rounded-xl" style={{ background: 'rgba(139,92,246,0.08)', border: `1px solid ${COLORS.sleepPrimaryBorder}` }}>
-              <div className="text-2xl font-mono tabular-nums font-bold" style={{ color: COLORS.sleepPrimary }}>
+            <div className="p-4 rounded-xl" style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.18)' }}>
+              <div className="text-2xl font-mono tabular-nums font-bold" style={{ color: '#8B5CF6' }}>
                 {weekEntries.length}
               </div>
               <div className="text-xs tracking-wider uppercase mt-1" style={{ color: COLORS.textMuted }}>
