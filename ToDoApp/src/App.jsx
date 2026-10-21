@@ -120,7 +120,6 @@ export default function App() {
   }, [setAlarms]);
 
   // ── NLM (natural-language model) ───────────────────────────────
-  // Materialize a batch of parsed actions (from the scratchpad agent).
   const handleNlmActions = useCallback((actions) => {
     let created = 0;
     actions.forEach((action) => {
@@ -136,11 +135,9 @@ export default function App() {
     return created;
   }, [handleAddAlarm, handleAddTask]);
 
-  // Parse one free-form sentence (typed or spoken) into task(s)/alarm(s).
   const handleNlmText = useCallback(async (text) => {
     const actions = await parseActions(text);
     if (!actions || actions.length === 0) {
-      // NLM found nothing actionable → keep the user's words as a plain task
       handleAddTask(text, {});
       return 1;
     }
@@ -148,7 +145,7 @@ export default function App() {
   }, [handleAddTask, handleNlmActions]);
 
   return (
-    <div className="relative">
+      <div className="relative min-h-screen" style={{ minHeight: '100vh' }}>
       {/* ── Cursor Glow Layer ─────────────────────────────────── */}
       <div
         ref={glowRef}
@@ -191,10 +188,7 @@ export default function App() {
         <EnforcerModal title={enforcerAlert.title} subtext={enforcerAlert.subtext} onDismiss={dismissEnforcer} />
       )}
 
-      {/* ── Layout: MobileShell (≤640px) or desktop 3-column (≥641px) ── */}
-      {/* Both branches render the SAME feature components; the layout
-          is responsive, never forked. Desktop keeps the existing
-          three-column grid + sticky asides untouched. */}
+      {/* ── Layout: MobileShell (≤640px) or responsive single-scroll desktop (≥641px) ── */}
       <MobileShell
         tasks={tasks}
         alarms={alarms}
@@ -220,21 +214,38 @@ export default function App() {
           </p>
         </header>
 
-        {/* ── Three-Column Layout ─────────────────────────────── */}
-        <div className="three-col-grid grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-10 items-start">
+        {/* ── Unified Document Flow Grid ──────────────────────── */}
+        <div className="dashboard-grid grid gap-6"
+             style={{
+               gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+             }}>
 
-          {/* Left — Timer & Alarms */}
-          <aside className="lg:sticky lg:top-12 flex flex-col gap-12">
+          {/* Row 1: Timer & Alarms (was left column) */}
+          <section className="nothing-card p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="timer-heading">
+            <h2 id="timer-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
+              TIMER & ALARMS
+            </h2>
             <TimerHub />
             <AlarmsHub
               alarms={alarms}
               onAdd={handleAddAlarm}
               onDelete={handleDeleteAlarm}
             />
-          </aside>
+          </section>
 
-          {/* Center — Tasks + Stopwatch + Sleep + Hydration */}
-          <main className="min-h-[60vh] flex flex-col gap-5">
+          {/* Row 2: Scratchpad (was right column) */}
+          <section className="nothing-card p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="scratchpad-heading">
+            <h2 id="scratchpad-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
+              SCRATCHPAD
+            </h2>
+            <RichScratchpad onNlmActions={handleNlmActions} />
+          </section>
+
+          {/* Row 3: Tasks + Stopwatch (was center column) */}
+          <section className="nothing-card p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="tasks-heading">
+            <h2 id="tasks-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
+              TASKS & STOPWATCH
+            </h2>
             <TaskList
               tasks={tasks}
               onAddTask={handleAddTask}
@@ -244,17 +255,24 @@ export default function App() {
               onNlmText={handleNlmText}
             />
             <StopwatchModule />
-            {/* Sleep & Hydration: side-by-side on desktop, stacked on mobile */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              <SleepTracker />
-              <HydrationTracker />
-            </div>
-          </main>
+          </section>
 
-          {/* Right — Scratchpad */}
-          <aside className="lg:sticky lg:top-12 lg:h-[calc(100vh-8rem)] lg:min-h-[600px] flex flex-col">
-            <RichScratchpad onNlmActions={handleNlmActions} />
-          </aside>
+          {/* Row 4: Sleep Tracker */}
+          <section className="nothing-card p-5 sm:p-6" aria-labelledby="sleep-heading">
+            <h2 id="sleep-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase mb-4">
+              SLEEP TRACKER
+            </h2>
+            <SleepTracker />
+          </section>
+
+          {/* Row 5: Hydration Tracker */}
+          <section className="nothing-card p-5 sm:p-6" aria-labelledby="hydration-heading">
+            <h2 id="hydration-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase mb-4">
+              HYDRATION TRACKER
+            </h2>
+            <HydrationTracker />
+          </section>
+
         </div>
       </div>
     </div>

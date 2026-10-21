@@ -7,7 +7,7 @@ export default function TaskList({ tasks, onAddTask, onToggleTask, onDeleteTask,
   const { active, done } = useMemo(() => partitionTasks(tasks), [tasks]);
 
   return (
-    <div className="nothing-card p-5 sm:p-6 flex flex-col gap-5 h-full">
+      <div className="nothing-card p-5 sm:p-6 flex flex-col gap-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase">TASKS</h3>

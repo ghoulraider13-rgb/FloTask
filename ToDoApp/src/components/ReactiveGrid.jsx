@@ -15,14 +15,26 @@ export default function ReactiveGrid() {
   const rafRef = useRef(null);
   const resizeObserverRef = useRef(null);
 
+  const getDocHeight = () => Math.max(
+    document.body.scrollHeight,
+    document.documentElement.scrollHeight,
+    window.innerHeight
+  );
+
+  const getDocWidth = () => Math.max(
+    document.body.scrollWidth,
+    document.documentElement.scrollWidth,
+    window.innerWidth
+  );
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
     const initDots = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
+      const w = getDocWidth();
+      const h = getDocHeight();
       canvas.width = w * window.devicePixelRatio;
       canvas.height = h * window.devicePixelRatio;
       canvas.style.width = w + 'px';
@@ -45,13 +57,19 @@ export default function ReactiveGrid() {
     initDots();
 
     const handleMouseMove = (e) => {
-      mouseRef.current.x = e.clientX;
-      mouseRef.current.y = e.clientY;
+      // Convert viewport coordinates to document coordinates
+      mouseRef.current.x = e.clientX + window.scrollX;
+      mouseRef.current.y = e.clientY + window.scrollY;
     };
 
     const handleMouseLeave = () => {
       mouseRef.current.x = -9999;
       mouseRef.current.y = -9999;
+    };
+
+    const handleScroll = () => {
+      // Re-initialize dots when document height changes significantly
+      // (debounced via requestAnimationFrame in animate loop)
     };
 
     const animate = () => {
@@ -107,20 +125,41 @@ export default function ReactiveGrid() {
 
     rafRef.current = requestAnimationFrame(animate);
 
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('mouseleave', handleMouseLeave);
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
-    // Handle resize
-    resizeObserverRef.current = new ResizeObserver(() => {
-      initDots();
-    });
+    // Handle resize and content changes
+    const checkResize = () => {
+      const newW = getDocWidth();
+      const newH = getDocHeight();
+      const curW = parseFloat(canvas.style.width);
+      const curH = parseFloat(canvas.style.height);
+      if (Math.abs(newW - curW) > 2 || Math.abs(newH - curH) > 2) {
+        initDots();
+      }
+    };
+
+    resizeObserverRef.current = new ResizeObserver(checkResize);
     resizeObserverRef.current.observe(document.body);
+    resizeObserverRef.current.observe(document.documentElement);
+
+    // Also check on scroll for dynamic content
+    let scrollCheckTimer = null;
+    const debouncedCheck = () => {
+      clearTimeout(scrollCheckTimer);
+      scrollCheckTimer = setTimeout(checkResize, 150);
+    };
+    window.addEventListener('scroll', debouncedCheck, { passive: true });
 
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', debouncedCheck);
       if (resizeObserverRef.current) resizeObserverRef.current.disconnect();
+      clearTimeout(scrollCheckTimer);
     };
   }, []);
 
@@ -128,8 +167,9 @@ export default function ReactiveGrid() {
     <canvas
       ref={canvasRef}
       style={{
-        position: 'fixed',
-        inset: 0,
+        position: 'absolute',
+        top: 0,
+        left: 0,
         zIndex: 0,
         pointerEvents: 'none',
       }}

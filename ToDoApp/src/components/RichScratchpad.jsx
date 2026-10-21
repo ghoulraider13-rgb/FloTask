@@ -252,7 +252,7 @@ export default function RichScratchpad({ onNlmActions }) {
   ];
 
   return (
-    <div className="flex flex-col gap-5 h-full relative">
+      <div className="flex flex-col gap-5 relative">
       <div className={`nothing-card flex flex-col flex-1 transition-all duration-400 ${isShrinking ? 'scale-95 opacity-0' : ''}`}>
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <h3 className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase">SCRATCHPAD</h3>

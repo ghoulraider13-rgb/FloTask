@@ -295,7 +295,7 @@ export default function HydrationTracker() {
   const weekAvg = weekEntries.length > 0 ? Math.round(weekTotal / 7) : 0;
 
   return (
-    <div className="flex flex-col h-full" style={{ background: COLORS.surface0, minHeight: '100%' }}>
+    <div className="flex flex-col relative" style={{ background: COLORS.surface0 }}>
       {/* Ambient background glow */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -307,7 +307,7 @@ export default function HydrationTracker() {
         }}
       />
 
-      <div className="relative z-10 flex flex-col h-full p-4 sm:p-6 gap-6">
+      <div className="relative z-10 flex flex-col gap-6 p-4 sm:p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -516,7 +516,7 @@ export default function HydrationTracker() {
         </form>
 
         {/* Today's Entries */}
-        <GlassCard className="p-6 flex-1 min-h-0">
+        <GlassCard className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xs font-bold tracking-widest uppercase" style={{ color: COLORS.textSecondary }}>
               TODAY'S LOG
