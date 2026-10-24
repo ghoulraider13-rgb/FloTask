@@ -1,191 +1,200 @@
 /**
- * Natural-language model client for FloTask.
+ * NLM — offline natural-language parsing. No server, no API keys, no Ollama.
  *
- * The client never talks to a model service directly — secrets must not live
- * in the bundle. It proxies through the `/api/chat` endpoint, which is backed
- * by the same NLM engine in both local dev (Vite dev middleware, see
- * vite.config.js) and production (Vercel serverless function `api/chat.js`).
- * The server attaches the API key and resolves relative times against the
- * user's local clock + timezone, which it receives in the request body.
+ * Runs entirely in the browser as bundled JS (chrono-node + a weighted
+ * pattern classifier), so it works offline, on the LAN/phone, and when the
+ * host machine is asleep — the three failure modes of the old Ollama path.
  *
- * Usage:
- *   import { parseActions } from './utils/nlm'
- *   const actions = await parseActions('walk the dog tomorrow at 6pm')
- *   // actions = [{ type:'task', title:'Walk the Dog', dueDateTime:'...', ... }]
+ * Pipeline per line of text:
+ *   1. Time extraction — chrono-node (pure JS, offline) with forwardDate so
+ *      bare times like "at 6am" resolve to the NEXT occurrence.
+ *   2. Intent classification — keyword patterns:
+ *        "wake me" / "alarm"            → alarm (only)
+ *        "remind me" / "reminder"       → task + reminder (no extra alarm)
+ *        timed line with neither        → task + alarm (default, per spec:
+ *                                         "walk dog at 6am" rings and lists)
+ *   3. Priority extraction — "urgent/asap/critical/important/high priority"
+ *      → high; "low priority / no rush" → low; default normal.
+ *      "enforcer/captcha" → high intensity (The Enforcer, CAPTCHA-to-dismiss).
+ *   4. Title cleanup — strips the time phrase, intent phrases and priority
+ *      words; honors explicit "titled/called/named X".
  *
- * Returns:
- *   - `null`  when the endpoint is unreachable / the request fails (callers
- *             fall back to creating a plain task from the raw text)
- *   - `[]`    when the text is understood but contains no actionable items
- *   - `[{...}]` a normalized action list, each shaped as
- *     { type:'task'|'alarm', title, dueDateTime, priority, intensity }
+ * Output contract (array — consumers iterate with forEach):
+ *   [{ type: 'task'|'alarm', title, dueDateTime, priority, intensity, isAgentCreated }]
+ * dueDateTime is a NAIVE LOCAL "YYYY-MM-DDTHH:MM" string — exactly what
+ * parseLocalDateTime() in taskHelpers anchors to the user's timezone (passing
+ * full UTC ISO here re-anchors it wrong — the old shift bug).
  */
+import * as chrono from 'chrono-node';
+import { toLocalInputValue } from './taskHelpers.js';
+
+const INTENT_ALARM = /\b(wake me|alarm)\b/i;
+const INTENT_REMIND = /\b(remind me|reminder)\b/i;
+const PRIORITY_HIGH = /\b(urgent|asap|critical|important|high[- ]priority)\b/i;
+const PRIORITY_LOW = /\b(low[- ]priority|no rush|whenever you (get )?a chance)\b/i;
+const INTENSITY_HIGH = /\b(enforcer|captcha)\b/i;
+
+const EXPLICIT_TITLE = /\b(?:titled|called|named)\s+["']([^"'\n]+)["']/i;
+const LEADING_ALARM_PREFIX = /^\s*alarms?\s*[:\-–—]\s*/i; // "alarm: gym" → "gym"
+const STRIP_PATTERNS = [
+  /\b(?:set an alarm|set alarm|set up an alarm|remind me to|remind me|wake me up|wake me|add a task (?:to|for)|add task|todo|reminder)\b/gi,
+  /\b(?:urgent|asap|critical|important|high[- ]priority|low[- ]priority|no rush|enforcer|captcha)\b/gi,
+  /\b(?:at|on|by|for|to)\s*$/gi, // trailing preposition left behind by the time strip
+];
+const LIST_MARKER = /^[\s]*[-*•>\d.)\]+]+\s*/;
+
+function cleanTitle(raw) {
+  const explicit = raw.match(EXPLICIT_TITLE);
+  if (explicit) return explicit[1].trim(); // 'titled "X"' → X verbatim
+  let t = raw.replace(LEADING_ALARM_PREFIX, ' ');
+  STRIP_PATTERNS.forEach((p) => { t = t.replace(p, ' '); });
+  t = t
+    .replace(LIST_MARKER, '')
+    .replace(/^\s*to\s+/i, '') // purpose connector: "set an alarm … to walk dog" → "walk dog"
+    .replace(/\s+/g, ' ')
+    .replace(/^[\s:;\-–—,]+/, '')
+    .replace(/[\s:;\-–—,]+$/, '')
+    .trim();
+  if (!t) return '';
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
 
 /**
- * Send free-form text to /api/chat and return a normalized action list.
+ * Parse one line into actions. Returns an array (0–2 items).
+ * skipUntagged: in multi-line notes, a line with no time and no intent/
+ * priority keyword is prose, not an action item — skip it.
  */
+function parseLine(line, skipUntagged) {
+  const match = chrono.parse(line, undefined, { forwardDate: true })[0];
+  const wantsAlarm = INTENT_ALARM.test(line);
+  const wantsRemind = INTENT_REMIND.test(line);
+  const isPriorityHigh = PRIORITY_HIGH.test(line);
+  const isPriorityLow = PRIORITY_LOW.test(line);
+  const timed = !!match;
+
+  if (skipUntagged && !timed && !wantsAlarm && !wantsRemind && !isPriorityHigh && !isPriorityLow) {
+    return [];
+  }
+
+  const stripped = match
+    ? `${line.slice(0, match.index)} ${line.slice(match.index + match.text.length)}`
+    : line;
+  const title = cleanTitle(stripped) || (wantsAlarm ? 'Alarm' : '');
+  if (!title) return [];
+
+  const priority = isPriorityHigh ? 'high' : isPriorityLow ? 'low' : 'normal';
+  const intensity = /\b(enforcer|captcha)\b/i.test(line)
+    ? 'high'
+    : (isPriorityHigh || timed)
+      ? 'medium'
+      : 'low';
+  const due = match ? toLocalInputValue(match.date()) : null;
+
+  // Explicit alarm request → alarm only, even when timed.
+  if (wantsAlarm) {
+    return [{
+      type: 'alarm', title, dueDateTime: due, priority,
+      intensity: intensity === 'low' ? 'medium' : intensity, isAgentCreated: true,
+    }];
+  }
+  if (timed && !wantsRemind) {
+    // Timed + no explicit reminder intent → alarm AND task (default behavior).
+    return [
+      { type: 'alarm', title, dueDateTime: due, priority, intensity: intensity === 'low' ? 'medium' : intensity, isAgentCreated: true },
+      { type: 'task', title, dueDateTime: due, priority, intensity, isAgentCreated: true },
+    ];
+  }
+  // Reminder intent (timed or not) or untimed plain task → task only.
+  return [{ type: 'task', title, dueDateTime: due, priority, intensity, isAgentCreated: true }];
+}
+
+/**
+ * Parse free-form text into an array of task/alarm actions.
+ * Single-line input (task form): always yields at least one action — the
+ * user typed it into a task field, never drop it. Multi-line (scratchpad):
+ * only lines with a time or intent/priority keyword become items.
+ *
+ * Mic/voice extension (Feature 3): one utterance can produce MULTIPLE items —
+ *   "wake me at 6, 6:15 and 6:30"      → 3 alarms (same intent, repeated times)
+ *   "add tasks: milk, eggs, bread"     → 3 tasks
+ *   "grocery list: milk, eggs, bread"  → checklist note handled by the
+ *                                         caller (see parseChecklistNote);
+ *                                         least invasive: NOT split into tasks
+ * Multi-item splitting applies only to single-line spoken input, and only
+ * when the text carries an explicit list prefix ("add tasks:", "alarms at",
+ * "remind me to… and…") — prose stays one item.
+ */
+const LIST_TASKS_PREFIX = /^\s*(?:add\s+(?:a\s+)?tasks?|tasks?)\s*:\s*/i;
+const CHECKLIST_PREFIX = /^\s*(?:[a-z\s]{0,30}?)\s*list\s*:\s*(.+)$/i;
+
+/** Split "wake me at 6, 6:15 and 6:30" style utterances into per-time items.
+ * Returns null when the text isn't a repeated-time utterance. */
+function splitRepeatedTimes(text) {
+  const times = [...text.matchAll(/\b(?:at\s*)?(\d{1,2}(?::\d{2})?)\s*(a\.?m\.?|p\.?m\.?)?/gi)]
+    .filter((m) => /^\d/.test(m[1]))
+    .map((m) => m[0]);
+  if (times.length < 2) return null;
+  // Everything before the first time is the shared intent; build one
+  // utterance per time, preserving the am/pm of that time (or the last one).
+  const firstIdx = text.indexOf(times[0]);
+  const intent = text.slice(0, firstIdx).trim();
+  const globalAmpm = (text.match(/(a\.?m\.?|p\.?m\.?)/i) || [])[0];
+  return times.map((t) => {
+    const hasOwnAmpm = /(a\.?m\.?|p\.?m\.?)/i.test(t);
+    const phrase = `${intent} ${t}${!hasOwnAmpm && globalAmpm ? ` ${globalAmpm}` : ''}`.trim();
+    return phrase;
+  });
+}
+
 export async function parseActions(text) {
-  if (!text || !text.trim()) return [];
+  const input = String(text ?? '').trim();
+  if (!input) return [];
 
-  const payload = {
-    text: text.trim(),
-    currentTime: new Date().toISOString(),
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-  };
-
-  let res;
-  try {
-    res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-  } catch (err) {
-    console.error('NLM endpoint unreachable:', err?.message || err);
-    return null;
+  const multiline = /\n/.test(input);
+  if (multiline) {
+    return input
+      .split(/\n+/)
+      .flatMap((line) => parseLine(line, true));
   }
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    console.error('NLM parse failed:', err.error || `HTTP ${res.status}`);
-    return null;
+  // Multi-item utterance (mic): explicit task-list prefix
+  if (LIST_TASKS_PREFIX.test(input)) {
+    const body = input.replace(LIST_TASKS_PREFIX, '');
+    const parts = body.split(/,| and /i).map((p) => p.trim()).filter(Boolean);
+    if (parts.length > 1) {
+      return parts.map((p) => ({ type: 'task', title: cleanTitle(p), dueDateTime: null, priority: 'normal', intensity: 'low', isAgentCreated: true }));
+    }
   }
 
-  const data = await res.json().catch(() => ({}));
-  const actions = Array.isArray(data?.actions) ? data.actions : [];
+  // Multi-item utterance (mic): repeated times — "wake me at 6, 6:15 and 6:30"
+  const repeated = splitRepeatedTimes(input);
+  if (repeated) {
+    const perTime = await Promise.all(repeated.map((phrase) => parseLine(phrase, false)));
+    const flat = perTime.flatMap((x) => x);
+    if (flat.length > 0) return flat;
+  }
+
+  const actions = parseLine(input, false);
+  if (actions.length === 0) {
+    // Time phrase only ("tomorrow 6pm") or unparseable → keep raw words.
+    return [{ type: 'task', title: input, dueDateTime: null, priority: 'normal', intensity: 'low', isAgentCreated: true }];
+  }
   return actions;
 }
 
 /**
- * Local fallback parser using simple keyword matching.
- * Used when the remote NLM endpoint is unavailable.
- * Returns normalized actions or null if no patterns match.
+ * Feature 3: detect a "grocery list: milk, eggs, bread" checklist note.
+ * Least invasive option for lists: a checklist NOTE (one SavedNotes-style
+ * entry), NOT several tasks — the caller decides where to store it.
+ * Returns the list title + items, or null when the text isn't a list.
  */
-export function parseActionsLocal(text) {
-  if (!text || !text.trim()) return [];
-  const t = text.trim().toLowerCase();
-
-  // Simple patterns for task/alarm extraction
-  const actions = [];
-
-  // Pattern: "remind me to X at Y" or "X at Y" or "X tomorrow at Y"
-  const remindMatch = t.match(/^(?:remind me to\s+)?(.+?)\s+(?:at|on)\s+(.+)$/);
-  if (remindMatch) {
-    const title = remindMatch[1].trim();
-    const timeStr = remindMatch[2].trim();
-    const dueDateTime = parseRelativeTime(timeStr);
-    if (dueDateTime) {
-      actions.push({
-        type: 'alarm',
-        title: toTitleCase(title),
-        dueDateTime,
-        priority: 'Medium',
-        intensity: 'medium',
-      });
-    } else {
-      actions.push({
-        type: 'task',
-        title: toTitleCase(title),
-        dueDateTime: null,
-        priority: 'Low',
-        intensity: 'low',
-      });
-    }
-    return actions;
-  }
-
-  // Pattern: "wake me up at X" or "alarm at X"
-  const alarmMatch = t.match(/^(?:wake me up|set alarm|alarm)\s+(?:at|for)\s+(.+)$/);
-  if (alarmMatch) {
-    const timeStr = alarmMatch[1].trim();
-    const dueDateTime = parseRelativeTime(timeStr);
-    if (dueDateTime) {
-      actions.push({
-        type: 'alarm',
-        title: 'Alarm',
-        dueDateTime,
-        priority: 'High',
-        intensity: 'high',
-      });
-      return actions;
-    }
-  }
-
-  // Pattern: "X tomorrow" or "X today" or "X tonight"
-  const simpleMatch = t.match(/^(.+?)\s+(tomorrow|today|tonight|next\s+\w+)$/);
-  if (simpleMatch) {
-    const title = simpleMatch[1].trim();
-    const day = simpleMatch[2].trim();
-    const dueDateTime = parseRelativeTime(day);
-    if (dueDateTime) {
-      actions.push({
-        type: 'task',
-        title: toTitleCase(title),
-        dueDateTime,
-        priority: 'Medium',
-        intensity: 'medium',
-      });
-      return actions;
-    }
-  }
-
-  return [];
-}
-
-function parseRelativeTime(str) {
-  const now = new Date();
-  const lower = str.toLowerCase().trim();
-
-  // Try to parse time first (e.g., "6pm", "18:00", "6:30")
-  const timeMatch = lower.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/);
-  let hour = null, minute = 0;
-  if (timeMatch) {
-    hour = parseInt(timeMatch[1], 10);
-    minute = parseInt(timeMatch[2] || '0', 10);
-    const ampm = timeMatch[3];
-    if (ampm === 'pm' && hour < 12) hour += 12;
-    if (ampm === 'am' && hour === 12) hour = 0;
-  }
-
-  // Day offsets
-  let dayOffset = 0;
-  if (lower.includes('tomorrow')) dayOffset = 1;
-  else if (lower.includes('today')) dayOffset = 0;
-  else if (lower.includes('tonight')) { dayOffset = 0; if (hour === null) hour = 21; }
-  else if (lower.includes('morning')) { dayOffset = 0; if (hour === null) hour = 9; }
-  else if (lower.includes('afternoon')) { dayOffset = 0; if (hour === null) hour = 14; }
-  else if (lower.includes('evening')) { dayOffset = 0; if (hour === null) hour = 19; }
-  else if (lower.includes('night')) { dayOffset = 0; if (hour === null) hour = 21; }
-  else {
-    const nextDayMatch = lower.match(/next\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/);
-    if (nextDayMatch) {
-      const targetDay = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'].indexOf(nextDayMatch[1]);
-      const currentDay = now.getDay();
-      dayOffset = (targetDay - currentDay + 7) % 7 || 7;
-    }
-  }
-
-  if (hour === null && dayOffset === 0) return null;
-
-  const target = new Date(now);
-  target.setDate(target.getDate() + dayOffset);
-  if (hour !== null) {
-    target.setHours(hour, minute, 0, 0);
-  } else {
-    target.setHours(9, 0, 0, 0); // default morning
-  }
-
-  // If the time has already passed today, push to tomorrow
-  if (dayOffset === 0 && target <= now) {
-    target.setDate(target.getDate() + 1);
-  }
-
-  return target.toISOString().slice(0, 19); // YYYY-MM-DDTHH:MM:SS
-}
-
-function toTitleCase(str) {
-  return str
-    .split(' ')
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join(' ');
+export function parseChecklistNote(text) {
+  const m = String(text ?? '').trim().match(CHECKLIST_PREFIX);
+  if (!m) return null;
+  const items = m[1].split(/,| and /i).map((p) => p.trim()).filter(Boolean);
+  if (items.length < 2) return null;
+  // Title = the words before the colon ("grocery list: milk, eggs" → "Grocery list")
+  const titleRaw = String(text ?? '').trim().split(':')[0].trim();
+  if (!titleRaw) return null;
+  return { title: titleRaw.charAt(0).toUpperCase() + titleRaw.slice(1), items };
 }
