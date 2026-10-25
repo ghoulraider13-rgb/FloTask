@@ -7,20 +7,20 @@ import AlarmSection from './AlarmSection';
 import TimerHub from './TimerHub';
 import StopwatchModule from './StopwatchModule';
 import RichScratchpad from './RichScratchpad';
-import SleepTracker from './SleepTracker';
-import HydrationTracker from './HydrationTracker';
+import HealthScreen from './HealthScreen';
 
 /**
  * Mobile shell — phone-width layout for the SAME components as desktop
  * (no UI fork). Structure:
  *   - compact header (FLOTASK + tagline)
- *   - swipeable full-height screens: Tasks, Alarms, Timer, Stopwatch,
- *     Notes, Sleep, Hydration (Embla Carousel, kept in sync with the tab bar)
+ *   - swipeable full-height screens: Tasks, Notes, Focus, Alarms, Health
  *   - bottom tab bar (primary navigation) with safe-area padding
  *
  * Tablet/desktop widths (≥641px) never render this — App keeps the
- * existing three-column layout. Feature components are unchanged;
+ * existing single-scroll layout. Feature components are unchanged;
  * responsive behavior lives in this container + breakpoint utilities.
+ *
+ * Mobile tabs (5): Tasks, Notes, Focus, Alarms, Health (Hydration + Sleep)
  */
 
 // Inline Heroicons (24px viewBox, stroke 1.5) — 18px display size,
@@ -44,33 +44,23 @@ const TABS = [
     icon: icon('M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z'),
   },
   {
+    id: 'notes',
+    label: 'Notes',
+    icon: icon('M16.862 4.487l1.687-1.688a1.875 1.875 0 112.65 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125'),
+  },
+  {
+    id: 'focus',
+    label: 'Focus',
+    icon: icon('M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z'),
+  },
+  {
     id: 'alarms',
     label: 'Alarms',
     icon: icon('M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0'),
   },
   {
-    id: 'timer',
-    label: 'Timer',
-    icon: icon('M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z'),
-  },
-  {
-    id: 'stopwatch',
-    label: 'Stopwatch',
-    icon: icon('M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'),
-  },
-  {
-    id: 'scratchpad',
-    label: 'Notes',
-    icon: icon('M16.862 4.487l1.687-1.688a1.875 1.875 0 112.65 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125'),
-  },
-  {
-    id: 'sleep',
-    label: 'Sleep',
-    icon: icon('M20.354 7.354A9 9 0 0116.646 3.354 9.003 9.003 0 0012 21a9 9 0 008.354-5.646z'),
-  },
-  {
-    id: 'hydration',
-    label: 'Water',
+    id: 'health',
+    label: 'Health',
     icon: icon('M12 2.66l.66.66c2.34 2.3 6.34 5.87 6.34 8.68 0 3.32-2.68 6-6 6s-6-2.68-6-6c0-2.81 4-6.38 6-8.68l.66-.66z'),
   },
 ];
@@ -81,9 +71,16 @@ const TABS = [
 const SUPPRESS_SWIPE = ['.rich-editor', '[data-swipe-to-delete]'];
 
 export default function MobileShell({
-  tasks, alarms,
-  onAddTask, onToggleTask, onDeleteTask, onSetReminder, onNlmText,
-  onAddAlarm, onDeleteAlarm, onNlmActions,
+  tasks,
+  alarms,
+  onAddTask,
+  onToggleTask,
+  onDeleteTask,
+  onSetReminder,
+  onNlmText,
+  onAddAlarm,
+  onDeleteAlarm,
+  onNlmActions,
 }) {
   const isMobile = useIsMobile();
 
@@ -109,36 +106,30 @@ export default function MobileShell({
       ),
     },
     {
-      id: 'alarms',
-      content: (
-        <AlarmSection
-          alarms={alarms}
-          onAdd={onAddAlarm}
-          onDelete={onDeleteAlarm}
-        />
-      ),
-    },
-    { id: 'timer', content: <TimerHub /> },
-    { id: 'stopwatch', content: <StopwatchModule /> },
-    {
-      id: 'scratchpad',
+      id: 'notes',
       content: <RichScratchpad onNlmActions={onNlmActions} />,
     },
-    { id: 'sleep', content: <SleepTracker /> },
-    { id: 'hydration', content: <HydrationTracker /> },
+    { id: 'focus', content: <TimerHub /> },
+    {
+      id: 'alarms',
+      content: (
+        <AlarmSection alarms={alarms} onAdd={onAddAlarm} onDelete={onDeleteAlarm} />
+      ),
+    },
+    { id: 'health', content: <HealthScreen /> },
   ];
 
   return (
     <div className="flex flex-col h-[100dvh]">
       {/* Compact header — same type treatment as the desktop header */}
       <header
-        className="text-center pt-3 pb-2 border-b border-surface-5 bg-surface-0/95 backdrop-blur-md"
+        className="text-center pt-3 pb-2 border-b border-gray-900 bg-black/95 backdrop-blur-md"
         style={{ paddingTop: 'calc(12px + env(safe-area-inset-top, 0px))' }}
       >
-        <h1 className="text-2xl font-bold tracking-hero text-ink-primary uppercase font-mono leading-none">
+        <h1 className="text-2xl font-bold tracking-[0.35em] text-white uppercase font-mono leading-none">
           FLOTASK
         </h1>
-        <p className="text-4xs text-ink-faint mt-1.5 tracking-tagline uppercase font-mono">
+        <p className="text-[10px] text-gray-500 mt-1.5 tracking-[0.4em] uppercase font-mono">
           FOCUS · FLOW · FINISH
         </p>
       </header>
