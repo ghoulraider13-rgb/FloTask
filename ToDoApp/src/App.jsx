@@ -212,9 +212,9 @@ export default function App() {
         onNlmActions={handleNlmActions}
       />
 
-      <div className="hidden md:block relative z-10 max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
-        {/* ── Header ──────────────────────────────────────────── */}
-        <header className="text-center mb-12">
+      <div className="hidden md:block relative z-10 max-w-[1024px] mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
+        {/* ── Header ── */}
+        <header className="text-center mb-16">
           <h1 className="text-4xl sm:text-5xl font-bold tracking-[0.35em] text-white uppercase font-mono">
             FLOTASK
           </h1>
@@ -223,71 +223,83 @@ export default function App() {
           </p>
         </header>
 
-        {/* ── Unified Document Flow Grid ──────────────────────── */}
-        <div className="dashboard-grid grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
+        {/* ── Clean vertical flow (Todoist-style: each feature its own space) ── */}
+        <div className="flex flex-col space-y-8">
 
           {/* Section 1: Tasks */}
-          <section id="tasks" className="nothing-card p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="tasks-heading">
-            <h2 id="tasks-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
+          <section id="tasks" className="space-y-5" aria-labelledby="tasks-heading">
+            <h2 id="tasks-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase">
               TASKS
             </h2>
-            <TaskList
-              tasks={tasks}
-              onAddTask={handleAddTask}
-              onToggleTask={handleToggleTask}
-              onDeleteTask={handleDeleteTask}
-              onSetReminder={handleSetReminder}
-              onNlmText={handleNlmText}
-            />
+            <div className="nothing-card p-5 sm:p-6">
+              <TaskList
+                tasks={tasks}
+                onAddTask={handleAddTask}
+                onToggleTask={handleToggleTask}
+                onDeleteTask={handleDeleteTask}
+                onSetReminder={handleSetReminder}
+                onNlmText={handleNlmText}
+              />
+            </div>
           </section>
 
           {/* Section 2: Notes (Scratchpad) */}
-          <section id="notes" className="nothing-card p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="notes-heading">
-            <h2 id="notes-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
+          <section id="notes" className="space-y-5" aria-labelledby="notes-heading">
+            <h2 id="notes-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase">
               NOTES
             </h2>
-            <RichScratchpad onNlmActions={handleNlmActions} />
+            <div className="nothing-card p-5 sm:p-6">
+              <RichScratchpad onNlmActions={handleNlmActions} />
+            </div>
           </section>
 
           {/* Section 3: Focus (Timer + Stopwatch) */}
-          <section id="focus" className="nothing-card p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="focus-heading">
-            <h2 id="focus-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
+          <section id="focus" className="space-y-5" aria-labelledby="focus-heading">
+            <h2 id="focus-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase">
               FOCUS
             </h2>
-            <TimerHub />
-            <StopwatchModule />
+            <div className="nothing-card p-5 sm:p-6 space-y-6">
+              <TimerHub />
+              <StopwatchModule />
+            </div>
           </section>
 
           {/* Section 4: Alarms */}
-          <section id="alarms" className="nothing-card p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="alarms-heading">
-            <h2 id="alarms-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
+          <section id="alarms" className="space-y-5" aria-labelledby="alarms-heading">
+            <h2 id="alarms-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase">
               ALARMS
             </h2>
-            <AlarmsHub
-              alarms={alarms}
-              onAdd={handleAddAlarm}
-              onDelete={handleDeleteAlarm}
-            />
+            <div className="nothing-card p-5 sm:p-6">
+              <AlarmsHub
+                alarms={alarms}
+                onAdd={handleAddAlarm}
+                onDelete={handleDeleteAlarm}
+              />
+            </div>
           </section>
 
-          {/* Section 5: Hydration */}
-          <section id="hydration" className="nothing-card p-5 sm:p-6" aria-labelledby="hydration-heading">
-            <h2 id="hydration-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase mb-4">
+          {/* Section 5: Hydration Tracker */}
+          <section id="hydration" className="space-y-5" aria-labelledby="hydration-heading">
+            <h2 id="hydration-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase">
               HYDRATION TRACKER
             </h2>
-            <HydrationTracker />
+            <div className="nothing-card p-5 sm:p-6">
+              <HydrationTracker />
+            </div>
           </section>
 
-          {/* Section 6: Sleep */}
-          <section id="sleep" className="nothing-card p-5 sm:p-6" aria-labelledby="sleep-heading">
-            <h2 id="sleep-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase mb-4">
+          {/* Section 6: Sleep Tracker */}
+          <section id="sleep" className="space-y-5" aria-labelledby="sleep-heading">
+            <h2 id="sleep-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase">
               SLEEP TRACKER
             </h2>
-            <SleepTracker />
+            <div className="nothing-card p-5 sm:p-6">
+              <SleepTracker />
+            </div>
           </section>
 
         </div>
       </div>
     </div>
   );
-}// test change
+}

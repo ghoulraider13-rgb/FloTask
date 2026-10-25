@@ -13,6 +13,13 @@ export default {
         mono: ['"Space Mono"', '"Roboto Mono"', '"JetBrains Mono"', 'monospace'],
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         dotmatrix: ['"DotGothic16"', '"Space Mono"', 'monospace'],
+        // Typography tokens for tracker components (Monochrome Glyph)
+        'label-sm': ['"Space Mono"', 'monospace'],
+        'label-md': ['"Space Mono"', 'monospace'],
+        'title-md': ['"Space Mono"', 'monospace'],
+        'body-sm': ['Inter', 'system-ui', 'sans-serif'],
+        'headline-xl': ['"Space Mono"', 'monospace'],
+        'headline-lg': ['"Space Mono"', 'monospace'],
       },
       colors: {
         // Surfaces — Nothing OS monochrome ladder
@@ -55,6 +62,13 @@ export default {
         '2xs': '0.6875rem',  // 11px — section labels
         '3xs': '0.625rem',   // 10px — meta text, counts, controls
         '4xs': '0.5625rem',  // 9px  — micro buttons, save indicator
+        // Typography tokens used by HydrationTracker & SleepTracker (Monochrome Glyph scale)
+        'label-sm': ['0.625rem', { lineHeight: '0.75rem' }],    // 10px — tiny label text
+        'label-md': ['0.6875rem', { lineHeight: '0.875rem' }],  // 11px — label text
+        'title-md': ['0.75rem', { lineHeight: '0.9rem' }],      // 12px — title text
+        'body-sm': ['0.8125rem', { lineHeight: '1rem' }],        // 13px — body text
+        'headline-xl': ['1rem', { lineHeight: '1.2rem' }],       // 16px — large numeric display
+        'headline-lg': ['1.125rem', { lineHeight: '1.3rem' }],   // 18px — headings
       },
       // Semantic letter-spacing scale (Nothing OS wide tracking)
       letterSpacing: {

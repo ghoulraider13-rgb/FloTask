@@ -2,7 +2,12 @@
 
 <div align="center">
 
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?logo=vercel)](https://flotask-xi.vercel.app/)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repo-181718?logo=github)](https://github.com/ghoulraider13-rgb/FloTask)
+[![GitHub README](https://img.shields.io/badge/Docs-README-6e5494?logo=readme)](https://github.com/ghoulraider13-rgb/FloTask#readme)
+
 **Live app → https://flotask-xi.vercel.app/**
+**Source & docs → https://github.com/ghoulraider13-rgb/FloTask**
 
 React 18 · Gemini Flash · Tailwind CSS · Vite · PWA
 

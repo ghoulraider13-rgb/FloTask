@@ -1,2 +1,8 @@
 .vercel/
 dev-dist/
+node_modules/
+dist/
+*.log
+test-results/
+playwright-report/
+playwright/.cache/
