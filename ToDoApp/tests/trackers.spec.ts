@@ -123,7 +123,7 @@ test.describe('Cross-Platform Consistency', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('section#sleep').locator('text=SYS.BIO')).toBeVisible();
+    await expect(page.locator('section#sleep').locator('text=SLEEP MODULE').first()).toBeVisible();
 
     // Mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
@@ -134,6 +134,6 @@ test.describe('Cross-Platform Consistency', () => {
     await page.locator('button[role="tab"]:has-text("SLEEP")').click();
     await page.waitForTimeout(500);
 
-    await expect(page.locator('text=SYS.BIO // HYPNOGRAM_V04').first()).toBeVisible();
+    await expect(page.locator('text=SLEEP MODULE // V04').first()).toBeVisible();
   });
 });

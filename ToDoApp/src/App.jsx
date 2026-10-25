@@ -278,22 +278,22 @@ export default function App() {
             </div>
           </section>
 
-          {/* Section 5: Hydration Tracker */}
+          {/* Section 5: Hydration Tracker — full page fill */}
           <section id="hydration" className="space-y-5" aria-labelledby="hydration-heading">
             <h2 id="hydration-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase">
               HYDRATION TRACKER
             </h2>
-            <div className="nothing-card p-5 sm:p-6">
+            <div className="nothing-card overflow-hidden p-0">
               <HydrationTracker />
             </div>
           </section>
 
-          {/* Section 6: Sleep Tracker */}
+          {/* Section 6: Sleep Tracker — full page fill */}
           <section id="sleep" className="space-y-5" aria-labelledby="sleep-heading">
             <h2 id="sleep-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase">
               SLEEP TRACKER
             </h2>
-            <div className="nothing-card p-5 sm:p-6">
+            <div className="nothing-card overflow-hidden p-0">
               <SleepTracker />
             </div>
           </section>

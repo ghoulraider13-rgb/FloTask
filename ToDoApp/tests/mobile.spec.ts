@@ -87,7 +87,7 @@ test.describe('FlowTask Mobile Layout', () => {
     // Check for SleepTracker content in setup phase
     await expect(page.locator('text=Sleep Timer').first()).toBeVisible();
     await expect(page.locator('text=START SLEEP SESSION').first()).toBeVisible();
-    await expect(page.locator('text=OPTICAL.HRV').first()).toBeVisible();
+    await expect(page.locator('text=SLEEP MODULE // V04')).toBeVisible();
   });
 
   test('should support swipe navigation between tabs', async ({ page }) => {

@@ -82,8 +82,7 @@ test.describe('FlowTask Desktop Layout', () => {
     await expect(sleepSection.locator('text=Sleep Timer')).toBeVisible();
     await expect(sleepSection.locator('text=15 MIN')).toBeVisible();
     await expect(sleepSection.locator('text=START SLEEP SESSION')).toBeVisible();
-    await expect(sleepSection.locator('text=OPTICAL.HRV')).toBeVisible();
-    await expect(sleepSection.locator('text=SYS.BIO // HYPNOGRAM_V04')).toBeVisible();
+    await expect(sleepSection.locator('text=SLEEP MODULE // V04')).toBeVisible();
     // Results-phase elements (HYPNOGRAM ARCHITECTURE, RHR DIP, LATENCY, etc.) 
     // only appear after a session completes - not checked in initial state test
   });

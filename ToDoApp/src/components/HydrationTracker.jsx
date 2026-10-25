@@ -30,19 +30,19 @@ const COLORS = {
   'surface-container-high': '#292a2a',
   'surface-container-highest': '#343535',
   'on-surface': '#e3e2e2',
-  'on-surface-variant': '#e8bcb7',
-  outline: '#af8783',
-  'outline-variant': '#5e3f3b',
-  primary: '#ffb4ab',
-  'on-primary': '#690005',
-  'primary-container': '#ff5449',
-  secondary: '#ffc080',
-  'on-secondary': '#4a2800',
-  'secondary-container': '#fe9800',
-  tertiary: '#00dbe9',
-  'on-tertiary': '#00363a',
-  'tertiary-container': '#00a0aa',
-  error: '#ffb4ab',
+  'on-surface-variant': '#a0a0a0',
+  outline: '#555555',
+  'outline-variant': '#333333',
+  primary: '#ffffff',
+  'on-primary': '#000000',
+  'primary-container': '#e0e0e0',
+  secondary: '#cccccc',
+  'on-secondary': '#000000',
+  'secondary-container': '#aaaaaa',
+  tertiary: '#ffffff',
+  'on-tertiary': '#000000',
+  'tertiary-container': '#e0e0e0',
+  error: '#ffffff',
 };
 
 function todayKey() {
@@ -133,7 +133,7 @@ function QuickDosePill({ amount, label, icon, color, isSelected, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="group relative p-4 rounded-xl text-left flex flex-col justify-between h-28 transition-colors duration-75 overflow-hidden"
+      className="group relative p-4 rounded-xl text-left flex flex-col justify-between h-32 transition-colors duration-75 overflow-hidden"
       style={{
         background: isSelected ? 'rgba(255, 180, 171, 0.12)' : 'rgba(255,255,255,0.03)',
         border: `1px solid ${isSelected ? COLORS.primary : COLORS.outline}`,
@@ -148,9 +148,9 @@ function QuickDosePill({ amount, label, icon, color, isSelected, onClick }) {
         </span>
       </div>
       <div className="flex flex-col">
-        <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>
-          {label === 'H2O' ? 'PURE WATER' : label === 'ION' ? 'ELECTROLYTES' : label === 'THEA' ? 'CHRONO-TEA' : 'AMINO BOOST'}
-        </span>
+        <span className="font-label-sm text-label-sm uppercase whitespace-normal break-all leading-tight" style={{ color: COLORS['on-surface-variant'] }}>
+          {label === 'H2O' ? 'PURE WATER' : label === 'ION' ? 'ELECTROLYTES' : label === 'THEA' ? 'CHRONO-TEA' : 'AMINO BOOST'
+          }</span>
         <span className="font-title-md text-title-md" style={{ color: isSelected ? color : COLORS['on-surface'], textShadow: isSelected ? `0 0 8px ${color}80` : 'none' }}>
           +{amount} ML
         </span>
@@ -174,10 +174,10 @@ function HistoryEntry({ entry, onDelete, index }) {
     >
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{
-          background: `rgba(255, 180, 171, 0.12)`,
-          border: `1px solid ${COLORS.primary}`,
+          background: 'rgba(255,255,255,0.04)',
+          border: `1px solid ${COLORS.outline}`,
         }}>
-          <span className="material-symbols-outlined text-[20px]" style={{ color: COLORS.primary }}>
+          <span className="material-symbols-outlined text-[20px]" style={{ color: COLORS['on-surface'] }}>
             water_drop
           </span>
         </div>
@@ -364,9 +364,9 @@ export default function HydrationTracker() {
                 disabled={!goalDraft}
                 className="px-6 py-3 rounded-xl font-semibold tracking-wide transition-colors"
                 style={{
-                  background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS['primary-container']})`,
+                  background: 'linear-gradient(135deg, #ffffff, #e0e0e0)',
                   color: COLORS['on-primary'],
-                  boxShadow: `0 0 12px ${COLORS.primary}40`,
+                  boxShadow: '0 0 12px rgba(255,255,255,0.2)',
                 }}
               >
                 SET
@@ -410,13 +410,13 @@ export default function HydrationTracker() {
               <span className="font-label-sm text-label-sm uppercase tracking-widest" style={{ color: COLORS['on-surface-variant'] }}>
                 INTAKE TOTAL
               </span>
-              <span className="font-label-sm text-label-sm" style={{ color: COLORS.tertiary }}>
+              <span className="font-label-sm text-label-sm" style={{ color: COLORS['on-surface'] }}>
                 #01
               </span>
             </div>
             <div className="flex items-center gap-1 px-2 py-0.5 rounded-full" style={{ background: COLORS['surface-container-highest'] }}>
               <span className="w-1.5 h-1.5 rounded-full" style={{ background: COLORS.secondary }}></span>
-              <span className="font-label-sm text-label-sm tracking-widest" style={{ color: COLORS.secondary }}>
+              <span className="font-label-sm text-label-sm tracking-widest" style={{ color: COLORS['on-surface-variant'] }}>
                 {Math.round(progress)}%
               </span>
             </div>
@@ -444,7 +444,7 @@ export default function HydrationTracker() {
                   className="h-full rounded-none"
                   style={{
                     background: i < Math.round(progress / 100 * 14)
-                      ? (i < 7 ? COLORS['on-surface'] : COLORS.secondary)
+                      ? (i < 7 ? COLORS['on-surface'] : COLORS['on-surface-variant'])
                       : COLORS['surface-container-highest'],
                   }}
                 />
@@ -479,7 +479,7 @@ export default function HydrationTracker() {
                   className="w-full h-1.5"
                   style={{
                     background: i < Math.round(progress / 100 * 12)
-                      ? (i < 7 ? COLORS['on-surface'] : COLORS.secondary)
+                      ? (i < 7 ? COLORS['on-surface'] : COLORS['on-surface-variant'])
                       : COLORS['surface-container-highest'],
                   }}
                 />
@@ -508,7 +508,7 @@ export default function HydrationTracker() {
               <svg className="w-full h-14 overflow-visible" fill="none" viewBox="0 0 160 55">
                 {/* Baseline and sleep boundary */}
                 <line stroke={COLORS['surface-container-highest']} strokeDasharray="2 2" strokeWidth="1" x1="0" x2="160" y1="48" y2="48" />
-                <line stroke={COLORS.primary} strokeDasharray="1 3" strokeOpacity="0.4" strokeWidth="1" x1="120" x2="120" y1="0" y2="52" />
+                <line stroke={COLORS['on-surface']} strokeDasharray="1 3" strokeOpacity="0.4" strokeWidth="1" x1="120" x2="120" y1="0" y2="52" />
                 {/* Stepped Intakes Curve */}
                 <polyline
                   points="0,45 25,45 25,32 50,32 50,22 80,22 80,14 105,14 105,38 120,48 160,48"
@@ -517,8 +517,8 @@ export default function HydrationTracker() {
                   strokeWidth="2"
                 />
                 {/* Current Position Beacon */}
-                <circle cx="105" cy="14" r="3" fill={COLORS.secondary} />
-                <circle cx="105" cy="14" r="6" stroke={COLORS.secondary} strokeOpacity="0.5" strokeWidth="1" fill="none" />
+                <circle cx="105" cy="14" r="3" fill={COLORS['on-surface']} />
+                <circle cx="105" cy="14" r="6" stroke={COLORS['on-surface']} strokeOpacity="0.4" strokeWidth="1" fill="none" />
               </svg>
             </div>
             <div className="flex items-center justify-between font-label-sm text-label-sm" style={{ color: COLORS['on-surface-variant'] }}>
@@ -543,7 +543,7 @@ export default function HydrationTracker() {
             </div>
           </div>
           <div className="flex flex-col items-end">
-            <span className="font-label-sm text-label-sm" style={{ color: COLORS.secondary }}>
+            <span className="font-label-sm text-label-sm" style={{ color: COLORS['on-surface-variant'] }}>
               T-MINUS
             </span>
             <span className="font-title-md text-title-md tracking-tight" style={{ color: COLORS['on-surface'] }}>
@@ -605,9 +605,9 @@ export default function HydrationTracker() {
             disabled={!customAmount}
             className="px-8 py-3 rounded-xl font-semibold tracking-wide transition-colors self-end"
             style={{
-              background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS['primary-container']})`,
+              background: 'linear-gradient(135deg, #ffffff, #e0e0e0)',
               color: COLORS['on-primary'],
-              boxShadow: `0 0 12px ${COLORS.primary}40`,
+              boxShadow: '0 0 12px rgba(255,255,255,0.2)',
               opacity: customAmount ? 1 : 0.5,
             }}
           >
@@ -649,24 +649,24 @@ export default function HydrationTracker() {
             WEEKLY OVERVIEW
           </h3>
           <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="p-4 rounded-xl" style={{ background: `rgba(255,180,171,0.08)`, border: `1px solid ${COLORS.primary}` }}>
-              <div className="text-2xl font-mono tabular-nums font-bold" style={{ color: COLORS.primary }}>
+            <div className="p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${COLORS.outline}` }}>
+              <div className="text-2xl font-mono tabular-nums font-bold" style={{ color: COLORS['on-surface'] }}>
                 {weekTotal.toLocaleString()}
               </div>
               <div className="text-xs tracking-wider uppercase mt-1" style={{ color: COLORS['on-surface-variant'] }}>
                 Total this week
               </div>
             </div>
-            <div className="p-4 rounded-xl" style={{ background: `rgba(254,152,0,0.08)`, border: `1px solid ${COLORS.secondary}` }}>
-              <div className="text-2xl font-mono tabular-nums font-bold" style={{ color: COLORS.secondary }}>
+            <div className="p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${COLORS.outline}` }}>
+              <div className="text-2xl font-mono tabular-nums font-bold" style={{ color: COLORS['on-surface-variant'] }}>
                 {weekAvg.toLocaleString()}
               </div>
               <div className="text-xs tracking-wider uppercase mt-1" style={{ color: COLORS['on-surface-variant'] }}>
                 Daily average
               </div>
             </div>
-            <div className="p-4 rounded-xl" style={{ background: `rgba(0,219,233,0.08)`, border: `1px solid ${COLORS.tertiary}` }}>
-              <div className="text-2xl font-mono tabular-nums font-bold" style={{ color: COLORS.tertiary }}>
+            <div className="p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${COLORS.outline}` }}>
+              <div className="text-2xl font-mono tabular-nums font-bold" style={{ color: COLORS['on-surface'] }}>
                 {weekEntries.length}
               </div>
               <div className="text-xs tracking-wider uppercase mt-1" style={{ color: COLORS['on-surface-variant'] }}>
