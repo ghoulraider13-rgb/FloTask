@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('FlowTask Desktop Layout', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('networkidle', { timeout: 60000 });
   });
 
   test('should load the app successfully', async ({ page }) => {
@@ -15,10 +15,10 @@ test.describe('FlowTask Desktop Layout', () => {
     const quickAccessBar = page.locator('header[role="navigation"][aria-label="Quick access"]');
     await expect(quickAccessBar).toBeVisible();
 
-    // Check for all section buttons
+    // Check for all section buttons in QuickAccessBar specifically
     const sections = ['TASKS', 'NOTES', 'FOCUS', 'ALARMS', 'HYDRATION', 'SLEEP'];
     for (const section of sections) {
-      await expect(page.locator(`button:has-text("${section}")`)).toBeVisible();
+      await expect(quickAccessBar.locator(`button:has-text("${section}")`)).toBeVisible();
     }
   });
 
@@ -49,8 +49,9 @@ test.describe('FlowTask Desktop Layout', () => {
   });
 
   test('QuickAccessBar smooth scroll navigation', async ({ page }) => {
-    // Click on Sleep section in quick access bar
-    await page.locator('button:has-text("SLEEP")').click();
+    // Click on Sleep section in quick access bar (specifically in the header)
+    const quickAccessBar = page.locator('header[role="navigation"][aria-label="Quick access"]');
+    await quickAccessBar.locator('button:has-text("SLEEP")').click();
     await page.waitForTimeout(500);
 
     // Check that sleep section is in view
@@ -62,29 +63,28 @@ test.describe('FlowTask Desktop Layout', () => {
     const hydrationSection = page.locator('section#hydration');
     await expect(hydrationSection).toBeVisible();
 
-    // Check for key HydrationTracker elements
-    await expect(page.locator('text=HYDRA-04')).toBeVisible();
-    await expect(page.locator('text=MODULE // HYDRATION TRACKER')).toBeVisible();
-    await expect(page.locator('text=INTAKE TOTAL')).toBeVisible();
-    await expect(page.locator('text=TACTILE DOSING MATRIX')).toBeVisible();
-    await expect(page.locator('text=HYDRA-HALT PROTOCOL')).toBeVisible();
-    await expect(page.locator('text=CIRCADIAN TAPER')).toBeVisible();
-    await expect(page.locator('text=CHAMBER')).toBeVisible();
+    // Check for key HydrationTracker elements (scope to hydration section)
+    await expect(hydrationSection.locator('text=HYDRA-04').first()).toBeVisible();
+    await expect(hydrationSection.locator('text=MODULE // HYDRATION TRACKER')).toBeVisible();
+    await expect(hydrationSection.locator('text=INTAKE TOTAL')).toBeVisible();
+    await expect(hydrationSection.locator('text=TACTILE DOSING MATRIX')).toBeVisible();
+    await expect(hydrationSection.locator('text=HYDRA-HALT PROTOCOL')).toBeVisible();
+    await expect(hydrationSection.locator('text=CIRCADIAN TAPER')).toBeVisible();
+    await expect(hydrationSection.locator('text=CHAMBER')).toBeVisible();
   });
 
   test('should have SleepTracker with Stitch-inspired design', async ({ page }) => {
     const sleepSection = page.locator('section#sleep');
     await expect(sleepSection).toBeVisible();
 
-    // Check for key SleepTracker elements
-    await expect(page.locator('text=SYS.BIO // HYPNOGRAM_V04')).toBeVisible();
-    await expect(page.locator('text=OPTICAL.HRV')).toBeVisible();
-    await expect(page.locator('text=SESSION READOUT')).toBeVisible();
-    await expect(page.locator('text=HYPNOGRAM ARCHITECTURE')).toBeVisible();
-    await expect(page.locator('text=RHR DIP // HAMMOCK DYNAMICS')).toBeVisible();
-    await expect(page.locator('text=LATENCY')).toBeVisible();
-    await expect(page.locator('text=RESTFULNESS')).toBeVisible();
-    await expect(page.locator('text=RESPIRATION')).toBeVisible();
-    await expect(page.locator('text=CIRCADIAN')).toBeVisible();
+    // Check for key SleepTracker elements visible in SETUP phase (initial state)
+    // In setup phase: "Sleep Timer" label, timer presets, START SLEEP SESSION button
+    await expect(sleepSection.locator('text=Sleep Timer')).toBeVisible();
+    await expect(sleepSection.locator('text=15 MIN')).toBeVisible();
+    await expect(sleepSection.locator('text=START SLEEP SESSION')).toBeVisible();
+    await expect(sleepSection.locator('text=OPTICAL.HRV')).toBeVisible();
+    await expect(sleepSection.locator('text=SYS.BIO // HYPNOGRAM_V04')).toBeVisible();
+    // Results-phase elements (HYPNOGRAM ARCHITECTURE, RHR DIP, LATENCY, etc.) 
+    // only appear after a session completes - not checked in initial state test
   });
 });

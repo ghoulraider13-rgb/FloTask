@@ -15,7 +15,7 @@ test.describe('HydrationTracker Functionality', () => {
     await expect(svg).toBeVisible();
 
     // Check for progress percentage display
-    await expect(page.locator('section#hydration text=INTAKE TOTAL')).toBeVisible();
+    await expect(page.locator('section#hydration').locator('text=INTAKE TOTAL')).toBeVisible();
   });
 
   test('should have quick dose matrix with 4 options', async ({ page }) => {
@@ -106,7 +106,7 @@ test.describe('Cross-Platform Consistency', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('section#hydration text=HYDRA-04')).toBeVisible();
+    await expect(page.locator('section#hydration').locator('text=HYDRA-04').first()).toBeVisible();
 
     // Mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
@@ -115,7 +115,7 @@ test.describe('Cross-Platform Consistency', () => {
     await page.locator('button:has-text("Health")').click();
     await page.waitForTimeout(500);
 
-    await expect(page.locator('text=HYDRA-04')).toBeVisible();
+    await expect(page.locator('text=HYDRA-04').first()).toBeVisible();
   });
 
   test('desktop and mobile should share same SleepTracker component', async ({ page }) => {
@@ -123,7 +123,7 @@ test.describe('Cross-Platform Consistency', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('section#sleep text=SYS.BIO')).toBeVisible();
+    await expect(page.locator('section#sleep').locator('text=SYS.BIO')).toBeVisible();
 
     // Mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
@@ -131,9 +131,9 @@ test.describe('Cross-Platform Consistency', () => {
 
     await page.locator('button:has-text("Health")').click();
     await page.waitForTimeout(500);
-    await page.locator('button:has-text("SLEEP")').click();
+    await page.locator('button[role="tab"]:has-text("SLEEP")').click();
     await page.waitForTimeout(500);
 
-    await expect(page.locator('text=SYS.BIO // HYPNOGRAM_V04')).toBeVisible();
+    await expect(page.locator('text=SYS.BIO // HYPNOGRAM_V04').first()).toBeVisible();
   });
 });
