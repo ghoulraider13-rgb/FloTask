@@ -26,3 +26,11 @@ dev-dist
 .env
 .vercel
 .env*
+
+# Test artifacts
+test-results/
+playwright-report/
+*.trace.zip
+
+# Playwright config
+playwright.config.ts

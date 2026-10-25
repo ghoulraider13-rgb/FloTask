@@ -7,7 +7,13 @@
     "dev": "vite",
     "build": "vite build && node scripts/kill-sw.mjs",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:desktop": "playwright test tests/desktop.spec.ts",
+    "test:mobile": "playwright test tests/mobile.spec.ts",
+    "test:trackers": "playwright test tests/trackers.spec.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -21,6 +27,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@playwright/test": "^1.64.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
@@ -29,7 +36,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
-    "playwright": "^1.63.0",
+    "playwright": "^1.64.1",
     "postcss": "^8.5.8",
     "puppeteer-core": "^25.9.0",
     "tailwindcss": "^3.4.19",

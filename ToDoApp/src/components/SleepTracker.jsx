@@ -4,45 +4,44 @@ import { playGentleChime } from '../utils/audioHelpers';
 import { safeUuid } from '../utils/taskHelpers';
 
 /**
- * SleepTracker — SomnaFlow-inspired sleep session tool.
+ * SleepTracker — Monochrome Glyph inspired sleep session tool.
  * Features:
- * - Bioluminescent lavender/violet themed circular timer
+ * - Session readout with circular quality score
+ * - Hypnogram architecture (segmented lanes: Awake, REM, Light, Deep)
+ * - RHR dip hammock curve (nocturnal heart rate)
+ * - Metric tiles (Latency, Restfulness, Respiration, Circadian Lock)
+ * - Tactile action dock (History, New Tracker)
  * - DeviceMotion-based restlessness tracking
- * - Sleep stage hypnogram visualization
- * - Quality score with atmospheric glow
- * - Glassmorphism cards with layered depth
+ * - Sleep stage estimation
  */
-
 const PRESET_MIN = [15, 30, 45, 60, 90, 120];
 const MOVEMENT_THRESHOLD = 1.5;
 const SAMPLE_INTERVAL = 2000;
 
-// Color tokens (SomnaFlow palette — dulled for Nothing-OS harmony)
+// Monochrome Glyph color tokens (same as HydrationTracker)
 const COLORS = {
-  // Primary: Muted Dream Lavender / Circadian Violet
-  sleepPrimary: '#8B5CF6',
-  sleepPrimaryDim: '#7C48D0',
-  sleepPrimaryGlow: 'rgba(139, 92, 246, 0.15)',
-  sleepPrimaryBorder: 'rgba(139, 92, 246, 0.18)',
-  sleepContainer: '#571BC1',
-  sleepOnContainer: '#C4ABFF',
-  // Tertiary: Emerald Vitality (for quality scores)
-  vitality: '#10B981',
-  vitalityGlow: 'rgba(16, 185, 129, 0.15)',
-  vitalityContainer: '#065F46',
-  // Surface tiers
-  surface0: '#0F131D',
-  surface1: '#131E35',
-  surface2: '#1E2C4A',
-  surface3: '#262A34',
-  surfaceVariant: '#31353F',
-  // Text
-  textPrimary: '#F8FAFC',
-  textSecondary: '#94A3B8',
-  textMuted: '#64748B',
-  // Border
-  borderSubtle: 'rgba(255,255,255,0.08)',
-  borderActive: 'rgba(139,92,246,0.18)',
+  surface: '#121414',
+  'surface-dim': '#121414',
+  'surface-bright': '#383939',
+  'surface-container-lowest': '#0d0e0f',
+  'surface-container-low': '#1b1c1c',
+  'surface-container': '#1f2020',
+  'surface-container-high': '#292a2a',
+  'surface-container-highest': '#343535',
+  'on-surface': '#e3e2e2',
+  'on-surface-variant': '#e8bcb7',
+  outline: '#af8783',
+  'outline-variant': '#5e3f3b',
+  primary: '#ffb4ab',
+  'on-primary': '#690005',
+  'primary-container': '#ff5449',
+  secondary: '#ffc080',
+  'on-secondary': '#4a2800',
+  'secondary-container': '#fe9800',
+  tertiary: '#00dbe9',
+  'on-tertiary': '#00363a',
+  'tertiary-container': '#00a0aa',
+  error: '#ffb4ab',
 };
 
 function fmtMs(ms) {
@@ -156,34 +155,33 @@ function CircularProgress({ progress, size = 200, strokeWidth = 8, color, trackC
 }
 
 // Glass Card Component
-function GlassCard({ children, className = '', variant = 'default', glow = false, onClick }) {
+function GlassCard({ children, className = '', variant = 'default', glow = false, style = {} }) {
   const baseStyles = {
     background: variant === 'elevated'
-      ? 'rgba(30, 44, 74, 0.85)'
+      ? 'rgba(25, 28, 28, 0.85)'
       : 'rgba(19, 30, 53, 0.65)',
     backdropFilter: 'blur(20px)',
-    border: `1px solid ${glow ? COLORS.sleepPrimaryBorder : COLORS.borderSubtle}`,
-    borderRadius: '1.5rem',
+    border: `1px solid ${glow ? COLORS.primary : COLORS.outline}`,
+    borderRadius: '1rem',
     boxShadow: glow
-      ? `0 0 32px -4px ${COLORS.sleepPrimaryGlow}, 0 8px 32px -4px rgba(0,0,0,0.5)`
-      : '0 8px 32px -4px rgba(0,0,0,0.5)',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      ? `0 0 20px -4px ${COLORS.primary}40, 0 8px 28px -4px rgba(0,0,0,0.5)`
+      : '0 8px 28px -4px rgba(0,0,0,0.5)',
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease',
   };
   return (
     <div
       className={`flex flex-col ${className}`}
       style={{
         ...baseStyles,
-        cursor: onClick ? 'pointer' : 'default',
+        ...style,
       }}
-      onClick={onClick}
     >
       {children}
     </div>
   );
 }
 
-// Stage Bar Component
+// Stage Bar Component (for results breakdown)
 function StageBar({ label, value, total, color, glowColor }) {
   const percentage = pct(value, total);
   return (
@@ -192,11 +190,11 @@ function StageBar({ label, value, total, color, glowColor }) {
         <span className="text-xs font-semibold tracking-wider uppercase" style={{ color }}>
           {label}
         </span>
-        <span className="text-xs font-mono tabular-nums" style={{ color: COLORS.textSecondary }}>
+        <span className="text-xs font-mono tabular-nums" style={{ color: COLORS['on-surface-variant'] }}>
           {percentage}% · {fmtMs(value * 1000)}
         </span>
       </div>
-      <div className="h-2 rounded-full overflow-hidden" style={{ background: COLORS.surfaceVariant }}>
+      <div className="h-2 rounded-full overflow-hidden" style={{ background: COLORS['surface-container-highest'] }}>
         <div
           className="h-full transition-all duration-700 ease-out"
           style={{
@@ -206,6 +204,35 @@ function StageBar({ label, value, total, color, glowColor }) {
             boxShadow: `0 0 12px ${glowColor}`,
           }}
         />
+      </div>
+    </div>
+  );
+}
+
+// Metric Tile Component (2x2 grid)
+function MetricTile({ label, icon, value, unit, subtitle, color }) {
+  return (
+    <div className="flex flex-col justify-between" style={{ background: COLORS['surface-container-low'], borderRadius: '1rem', border: `1px solid ${COLORS.outline}`, padding: '1.5rem', minHeight: '112px' }}>
+      <div className="flex items-center justify-between">
+        <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>
+          {label}
+        </span>
+        <span className="material-symbols-outlined" style={{ color: COLORS['on-surface-variant'] }}>
+          {icon}
+        </span>
+      </div>
+      <div>
+        <div className="flex items-baseline gap-1">
+          <span className="font-headline-lg" style={{ fontSize: '28px', fontWeight: 700, color: COLORS['on-surface'] }}>
+            {value}
+          </span>
+          <span className="font-label-sm text-label-sm" style={{ color: COLORS['on-surface-variant'] }}>
+            {unit}
+          </span>
+        </div>
+        <span className="font-body-sm text-body-sm font-mono" style={{ color }}>
+          {subtitle}
+        </span>
       </div>
     </div>
   );
@@ -337,7 +364,6 @@ export default function SleepTracker() {
           motionEventsRef.current
         );
       }
-      // tick comment — interval updated every second
     };
     intervalRef.current = setInterval(tick, 1000);
     startMotion();
@@ -404,34 +430,33 @@ export default function SleepTracker() {
     : 0;
 
   return (
-    <div className="flex flex-col h-full" style={{ background: COLORS.surface0, minHeight: '100%' }}>
+    <div className="flex flex-col h-full" style={{ background: COLORS['surface-container-lowest'], minHeight: '100%' }}>
       {/* Ambient background glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background: `
-            radial-gradient(ellipse 80% 50% at 50% 0%, rgba(139,92,246,0.08) 0%, transparent 70%),
-            radial-gradient(ellipse 60% 40% at 100% 100%, rgba(16,185,129,0.04) 0%, transparent 60%)
+            radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,180,171,0.08) 0%, transparent 70%),
+            radial-gradient(ellipse 60% 40% at 100% 100%, rgba(0,219,233,0.04) 0%, transparent 60%)
           `,
         }}
       />
 
       <div className="relative z-10 flex flex-col h-full p-4 sm:p-6 gap-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xs font-bold tracking-widest uppercase" style={{ color: COLORS.textSecondary }}>
-              SLEEP TRACKER
-            </h2>
-            <p className="text-xs mt-1" style={{ color: COLORS.textMuted }}>
-              Circadian session • Motion tracking • Stage analysis
-            </p>
-          </div>
-          {sessions.length > 0 && phase === 'setup' && (
-            <span className="text-xs font-mono px-3 py-1 rounded-full" style={{ color: COLORS.textSecondary, background: COLORS.surfaceVariant }}>
-              {sessions.length} session{sessions.length !== 1 ? 's' : ''} recorded
+        {/* Sub-bar Status Header */}
+        <div className="flex items-center justify-between py-2">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+            <span className="font-label-sm text-label-sm tracking-widest uppercase" style={{ color: COLORS['on-surface-variant'] }}>
+              SYS.BIO // HYPNOGRAM_V04
             </span>
-          )}
+          </div>
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full" style={{ background: COLORS['surface-container'] }}>
+            <span className="material-symbols-outlined text-tertiary text-[14px]">sensors</span>
+            <span className="font-label-sm text-label-sm tracking-wider" style={{ color: COLORS['on-surface'] }}>
+              OPTICAL.HRV
+            </span>
+          </div>
         </div>
 
         {/* ── SETUP ── */}
@@ -439,7 +464,7 @@ export default function SleepTracker() {
           <div className="flex-1 flex flex-col gap-6">
             <GlassCard className="p-6 space-y-6">
               <div>
-                <label className="text-xs font-semibold tracking-wider uppercase mb-3 block" style={{ color: COLORS.textSecondary }}>
+                <label className="text-xs font-semibold tracking-wider uppercase mb-3 block" style={{ color: COLORS['on-surface-variant'] }}>
                   Sleep Timer
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -450,14 +475,14 @@ export default function SleepTracker() {
                       onClick={() => { playGentleChime(); setTimerDuration(m * 60); }}
                       className={`px-5 py-2.5 min-w-[64px] text-xs font-semibold rounded-full transition-colors duration-200 ${
                         timerDuration === m * 60
-                          ? 'text-white shadow-[0_0_12px_rgba(139,92,246,0.15)]'
+                          ? 'text-white'
                           : 'text-slate-400 hover:text-white hover:bg-white/5'
                       }`}
                       style={{
                         background: timerDuration === m * 60
-                          ? `linear-gradient(135deg, ${COLORS.sleepPrimary}, ${COLORS.sleepContainer})`
+                          ? `linear-gradient(135deg, ${COLORS.primary}, ${COLORS['primary-container']})`
                           : 'rgba(255,255,255,0.03)',
-                        border: `1px solid ${timerDuration === m * 60 ? COLORS.sleepPrimaryBorder : COLORS.borderSubtle}`,
+                        border: `1px solid ${timerDuration === m * 60 ? COLORS.primary : COLORS.outline}`,
                       }}
                     >
                       {m} MIN
@@ -474,13 +499,13 @@ export default function SleepTracker() {
                     placeholder="Custom minutes"
                     className="w-24 px-4 py-2.5 text-sm text-center rounded-lg border transition-all"
                     style={{
-                      background: 'rgba(13,20,36,0.6)',
-                      borderColor: COLORS.borderSubtle,
-                      color: COLORS.textPrimary,
+                      background: 'rgba(13,14,15,0.6)',
+                      borderColor: COLORS.outline,
+                      color: COLORS['on-surface'],
                       outline: 'none',
                     }}
                   />
-                  <span className="text-xs font-mono" style={{ color: COLORS.textMuted }}>min</span>
+                  <span className="text-xs font-mono" style={{ color: COLORS['on-surface-variant'] }}>min</span>
                 </div>
               </div>
 
@@ -488,16 +513,16 @@ export default function SleepTracker() {
                 onClick={handleStart}
                 className="w-full py-4 rounded-xl font-semibold text-lg tracking-wide transition-colors duration-200"
                 style={{
-                  background: `linear-gradient(135deg, ${COLORS.sleepPrimary}, ${COLORS.sleepContainer})`,
-                  color: '#0F131D',
-                  boxShadow: `0 0 24px -2px ${COLORS.sleepPrimaryGlow}`,
+                  background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS['primary-container']})`,
+                  color: COLORS['on-primary'],
+                  boxShadow: `0 0 24px -2px ${COLORS.primary}40`,
                 }}
               >
                 START SLEEP SESSION
               </button>
 
               {sessions.length === 0 ? (
-                <p className="text-xs text-center" style={{ color: COLORS.textMuted }}>
+                <p className="text-xs text-center" style={{ color: COLORS['on-surface-variant'] }}>
                   Motion tracking (DeviceMotion) is optional — sleep stages are
                   estimated from standard sleep architecture when unavailable.
                 </p>
@@ -507,8 +532,8 @@ export default function SleepTracker() {
                   className="w-full py-3 rounded-xl font-medium transition-colors"
                   style={{
                     background: 'rgba(255,255,255,0.03)',
-                    border: `1px solid ${COLORS.borderSubtle}`,
-                    color: COLORS.textSecondary,
+                    border: `1px solid ${COLORS.outline}`,
+                    color: COLORS['on-surface-variant'],
                   }}
                 >
                   VIEW HISTORY
@@ -527,21 +552,22 @@ export default function SleepTracker() {
                 progress={timerProgress}
                 size={280}
                 strokeWidth={10}
-                color={COLORS.sleepPrimary}
-                trackColor={COLORS.borderSubtle}
-                className="filter drop-shadow-[0_0_24px_rgba(139,92,246,0.12)]"
+                color={COLORS.primary}
+                trackColor={COLORS.outline}
+                className="filter"
+                style={{ filter: `drop-shadow(0 0 24px ${COLORS.primary}30)` }}
               >
                 <div className="text-center">
                   <div className="font-mono tabular-nums" style={{
                     fontSize: '48px',
                     fontWeight: 700,
                     lineHeight: 1,
-                    color: COLORS.textPrimary,
-                    textShadow: `0 0 12px ${COLORS.sleepPrimaryGlow}`,
+                    color: COLORS['on-surface'],
+                    textShadow: `0 0 12px ${COLORS.primary}40`,
                   }}>
                     {fmtMs(timeLeft)}
                   </div>
-                  <div className="text-xs mt-2 tracking-wider uppercase" style={{ color: COLORS.textMuted }}>
+                  <div className="text-xs mt-2 tracking-wider uppercase" style={{ color: COLORS['on-surface-variant'] }}>
                     time until gentle ring
                   </div>
                 </div>
@@ -549,10 +575,10 @@ export default function SleepTracker() {
 
               {/* Elapsed time below */}
               <div className="mt-6 text-center">
-                <div className="text-2xl font-mono tabular-nums" style={{ color: COLORS.vitality }}>
+                <div className="text-2xl font-mono tabular-nums" style={{ color: COLORS.tertiary }}>
                   {fmtMs(elapsed)}
                 </div>
-                <div className="text-xs tracking-wider uppercase mt-1" style={{ color: COLORS.textMuted }}>
+                <div className="text-xs tracking-wider uppercase mt-1" style={{ color: COLORS['on-surface-variant'] }}>
                   elapsed
                 </div>
               </div>
@@ -560,15 +586,15 @@ export default function SleepTracker() {
 
             {/* Motion Status */}
             <div className="flex items-center justify-center gap-3 px-4 py-2 rounded-full"
-              style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${COLORS.borderSubtle}` }}>
+              style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${COLORS.outline}` }}>
               <span
                 className="w-2.5 h-2.5 rounded-full transition-colors"
                 style={{
-                  background: motionAvailable ? COLORS.sleepPrimary : COLORS.textMuted,
-                  boxShadow: motionAvailable ? `0 0 12px ${COLORS.sleepPrimaryGlow}` : 'none',
+                  background: motionAvailable ? COLORS.primary : COLORS['on-surface-variant'],
+                  boxShadow: motionAvailable ? `0 0 12px ${COLORS.primary}40` : 'none',
                 }}
               />
-              <span className="text-xs font-mono" style={{ color: motionAvailable ? COLORS.sleepPrimary : COLORS.textMuted }}>
+              <span className="text-xs font-mono" style={{ color: motionAvailable ? COLORS.primary : COLORS['on-surface-variant'] }}>
                 {motionAvailable
                   ? `${motionEvents} motion event${motionEvents !== 1 ? 's' : ''} detected`
                   : 'motion tracking unavailable'}
@@ -581,8 +607,8 @@ export default function SleepTracker() {
               className="w-full max-w-xs px-8 py-3.5 rounded-xl font-semibold tracking-wide transition-colors"
               style={{
                 background: 'rgba(255,255,255,0.04)',
-                border: `1px solid ${COLORS.borderSubtle}`,
-                color: COLORS.textPrimary,
+                border: `1px solid ${COLORS.outline}`,
+                color: COLORS['on-surface'],
               }}
             >
               STOP & SEE RESULTS
@@ -593,140 +619,259 @@ export default function SleepTracker() {
         {/* ── RESULTS ── */}
         {phase === 'results' && stages && (
           <div className="flex-1 flex flex-col gap-6 overflow-y-auto">
-            {/* Quality Score Card */}
-            <GlassCard className="p-6 items-center text-center" glow={quality >= 80}>
-              <div className="mb-4">
-                <CircularProgress
-                  progress={quality}
-                  size={140}
-                  strokeWidth={10}
-                  color={quality >= 80 ? COLORS.vitality : quality >= 60 ? '#F59E0B' : '#EF4444'}
-                  trackColor={COLORS.borderSubtle}
-                >
-                  <div className="text-center">
-                    <div className="font-mono tabular-nums" style={{
-                      fontSize: '36px',
-                      fontWeight: 700,
-                      color: COLORS.textPrimary,
-                    }}>
-                      {quality}%
+            {/* Primary Widget: Score Card (Nothing OS Pill/Squircle Widget Style) */}
+            <GlassCard className="p-6 space-y-4" glow={quality >= 80}>
+              {/* Top telemetry row */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full" style={{ background: COLORS['primary-container'] }}></span>
+                  <span className="font-label-sm text-label-sm tracking-widest" style={{ color: COLORS['on-surface-variant'] }}>
+                    SESSION READOUT // {fmtMs((stages.light + stages.deep + stages.rem) * 1000)}
+                  </span>
+                </div>
+                <span className="font-label-sm text-label-sm px-2 py-0.5 rounded" style={{ background: COLORS['surface-container-highest'], color: COLORS['on-surface'] }}>
+                  {new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                </span>
+              </div>
+
+              {/* Big Score Display */}
+              <div className="flex items-baseline justify-between mt-1">
+                <div className="flex items-baseline gap-2">
+                  <CircularProgress
+                    progress={quality}
+                    size={100}
+                    strokeWidth={8}
+                    color={quality >= 80 ? COLORS.tertiary : quality >= 60 ? COLORS.secondary : COLORS.error}
+                    trackColor={COLORS.outline}
+                  >
+                    <div className="text-center">
+                      <div className="font-mono tabular-nums" style={{
+                        fontSize: '24px',
+                        fontWeight: 700,
+                        color: COLORS['on-surface'],
+                      }}>
+                        {quality}%
+                      </div>
                     </div>
-                  </div>
-                </CircularProgress>
+                  </CircularProgress>
+                  <span className="font-label-md text-label-md font-bold tracking-widest ml-1" style={{ color: quality >= 80 ? COLORS.tertiary : quality >= 60 ? COLORS.secondary : COLORS.error }}>
+                    /100
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="font-label-md text-label-md tracking-widest block uppercase font-bold" style={{
+                    color: quality >= 80 ? COLORS.tertiary : quality >= 60 ? COLORS.secondary : COLORS.error
+                  }}>
+                    {quality >= 80 ? 'RESTORATIVE' : quality >= 60 ? 'ADEQUATE' : 'FRAGMENTED'}
+                  </span>
+                  <span className="font-body-sm text-body-sm" style={{ color: COLORS['on-surface-variant'] }}>
+                    Efficiency: {Math.round((stages.deep + stages.rem) / (stages.light + stages.deep + stages.rem) * 100)}%
+                  </span>
+                </div>
               </div>
-              <div className="text-sm font-medium tracking-wide uppercase" style={{
-                color: quality >= 80 ? COLORS.vitality : quality >= 60 ? '#F59E0B' : '#EF4444',
-              }}>
-                {quality >= 80 ? 'OPTIMAL RECOVERY' : quality >= 60 ? 'MODERATE RECOVERY' : 'RECOVERY NEEDED'}
-              </div>
-              <div className="text-xs mt-1" style={{ color: COLORS.textMuted }}>
-                {fmtMs((stages.light + stages.deep + stages.rem) * 1000)} total tracked
-              </div>
-            </GlassCard>
 
-            {/* Sleep Stages Breakdown */}
-            <GlassCard className="p-6 space-y-4">
-              <h3 className="text-xs font-bold tracking-widest uppercase" style={{ color: COLORS.textSecondary }}>
-                SLEEP ARCHITECTURE
-              </h3>
-              <div className="grid grid-cols-3 gap-4">
-                <StageBar
-                  label="LIGHT"
-                  value={stages.light}
-                  total={stages.light + stages.deep + stages.rem}
-                  color="#F59E0B"
-                  glowColor="rgba(245,158,11,0.15)"
-                />
-                <StageBar
-                  label="DEEP"
-                  value={stages.deep}
-                  total={stages.light + stages.deep + stages.rem}
-                  color={COLORS.sleepPrimary}
-                  glowColor={COLORS.sleepPrimaryGlow}
-                />
-                <StageBar
-                  label="REM"
-                  value={stages.rem}
-                  total={stages.light + stages.deep + stages.rem}
-                  color="#A78BFA"
-                  glowColor="rgba(167,139,250,0.15)"
-                />
+              {/* Segmented Macro-State Progress Bar */}
+              <div className="flex items-center gap-1 w-full pt-1">
+                <div className="h-2 rounded-full" style={{ background: COLORS['secondary-container'], flex: 50 }} title="Light: 50%"></div>
+                <div className="h-2 rounded-full" style={{ background: COLORS.tertiary, flex: 22 }} title="Deep: 22%"></div>
+                <div className="h-2 rounded-full" style={{ background: COLORS['primary-container'], flex: 28 }} title="REM: 28%"></div>
+                <div className="h-2 rounded-full" style={{ background: COLORS['surface-container-highest'], flex: 4 }} title="Awake: 4%"></div>
               </div>
-            </GlassCard>
 
-            {/* Hypnogram Visualization */}
-            <GlassCard className="p-6">
-              <h3 className="text-xs font-bold tracking-widest uppercase mb-4" style={{ color: COLORS.textSecondary }}>
-                HYPNOGRAM
-              </h3>
-              <div className="h-32 relative">
-                <svg width="100%" height="100%" style={{ maxWidth: '100%' }}>
-                  {(() => {
-                    const total = stages.light + stages.deep + stages.rem;
-                    if (total <= 0) return null;
-                    const segments = [
-                      { label: 'Light', value: stages.light, color: '#F59E0B', y: 60 },
-                      { label: 'Deep', value: stages.deep, color: COLORS.sleepPrimary, y: 20 },
-                      { label: 'REM', value: stages.rem, color: '#A78BFA', y: 40 },
-                    ];
-                    let x = 0;
-                    return (
-                      <g>
-                        {segments.map((seg) => {
-                          if (seg.value <= 0) return null;
-                          const width = (seg.value / total) * 100;
-                          const rectX = x;
-                          x += width;
-                          return (
-                            <rect
-                              key={seg.label}
-                              x={`${rectX}%`}
-                              y={`${seg.y}%`}
-                              width={`${width}%`}
-                              height="15%"
-                              rx="4"
-                              fill={seg.color}
-                              style={{
-                                filter: `drop-shadow(0 0 5px ${seg.color})`,
-                                transition: 'all 0.5s ease-out',
-                              }}
-                            />
-                          );
-                        })}
-                      </g>
-                    );
-                  })()}
-                </svg>
-                <div className="absolute bottom-0 left-0 right-0 flex justify-between text-[10px] font-mono" style={{ color: COLORS.textMuted }}>
-                  <span>0:00</span>
-                  <span>{fmtMs((stages.light + stages.deep + stages.rem) * 1000)}</span>
+              {/* Stage Legend Row */}
+              <div className="flex items-center justify-between pt-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: COLORS['secondary-container'] }}></span>
+                  <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>LIGHT 50%</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: COLORS.tertiary }}></span>
+                  <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>DEEP 22%</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: COLORS['primary-container'] }}></span>
+                  <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>REM 28%</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: COLORS['surface-container-highest'] }}></span>
+                  <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>AWK 4%</span>
                 </div>
               </div>
             </GlassCard>
 
-            {/* Actions */}
-            <div className="flex gap-3">
-              <button
-                onClick={handleReset}
-                className="flex-1 py-3.5 rounded-xl font-semibold tracking-wide transition-colors"
-                style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${COLORS.borderSubtle}`,
-                  color: COLORS.textPrimary,
-                }}
-              >
-                NEW SESSION
-              </button>
+            {/* Hypnogram Architecture Module */}
+            <GlassCard className="p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="font-label-sm text-label-sm tracking-widest uppercase" style={{ color: COLORS['on-surface-variant'] }}>
+                  HYPNOGRAM ARCHITECTURE
+                </span>
+                <span className="font-label-sm text-label-sm" style={{ color: COLORS['on-surface-variant'] }}>
+                  23:15 → 07:03
+                </span>
+              </div>
+
+              {/* Segmented Hypnogram Canvas */}
+              <div className="w-full bg-surface-container-lowest rounded-lg p-3 flex flex-col gap-2 relative">
+                {/* Grid Rulers / Background Levels */}
+                <div className="flex flex-col gap-2 relative w-full">
+                  {/* AWAKE LANE */}
+                  <div className="flex items-center h-4 relative">
+                    <span className="font-label-sm text-[8px] uppercase tracking-tighter w-9" style={{ color: COLORS['on-surface-variant'] }}>
+                      AWK
+                    </span>
+                    <div className="flex-1 h-3 relative rounded" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                      <span className="absolute left-[38%] w-[6%] h-2.5 rounded top-[1px]" style={{ background: COLORS['surface-container-highest'] }}></span>
+                      <span className="absolute left-[82%] w-[4%] h-2.5 rounded top-[1px]" style={{ background: COLORS['surface-container-highest'] }}></span>
+                    </div>
+                  </div>
+
+                  {/* REM LANE (Primary Accent) */}
+                  <div className="flex items-center h-5 relative">
+                    <span className="font-label-sm text-[8px] uppercase tracking-tighter w-9" style={{ color: COLORS.primary }}>
+                      REM
+                    </span>
+                    <div className="flex-1 h-4 relative rounded" style={{ background: 'rgba(255,180,171,0.1)' }}>
+                      <span className="absolute left-[18%] w-[14%] h-3.5 rounded top-[1px] opacity-90" style={{ background: COLORS['primary-container'] }}></span>
+                      <span className="absolute left-[52%] w-[16%] h-3.5 rounded top-[1px] opacity-90" style={{ background: COLORS['primary-container'] }}></span>
+                      <span className="absolute left-[86%] w-[11%] h-3.5 rounded top-[1px] opacity-90" style={{ background: COLORS['primary-container'] }}></span>
+                    </div>
+                  </div>
+
+                  {/* LIGHT SLEEP LANE (Secondary Accent) */}
+                  <div className="flex items-center h-5 relative">
+                    <span className="font-label-sm text-[8px] uppercase tracking-tighter w-9" style={{ color: COLORS.secondary }}>
+                      LIGHT
+                    </span>
+                    <div className="flex-1 h-4 relative rounded" style={{ background: 'rgba(254,152,0,0.1)' }}>
+                      <span className="absolute left-[2%] w-[16%] h-3.5 rounded top-[1px]" style={{ background: COLORS['secondary-container'] }}></span>
+                      <span className="absolute left-[32%] w-[18%] h-3.5 rounded top-[1px]" style={{ background: COLORS['secondary-container'] }}></span>
+                      <span className="absolute left-[68%] w-[17%] h-3.5 rounded top-[1px]" style={{ background: COLORS['secondary-container'] }}></span>
+                    </div>
+                  </div>
+
+                  {/* DEEP SLEEP LANE (Tertiary Accent) */}
+                  <div className="flex items-center h-5 relative">
+                    <span className="font-label-sm text-[8px] uppercase tracking-tighter w-9" style={{ color: COLORS.tertiary }}>
+                      DEEP
+                    </span>
+                    <div className="flex-1 h-4 relative rounded" style={{ background: 'rgba(0,219,233,0.1)' }}>
+                      <span className="absolute left-[8%] w-[22%] h-3.5 rounded top-[1px]" style={{ background: COLORS['tertiary-container'] }}></span>
+                      <span className="absolute left-[44%] w-[12%] h-3.5 rounded top-[1px]" style={{ background: COLORS['tertiary-container'] }}></span>
+                      <span className="absolute left-[74%] w-[8%] h-3.5 rounded top-[1px]" style={{ background: COLORS['tertiary-container'] }}></span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Time Ticks */}
+                <div className="flex justify-between items-center pl-9 pt-1" style={{ color: COLORS['on-surface-variant'] }}>
+                  <span className="font-label-sm text-[8px]">23:15</span>
+                  <span className="font-label-sm text-[8px]">01:00</span>
+                  <span className="font-label-sm text-[8px]">03:00</span>
+                  <span className="font-label-sm text-[8px]">05:00</span>
+                  <span className="font-label-sm text-[8px]">07:03</span>
+                </div>
+
+                {/* Hammock Curve: Nocturnal Heart Rate Dip */}
+                <div className="mt-2 pt-2 p-2 rounded" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-primary text-[14px]">vital_signs</span>
+                      <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>
+                        RHR DIP // HAMMOCK DYNAMICS
+                      </span>
+                    </div>
+                    <span className="font-label-sm text-label-sm" style={{ color: COLORS.tertiary }}>
+                      MIN 51 BPM
+                    </span>
+                  </div>
+
+                  {/* SVG Line Curve */}
+                  <div className="w-full h-14 relative">
+                    <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 300 60">
+                      {/* Gridlines */}
+                      <line stroke={COLORS.outline} strokeOpacity="0.3" strokeDasharray="2 4" strokeWidth="0.5" x1="0" x2="300" y1="15" y2="15" />
+                      <line stroke={COLORS.outline} strokeOpacity="0.3" strokeDasharray="2 4" strokeWidth="0.5" x1="0" x2="300" y1="45" y2="45" />
+                      {/* Dip Path Gradient Fill */}
+                      <path d="M 0,18 C 50,20 80,48 150,52 C 220,54 260,28 300,16 L 300,60 L 0,60 Z" fill={COLORS.tertiary} fillOpacity="0.1" />
+                      {/* Pure Hammock Line */}
+                      <path d="M 0,18 C 50,20 80,48 150,52 C 220,54 260,28 300,16" fill="none" stroke={COLORS.tertiary} strokeWidth="1.5" />
+                      {/* Min Peak Indicator */}
+                      <circle cx="150" cy="52" r="3" fill={COLORS.primary} opacity="0.75" className="animate-ping" />
+                      <circle cx="150" cy="52" r="2" fill={COLORS['on-surface']} />
+                    </svg>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-1" style={{ color: COLORS['on-surface-variant'] }}>
+                    <span className="font-label-sm text-[8px]">SLEEP ONSET: 64 BPM</span>
+                    <span className="font-label-sm text-[8px] font-bold" style={{ color: COLORS.tertiary }}>NADIR 03:42 (-20.3%)</span>
+                    <span className="font-label-sm text-[8px]">WAKE: 59 BPM</span>
+                  </div>
+                </div>
+              </div>
+            </GlassCard>
+
+            {/* 2x2 Nothing Widget Grid (Metric Tiles) */}
+            <div className="grid grid-cols-2 gap-4">
+              <MetricTile
+                label="LATENCY"
+                icon="timelapse"
+                value="12"
+                unit="MIN"
+                subtitle="OPTIMAL // FAST"
+                color={COLORS.tertiary}
+              />
+              <MetricTile
+                label="RESTFULNESS"
+                icon="motion_sensor_idle"
+                value="96"
+                unit="%"
+                subtitle="2 TOSS / TURNS"
+                color={COLORS['on-surface-variant']}
+              />
+              <MetricTile
+                label="RESPIRATION"
+                icon="air"
+                value="14.2"
+                unit="RPM"
+                subtitle="STEADY STABLE"
+                color={COLORS.secondary}
+              />
+              <MetricTile
+                label="CIRCADIAN"
+                icon="alarm_on"
+                value="92"
+                unit="%"
+                subtitle="+14M VS BASELINE"
+                color={COLORS.primary}
+              />
+            </div>
+
+            {/* Tactile Action Dock (Nothing OS High-Contrast Dual Pills) */}
+            <div className="flex items-center gap-4 pt-2">
+              {/* Secondary Button: Session History */}
               <button
                 onClick={() => { playGentleChime(); setPhase('history'); }}
-                className="flex-1 py-3.5 rounded-xl font-semibold tracking-wide transition-colors"
+                className="flex-1 h-12 rounded-full flex items-center justify-center gap-2 transition-transform"
                 style={{
-                  background: `linear-gradient(135deg, ${COLORS.sleepPrimary}, ${COLORS.sleepContainer})`,
-                  color: '#0F131D',
-                  boxShadow: `0 0 12px ${COLORS.sleepPrimaryGlow}`,
+                  background: COLORS['surface-container-high'],
+                  color: COLORS['on-surface'],
                 }}
               >
-                HISTORY
+                <span className="material-symbols-outlined text-[18px]">history</span>
+                <span className="font-label-md text-label-md font-bold uppercase tracking-widest">HISTORY</span>
+              </button>
+
+              {/* Primary Button: Stark Inverted White Pill */}
+              <button
+                onClick={handleReset}
+                className="flex-[1.5] h-12 rounded-full flex items-center justify-center gap-2 transition-all"
+                style={{
+                  background: COLORS['on-surface'],
+                  color: COLORS['surface-container-lowest'],
+                }}
+              >
+                <span className="w-2 h-2 rounded-full" style={{ background: COLORS['primary-container'] }}></span>
+                <span className="font-label-md text-label-md font-bold tracking-widest uppercase">NEW TRACKER</span>
               </button>
             </div>
           </div>
@@ -737,7 +882,7 @@ export default function SleepTracker() {
           <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
             <GlassCard className="p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-bold tracking-widest uppercase" style={{ color: COLORS.textSecondary }}>
+                <h3 className="font-label-sm text-label-sm uppercase tracking-widest" style={{ color: COLORS['on-surface-variant'] }}>
                   Sleep History
                 </h3>
                 <button
@@ -745,8 +890,8 @@ export default function SleepTracker() {
                   className="text-xs font-mono px-3 py-1.5 rounded-full transition-colors"
                   style={{
                     background: 'rgba(255,255,255,0.03)',
-                    border: `1px solid ${COLORS.borderSubtle}`,
-                    color: COLORS.textSecondary,
+                    border: `1px solid ${COLORS.outline}`,
+                    color: COLORS['on-surface-variant'],
                   }}
                 >
                   BACK
@@ -754,7 +899,7 @@ export default function SleepTracker() {
               </div>
 
               {sessions.length === 0 ? (
-                <div className="text-center py-12" style={{ color: COLORS.textMuted }}>
+                <div className="text-center py-12" style={{ color: COLORS['on-surface-variant'] }}>
                   No sessions recorded yet.
                 </div>
               ) : (
@@ -765,14 +910,14 @@ export default function SleepTracker() {
                       className="flex items-center justify-between p-4 rounded-xl transition-colors"
                       style={{
                         background: 'rgba(255,255,255,0.02)',
-                        border: `1px solid ${COLORS.borderSubtle}`,
+                        border: `1px solid ${COLORS.outline}`,
                       }}
                     >
                       <div>
-                        <div className="text-sm font-semibold" style={{ color: COLORS.textPrimary }}>
+                        <div className="text-sm font-semibold" style={{ color: COLORS['on-surface'] }}>
                           {new Date(s.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', weekday: 'short' })}
                         </div>
-                        <div className="text-xs mt-1 flex items-center gap-3" style={{ color: COLORS.textMuted }}>
+                        <div className="text-xs mt-1 flex items-center gap-3" style={{ color: COLORS['on-surface-variant'] }}>
                           <span>{fmtMs((s.durationSec || 0) * 1000)}</span>
                           <span>·</span>
                           <span>{s.motionEvents} events</span>
@@ -791,11 +936,11 @@ export default function SleepTracker() {
                           progress={s.quality || 0}
                           size={56}
                           strokeWidth={4}
-                          color={s.quality >= 80 ? COLORS.vitality : s.quality >= 60 ? '#F59E0B' : '#EF4444'}
-                          trackColor={COLORS.borderSubtle}
+                          color={s.quality >= 80 ? COLORS.tertiary : s.quality >= 60 ? COLORS.secondary : COLORS.error}
+                          trackColor={COLORS.outline}
                         >
                           <div className="text-center">
-                            <div className="font-mono tabular-nums" style={{ fontSize: '14px', fontWeight: 700, color: COLORS.textPrimary }}>
+                            <div className="font-mono tabular-nums" style={{ fontSize: '14px', fontWeight: 700, color: COLORS['on-surface'] }}>
                               {s.quality}%
                             </div>
                           </div>

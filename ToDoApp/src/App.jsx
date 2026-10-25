@@ -18,6 +18,7 @@ import NotificationToast from './components/NotificationToast';
 import PwaUpdateToast from './components/PwaUpdateToast';
 import AlarmModal from './components/AlarmModal';
 import EnforcerModal from './components/EnforcerModal';
+import QuickAccessBar from './components/QuickAccessBar';
 
 export default function App() {
   const [tasks, setTasks] = useLocalStorage('todo-tasks', []);
@@ -27,6 +28,9 @@ export default function App() {
   const [mediumAlert, setMediumAlert] = useState(null);
   const [enforcerAlert, setEnforcerAlert] = useState(null);
   const alarmStopRef = useRef(null);
+
+  // Quick access bar state
+  const [activeSection, setActiveSection] = useState('tasks');
 
   // ── Cursor glow (direct DOM — zero re-renders) ───────────────────
   const glowRef = useRef(null);
@@ -120,7 +124,6 @@ export default function App() {
   }, [setAlarms]);
 
   // ── NLM (natural-language model) ───────────────────────────────
-  // Materialize a batch of parsed actions (from the scratchpad agent).
   const handleNlmActions = useCallback((actions) => {
     let created = 0;
     actions.forEach((action) => {
@@ -136,11 +139,9 @@ export default function App() {
     return created;
   }, [handleAddAlarm, handleAddTask]);
 
-  // Parse one free-form sentence (typed or spoken) into task(s)/alarm(s).
   const handleNlmText = useCallback(async (text) => {
     const actions = await parseActions(text);
     if (!actions || actions.length === 0) {
-      // NLM found nothing actionable → keep the user's words as a plain task
       handleAddTask(text, {});
       return 1;
     }
@@ -148,7 +149,7 @@ export default function App() {
   }, [handleAddTask, handleNlmActions]);
 
   return (
-    <div className="relative">
+    <div className="relative min-h-screen" style={{ minHeight: '100vh' }}>
       {/* ── Cursor Glow Layer ─────────────────────────────────── */}
       <div
         ref={glowRef}
@@ -191,10 +192,13 @@ export default function App() {
         <EnforcerModal title={enforcerAlert.title} subtext={enforcerAlert.subtext} onDismiss={dismissEnforcer} />
       )}
 
-      {/* ── Layout: MobileShell (≤640px) or desktop 3-column (≥641px) ── */}
-      {/* Both branches render the SAME feature components; the layout
-          is responsive, never forked. Desktop keeps the existing
-          three-column grid + sticky asides untouched. */}
+      {/* ── Quick Access Bar (Desktop only) ── */}
+      <QuickAccessBar
+        activeSection={activeSection}
+        onSectionClick={setActiveSection}
+      />
+
+      {/* ── Layout: MobileShell (≤640px) or responsive single-scroll desktop (≥641px) ── */}
       <MobileShell
         tasks={tasks}
         alarms={alarms}
@@ -208,8 +212,7 @@ export default function App() {
         onNlmActions={handleNlmActions}
       />
 
-      <div className="hidden md:block relative z-10 max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
+      <div className="hidden md:block relative z-10 max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
         {/* ── Header ──────────────────────────────────────────── */}
         <header className="text-center mb-12">
           <h1 className="text-4xl sm:text-5xl font-bold tracking-[0.35em] text-white uppercase font-mono">
@@ -220,21 +223,14 @@ export default function App() {
           </p>
         </header>
 
-        {/* ── Three-Column Layout ─────────────────────────────── */}
-        <div className="three-col-grid grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-10 items-start">
+        {/* ── Unified Document Flow Grid ──────────────────────── */}
+        <div className="dashboard-grid grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
 
-          {/* Left — Timer & Alarms */}
-          <aside className="lg:sticky lg:top-12 flex flex-col gap-12">
-            <TimerHub />
-            <AlarmsHub
-              alarms={alarms}
-              onAdd={handleAddAlarm}
-              onDelete={handleDeleteAlarm}
-            />
-          </aside>
-
-          {/* Center — Tasks + Stopwatch + Sleep + Hydration */}
-          <main className="min-h-[60vh] flex flex-col gap-5">
+          {/* Section 1: Tasks */}
+          <section id="tasks" className="nothing-card p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="tasks-heading">
+            <h2 id="tasks-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
+              TASKS
+            </h2>
             <TaskList
               tasks={tasks}
               onAddTask={handleAddTask}
@@ -243,20 +239,55 @@ export default function App() {
               onSetReminder={handleSetReminder}
               onNlmText={handleNlmText}
             />
-            <StopwatchModule />
-            {/* Sleep & Hydration: side-by-side on desktop, stacked on mobile */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              <SleepTracker />
-              <HydrationTracker />
-            </div>
-          </main>
+          </section>
 
-          {/* Right — Scratchpad */}
-          <aside className="lg:sticky lg:top-12 lg:h-[calc(100vh-8rem)] lg:min-h-[600px] flex flex-col">
+          {/* Section 2: Notes (Scratchpad) */}
+          <section id="notes" className="nothing-card p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="notes-heading">
+            <h2 id="notes-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
+              NOTES
+            </h2>
             <RichScratchpad onNlmActions={handleNlmActions} />
-          </aside>
+          </section>
+
+          {/* Section 3: Focus (Timer + Stopwatch) */}
+          <section id="focus" className="nothing-card p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="focus-heading">
+            <h2 id="focus-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
+              FOCUS
+            </h2>
+            <TimerHub />
+            <StopwatchModule />
+          </section>
+
+          {/* Section 4: Alarms */}
+          <section id="alarms" className="nothing-card p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="alarms-heading">
+            <h2 id="alarms-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
+              ALARMS
+            </h2>
+            <AlarmsHub
+              alarms={alarms}
+              onAdd={handleAddAlarm}
+              onDelete={handleDeleteAlarm}
+            />
+          </section>
+
+          {/* Section 5: Hydration */}
+          <section id="hydration" className="nothing-card p-5 sm:p-6" aria-labelledby="hydration-heading">
+            <h2 id="hydration-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase mb-4">
+              HYDRATION TRACKER
+            </h2>
+            <HydrationTracker />
+          </section>
+
+          {/* Section 6: Sleep */}
+          <section id="sleep" className="nothing-card p-5 sm:p-6" aria-labelledby="sleep-heading">
+            <h2 id="sleep-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase mb-4">
+              SLEEP TRACKER
+            </h2>
+            <SleepTracker />
+          </section>
+
         </div>
       </div>
     </div>
   );
-}
+}// test change
