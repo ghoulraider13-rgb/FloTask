@@ -436,35 +436,25 @@ export default function SleepTracker() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background: `
-            radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,180,171,0.08) 0%, transparent 70%),
-            radial-gradient(ellipse 60% 40% at 100% 100%, rgba(0,219,233,0.04) 0%, transparent 60%)
+            radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,255,255,0.05) 0%, transparent 70%),
+            radial-gradient(ellipse 60% 40% at 100% 100%, rgba(255,255,255,0.03) 0%, transparent 60%)
           `,
         }}
       />
 
       <div className="relative z-10 flex flex-col h-full p-4 sm:p-6 gap-6">
-        {/* Sub-bar Status Header */}
-        <div className="flex items-center justify-between py-2">
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-            <span className="font-label-sm text-label-sm tracking-widest uppercase" style={{ color: COLORS['on-surface-variant'] }}>
-              SYS.BIO // HYPNOGRAM_V04
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full" style={{ background: COLORS['surface-container'] }}>
-            <span className="material-symbols-outlined text-tertiary text-[14px]">sensors</span>
-            <span className="font-label-sm text-label-sm tracking-wider" style={{ color: COLORS['on-surface'] }}>
-              OPTICAL.HRV
-            </span>
-          </div>
-        </div>
-
         {/* ── SETUP ── */}
         {phase === 'setup' && (
           <div className="flex-1 flex flex-col gap-6">
             <GlassCard className="p-6 space-y-6">
               <div>
-                <label className="text-xs font-semibold tracking-wider uppercase mb-3 block" style={{ color: COLORS['on-surface-variant'] }}>
+                <h2 className="text-xs font-bold tracking-widest uppercase mb-1" style={{ color: COLORS['on-surface-variant'] }}>
+                  SOMNA-04
+                </h2>
+                <p className="text-xs mt-1" style={{ color: COLORS['on-surface-variant'] }}>
+                  MODULE // SLEEP TRACKER
+                </p>
+                <label className="text-xs font-semibold tracking-wider uppercase mb-3 block mt-4" style={{ color: COLORS['on-surface-variant'] }}>
                   Sleep Timer
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -775,7 +765,7 @@ export default function SleepTracker() {
                 <div className="mt-2 pt-2 p-2 rounded" style={{ background: 'rgba(255,255,255,0.02)' }}>
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-primary text-[14px]">vital_signs</span>
+                      <span className="material-symbols-outlined text-[14px]" style={{ color: COLORS.primary }}>vital_signs</span>
                       <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>
                         RHR DIP // HAMMOCK DYNAMICS
                       </span>

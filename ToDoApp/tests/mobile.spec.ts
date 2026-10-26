@@ -1,6 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('FlowTask Mobile Layout', () => {
+  // Skip on desktop projects (≥700px): MobileShell is hidden there, so the
+  // bottom tab bar and swipe assertions can never pass on desktop viewports.
+  test.skip(({ viewport }) => (viewport?.width ?? 9999) >= 700, 'Mobile-only spec');
+
   test.use({ viewport: { width: 375, height: 667 } });
 
   test.beforeEach(async ({ page }) => {
@@ -87,7 +91,8 @@ test.describe('FlowTask Mobile Layout', () => {
     // Check for SleepTracker content in setup phase
     await expect(page.locator('text=Sleep Timer').first()).toBeVisible();
     await expect(page.locator('text=START SLEEP SESSION').first()).toBeVisible();
-    await expect(page.locator('text=OPTICAL.HRV').first()).toBeVisible();
+    await expect(page.locator('text=SOMNA-04').first()).toBeVisible();
+    await expect(page.locator('text=MODULE // SLEEP TRACKER').first()).toBeVisible();
   });
 
   test('should support swipe navigation between tabs', async ({ page }) => {

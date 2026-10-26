@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('HydrationTracker Functionality', () => {
+  // section#hydration lives in the desktop tree (hidden <md) — desktop-only.
+  test.skip(({ viewport }) => (viewport?.width ?? 0) < 700, 'Desktop-only spec');
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -64,6 +67,9 @@ test.describe('HydrationTracker Functionality', () => {
 });
 
 test.describe('SleepTracker Functionality', () => {
+  // section#sleep lives in the desktop tree (hidden <md) — desktop-only.
+  test.skip(({ viewport }) => (viewport?.width ?? 0) < 700, 'Desktop-only spec');
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -101,6 +107,10 @@ test.describe('SleepTracker Functionality', () => {
 });
 
 test.describe('Cross-Platform Consistency', () => {
+  // The desktop half of each check needs the desktop tree visible — run on
+  // desktop projects only (each test switches viewport internally).
+  test.skip(({ viewport }) => (viewport?.width ?? 0) < 700, 'Run on desktop projects');
+
   test('desktop and mobile should share same HydrationTracker component', async ({ page }) => {
     // Desktop
     await page.goto('/');
@@ -123,7 +133,7 @@ test.describe('Cross-Platform Consistency', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('section#sleep').locator('text=SYS.BIO')).toBeVisible();
+    await expect(page.locator('section#sleep').locator('text=SLEEP TRACKER').first()).toBeVisible();
 
     // Mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
@@ -134,6 +144,6 @@ test.describe('Cross-Platform Consistency', () => {
     await page.locator('button[role="tab"]:has-text("SLEEP")').click();
     await page.waitForTimeout(500);
 
-    await expect(page.locator('text=SYS.BIO // HYPNOGRAM_V04').first()).toBeVisible();
+    await expect(page.locator('text=SLEEP TRACKER').first()).toBeVisible();
   });
 });
