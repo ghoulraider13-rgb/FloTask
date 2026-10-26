@@ -29,19 +29,19 @@ const COLORS = {
   'surface-container-high': '#292a2a',
   'surface-container-highest': '#343535',
   'on-surface': '#e3e2e2',
-  'on-surface-variant': '#e8bcb7',
-  outline: '#af8783',
-  'outline-variant': '#5e3f3b',
-  primary: '#ffb4ab',
-  'on-primary': '#690005',
-  'primary-container': '#ff5449',
-  secondary: '#ffc080',
-  'on-secondary': '#4a2800',
-  'secondary-container': '#fe9800',
-  tertiary: '#00dbe9',
-  'on-tertiary': '#00363a',
-  'tertiary-container': '#00a0aa',
-  error: '#ffb4ab',
+  'on-surface-variant': '#a0a0a0',
+  outline: '#555555',
+  'outline-variant': '#333333',
+  primary: '#ffffff',
+  'on-primary': '#000000',
+  'primary-container': '#e0e0e0',
+  secondary: '#cccccc',
+  'on-secondary': '#000000',
+  'secondary-container': '#aaaaaa',
+  tertiary: '#ffffff',
+  'on-tertiary': '#000000',
+  'tertiary-container': '#e0e0e0',
+  error: '#ffffff',
 };
 
 function fmtMs(ms) {
@@ -565,7 +565,7 @@ export default function SleepTracker() {
 
               {/* Elapsed time below */}
               <div className="mt-6 text-center">
-                <div className="text-2xl font-mono tabular-nums" style={{ color: COLORS.tertiary }}>
+                <div className="text-2xl font-mono tabular-nums" style={{ color: COLORS['on-surface'] }}>
                   {fmtMs(elapsed)}
                 </div>
                 <div className="text-xs tracking-wider uppercase mt-1" style={{ color: COLORS['on-surface-variant'] }}>
@@ -631,7 +631,7 @@ export default function SleepTracker() {
                     progress={quality}
                     size={100}
                     strokeWidth={8}
-                    color={quality >= 80 ? COLORS.tertiary : quality >= 60 ? COLORS.secondary : COLORS.error}
+                    color={quality >= 80 ? COLORS['on-surface'] : quality >= 60 ? COLORS['on-surface-variant'] : COLORS.outline}
                     trackColor={COLORS.outline}
                   >
                     <div className="text-center">
@@ -644,13 +644,13 @@ export default function SleepTracker() {
                       </div>
                     </div>
                   </CircularProgress>
-                  <span className="font-label-md text-label-md font-bold tracking-widest ml-1" style={{ color: quality >= 80 ? COLORS.tertiary : quality >= 60 ? COLORS.secondary : COLORS.error }}>
+                  <span className="font-label-md text-label-md font-bold tracking-widest ml-1" style={{ color: quality >= 80 ? COLORS['on-surface'] : quality >= 60 ? COLORS['on-surface-variant'] : COLORS.outline }}>
                     /100
                   </span>
                 </div>
                 <div className="text-right">
                   <span className="font-label-md text-label-md tracking-widest block uppercase font-bold" style={{
-                    color: quality >= 80 ? COLORS.tertiary : quality >= 60 ? COLORS.secondary : COLORS.error
+                    color: quality >= 80 ? COLORS['on-surface'] : quality >= 60 ? COLORS['on-surface-variant'] : COLORS.outline
                   }}>
                     {quality >= 80 ? 'RESTORATIVE' : quality >= 60 ? 'ADEQUATE' : 'FRAGMENTED'}
                   </span>
@@ -661,32 +661,32 @@ export default function SleepTracker() {
               </div>
 
               {/* Segmented Macro-State Progress Bar */}
-              <div className="flex items-center gap-1 w-full pt-1">
-                <div className="h-2 rounded-full" style={{ background: COLORS['secondary-container'], flex: 50 }} title="Light: 50%"></div>
-                <div className="h-2 rounded-full" style={{ background: COLORS.tertiary, flex: 22 }} title="Deep: 22%"></div>
-                <div className="h-2 rounded-full" style={{ background: COLORS['primary-container'], flex: 28 }} title="REM: 28%"></div>
-                <div className="h-2 rounded-full" style={{ background: COLORS['surface-container-highest'], flex: 4 }} title="Awake: 4%"></div>
-              </div>
+                            <div className="flex items-center gap-1 w-full pt-1">
+                              <div className="h-2 rounded-full" style={{ background: COLORS['surface-container-high'], flex: 50 }} title="Light: 50%"></div>
+                              <div className="h-2 rounded-full" style={{ background: COLORS['on-surface-variant'], flex: 22 }} title="Deep: 22%"></div>
+                              <div className="h-2 rounded-full" style={{ background: COLORS['on-surface'], flex: 28 }} title="REM: 28%"></div>
+                              <div className="h-2 rounded-full" style={{ background: COLORS['surface-container-highest'], flex: 4 }} title="Awake: 4%"></div>
+                            </div>
 
-              {/* Stage Legend Row */}
-              <div className="flex items-center justify-between pt-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: COLORS['secondary-container'] }}></span>
-                  <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>LIGHT 50%</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: COLORS.tertiary }}></span>
-                  <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>DEEP 22%</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: COLORS['primary-container'] }}></span>
-                  <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>REM 28%</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: COLORS['surface-container-highest'] }}></span>
-                  <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>AWK 4%</span>
-                </div>
-              </div>
+                            {/* Stage Legend Row */}
+                            <div className="flex items-center justify-between pt-1">
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full" style={{ background: COLORS['surface-container-high'] }}></span>
+                                <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>LIGHT 50%</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full" style={{ background: COLORS['on-surface-variant'] }}></span>
+                                <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>DEEP 22%</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full" style={{ background: COLORS['on-surface'] }}></span>
+                                <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>REM 28%</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full" style={{ background: COLORS['surface-container-highest'] }}></span>
+                                <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>AWK 4%</span>
+                              </div>
+                            </div>
             </GlassCard>
 
             {/* Hypnogram Architecture Module */}
@@ -717,37 +717,37 @@ export default function SleepTracker() {
 
                   {/* REM LANE (Primary Accent) */}
                   <div className="flex items-center h-5 relative">
-                    <span className="font-label-sm text-[8px] uppercase tracking-tighter w-9" style={{ color: COLORS.primary }}>
+                    <span className="font-label-sm text-[8px] uppercase tracking-tighter w-9" style={{ color: COLORS['on-surface'] }}>
                       REM
                     </span>
-                    <div className="flex-1 h-4 relative rounded" style={{ background: 'rgba(255,180,171,0.1)' }}>
-                      <span className="absolute left-[18%] w-[14%] h-3.5 rounded top-[1px] opacity-90" style={{ background: COLORS['primary-container'] }}></span>
-                      <span className="absolute left-[52%] w-[16%] h-3.5 rounded top-[1px] opacity-90" style={{ background: COLORS['primary-container'] }}></span>
-                      <span className="absolute left-[86%] w-[11%] h-3.5 rounded top-[1px] opacity-90" style={{ background: COLORS['primary-container'] }}></span>
+                    <div className="flex-1 h-4 relative rounded" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                      <span className="absolute left-[18%] w-[14%] h-3.5 rounded top-[1px] opacity-90" style={{ background: COLORS['on-surface'] }}></span>
+                      <span className="absolute left-[52%] w-[16%] h-3.5 rounded top-[1px] opacity-90" style={{ background: COLORS['on-surface'] }}></span>
+                      <span className="absolute left-[86%] w-[11%] h-3.5 rounded top-[1px] opacity-90" style={{ background: COLORS['on-surface'] }}></span>
                     </div>
                   </div>
 
                   {/* LIGHT SLEEP LANE (Secondary Accent) */}
                   <div className="flex items-center h-5 relative">
-                    <span className="font-label-sm text-[8px] uppercase tracking-tighter w-9" style={{ color: COLORS.secondary }}>
+                    <span className="font-label-sm text-[8px] uppercase tracking-tighter w-9" style={{ color: COLORS['on-surface-variant'] }}>
                       LIGHT
                     </span>
-                    <div className="flex-1 h-4 relative rounded" style={{ background: 'rgba(254,152,0,0.1)' }}>
-                      <span className="absolute left-[2%] w-[16%] h-3.5 rounded top-[1px]" style={{ background: COLORS['secondary-container'] }}></span>
-                      <span className="absolute left-[32%] w-[18%] h-3.5 rounded top-[1px]" style={{ background: COLORS['secondary-container'] }}></span>
-                      <span className="absolute left-[68%] w-[17%] h-3.5 rounded top-[1px]" style={{ background: COLORS['secondary-container'] }}></span>
+                    <div className="flex-1 h-4 relative rounded" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                      <span className="absolute left-[2%] w-[16%] h-3.5 rounded top-[1px]" style={{ background: COLORS['on-surface-variant'] }}></span>
+                      <span className="absolute left-[32%] w-[18%] h-3.5 rounded top-[1px]" style={{ background: COLORS['on-surface-variant'] }}></span>
+                      <span className="absolute left-[68%] w-[17%] h-3.5 rounded top-[1px]" style={{ background: COLORS['on-surface-variant'] }}></span>
                     </div>
                   </div>
 
                   {/* DEEP SLEEP LANE (Tertiary Accent) */}
                   <div className="flex items-center h-5 relative">
-                    <span className="font-label-sm text-[8px] uppercase tracking-tighter w-9" style={{ color: COLORS.tertiary }}>
+                    <span className="font-label-sm text-[8px] uppercase tracking-tighter w-9" style={{ color: COLORS['on-surface'] }}>
                       DEEP
                     </span>
-                    <div className="flex-1 h-4 relative rounded" style={{ background: 'rgba(0,219,233,0.1)' }}>
-                      <span className="absolute left-[8%] w-[22%] h-3.5 rounded top-[1px]" style={{ background: COLORS['tertiary-container'] }}></span>
-                      <span className="absolute left-[44%] w-[12%] h-3.5 rounded top-[1px]" style={{ background: COLORS['tertiary-container'] }}></span>
-                      <span className="absolute left-[74%] w-[8%] h-3.5 rounded top-[1px]" style={{ background: COLORS['tertiary-container'] }}></span>
+                    <div className="flex-1 h-4 relative rounded" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                      <span className="absolute left-[8%] w-[22%] h-3.5 rounded top-[1px]" style={{ background: COLORS['on-surface'] }}></span>
+                      <span className="absolute left-[44%] w-[12%] h-3.5 rounded top-[1px]" style={{ background: COLORS['on-surface'] }}></span>
+                      <span className="absolute left-[74%] w-[8%] h-3.5 rounded top-[1px]" style={{ background: COLORS['on-surface'] }}></span>
                     </div>
                   </div>
                 </div>
@@ -765,12 +765,12 @@ export default function SleepTracker() {
                 <div className="mt-2 pt-2 p-2 rounded" style={{ background: 'rgba(255,255,255,0.02)' }}>
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[14px]" style={{ color: COLORS.primary }}>vital_signs</span>
+                      <span className="material-symbols-outlined text-[14px]" style={{ color: COLORS['on-surface'] }}>vital_signs</span>
                       <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>
                         RHR DIP // HAMMOCK DYNAMICS
                       </span>
                     </div>
-                    <span className="font-label-sm text-label-sm" style={{ color: COLORS.tertiary }}>
+                    <span className="font-label-sm text-label-sm" style={{ color: COLORS['on-surface'] }}>
                       MIN 51 BPM
                     </span>
                   </div>
@@ -782,18 +782,18 @@ export default function SleepTracker() {
                       <line stroke={COLORS.outline} strokeOpacity="0.3" strokeDasharray="2 4" strokeWidth="0.5" x1="0" x2="300" y1="15" y2="15" />
                       <line stroke={COLORS.outline} strokeOpacity="0.3" strokeDasharray="2 4" strokeWidth="0.5" x1="0" x2="300" y1="45" y2="45" />
                       {/* Dip Path Gradient Fill */}
-                      <path d="M 0,18 C 50,20 80,48 150,52 C 220,54 260,28 300,16 L 300,60 L 0,60 Z" fill={COLORS.tertiary} fillOpacity="0.1" />
+                      <path d="M 0,18 C 50,20 80,48 150,52 C 220,54 260,28 300,16 L 300,60 L 0,60 Z" fill={COLORS['on-surface']} fillOpacity="0.08" />
                       {/* Pure Hammock Line */}
-                      <path d="M 0,18 C 50,20 80,48 150,52 C 220,54 260,28 300,16" fill="none" stroke={COLORS.tertiary} strokeWidth="1.5" />
+                      <path d="M 0,18 C 50,20 80,48 150,52 C 220,54 260,28 300,16" fill="none" stroke={COLORS['on-surface']} strokeWidth="1.5" />
                       {/* Min Peak Indicator */}
-                      <circle cx="150" cy="52" r="3" fill={COLORS.primary} opacity="0.75" className="animate-ping" />
+                      <circle cx="150" cy="52" r="3" fill={COLORS['on-surface']} opacity="0.5" className="animate-ping" />
                       <circle cx="150" cy="52" r="2" fill={COLORS['on-surface']} />
                     </svg>
                   </div>
 
                   <div className="flex justify-between items-center pt-1" style={{ color: COLORS['on-surface-variant'] }}>
                     <span className="font-label-sm text-[8px]">SLEEP ONSET: 64 BPM</span>
-                    <span className="font-label-sm text-[8px] font-bold" style={{ color: COLORS.tertiary }}>NADIR 03:42 (-20.3%)</span>
+                    <span className="font-label-sm text-[8px] font-bold" style={{ color: COLORS['on-surface'] }}>NADIR 03:42 (-20.3%)</span>
                     <span className="font-label-sm text-[8px]">WAKE: 59 BPM</span>
                   </div>
                 </div>
@@ -808,7 +808,7 @@ export default function SleepTracker() {
                 value="12"
                 unit="MIN"
                 subtitle="OPTIMAL // FAST"
-                color={COLORS.tertiary}
+                color={COLORS['on-surface']}
               />
               <MetricTile
                 label="RESTFULNESS"
@@ -824,7 +824,7 @@ export default function SleepTracker() {
                 value="14.2"
                 unit="RPM"
                 subtitle="STEADY STABLE"
-                color={COLORS.secondary}
+                color={COLORS['on-surface-variant']}
               />
               <MetricTile
                 label="CIRCADIAN"
@@ -832,7 +832,7 @@ export default function SleepTracker() {
                 value="92"
                 unit="%"
                 subtitle="+14M VS BASELINE"
-                color={COLORS.primary}
+                color={COLORS['on-surface']}
               />
             </div>
 
@@ -926,7 +926,7 @@ export default function SleepTracker() {
                           progress={s.quality || 0}
                           size={56}
                           strokeWidth={4}
-                          color={s.quality >= 80 ? COLORS.tertiary : s.quality >= 60 ? COLORS.secondary : COLORS.error}
+                          color={s.quality >= 80 ? COLORS['on-surface'] : s.quality >= 60 ? COLORS['on-surface-variant'] : COLORS.outline}
                           trackColor={COLORS.outline}
                         >
                           <div className="text-center">

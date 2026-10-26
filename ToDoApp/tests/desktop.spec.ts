@@ -74,17 +74,17 @@ test.describe('FlowTask Desktop Layout', () => {
   });
 
   test('should have SleepTracker with Stitch-inspired design', async ({ page }) => {
-    const sleepSection = page.locator('section#sleep');
-    await expect(sleepSection).toBeVisible();
+      const sleepSection = page.locator('section#sleep');
+      await expect(sleepSection).toBeVisible();
 
-    // Check for key SleepTracker elements visible in SETUP phase (initial state)
-    // In setup phase: "Sleep Timer" label, timer presets, START SLEEP SESSION button
-    await expect(sleepSection.locator('text=Sleep Timer')).toBeVisible();
-    await expect(sleepSection.locator('text=15 MIN')).toBeVisible();
-    await expect(sleepSection.locator('text=START SLEEP SESSION')).toBeVisible();
-    await expect(sleepSection.locator('text=OPTICAL.HRV')).toBeVisible();
-    await expect(sleepSection.locator('text=SYS.BIO // HYPNOGRAM_V04')).toBeVisible();
-    // Results-phase elements (HYPNOGRAM ARCHITECTURE, RHR DIP, LATENCY, etc.) 
-    // only appear after a session completes - not checked in initial state test
-  });
+      // Check for key SleepTracker elements visible in SETUP phase (initial state)
+      // In setup phase: "Sleep Timer" label, timer presets, START SLEEP SESSION button
+      await expect(sleepSection.locator('text=Sleep Timer')).toBeVisible();
+      await expect(sleepSection.locator('text=15 MIN')).toBeVisible();
+      await expect(sleepSection.locator('text=START SLEEP SESSION')).toBeVisible();
+      await expect(sleepSection.locator('text=SOMNA-04')).toBeVisible();
+      await expect(sleepSection.locator('text=MODULE // SLEEP TRACKER')).toBeVisible();
+      // Results-phase elements (HYPNOGRAM ARCHITECTURE, RHR DIP, LATENCY, etc.)
+      // only appear after a session completes - not checked in initial state test
+    });
 });
