@@ -24,7 +24,7 @@ const icon = (path) => (
   </svg>
 );
 
-export default function QuickAccessBar({ isOpen, onToggle, activeSection, onSectionClick }) {
+export default function QuickAccessBar({ activeSection, onSectionClick }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const barRef = useRef(null);

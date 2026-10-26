@@ -16,7 +16,7 @@ import { safeUuid } from '../utils/taskHelpers';
 const QUICK_AMOUNTS = [250, 500, 200, 350]; // ml - matching Stitch: H2O, Electrolytes, Chrono-Tea, Amino Boost
 const QUICK_LABELS = ['H2O', 'ION', 'THEA', 'BCAA'];
 const QUICK_ICONS = ['water_drop', 'electric_bolt', 'local_cafe', 'science'];
-const QUICK_COLORS = ['#00dbe9', '#fe9800', '#ffb4ab', '#00dbe9']; // tertiary, secondary, primary, tertiary
+const QUICK_COLORS = ['#ffffff', '#e0e0e0', '#a0a0a0', '#ffffff']; // monochrome white/black glow
 const DEFAULT_GOAL = 2800; // ml - matching Stitch
 
 // Monochrome Glyph color tokens
@@ -64,7 +64,6 @@ function SegmentedCircularProgress({ progress, size = 200, strokeWidth = 8, colo
     <svg width={size} height={size} className={className} style={{ transform: 'rotate(-90deg)' }}>
       <g>
         {Array.from({ length: segments }, (_, i) => {
-          const angle = (i / segments) * 360;
           const isActive = i < activeSegments;
           const segmentColor = isActive ? color : trackColor;
           return (
@@ -133,9 +132,9 @@ function QuickDosePill({ amount, label, icon, color, isSelected, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="group relative p-4 rounded-xl text-left flex flex-col justify-between h-28 transition-colors duration-75 overflow-hidden"
+className="group relative p-4 rounded-xl text-left flex flex-col justify-between h-40 transition-colors duration-75 overflow-hidden"
       style={{
-        background: isSelected ? 'rgba(255, 180, 171, 0.12)' : 'rgba(255,255,255,0.03)',
+        background: isSelected ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
         border: `1px solid ${isSelected ? COLORS.primary : COLORS.outline}`,
       }}
     >
@@ -147,10 +146,10 @@ function QuickDosePill({ amount, label, icon, color, isSelected, onClick }) {
           #{label}
         </span>
       </div>
-      <div className="flex flex-col">
-        <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>
-          {label === 'H2O' ? 'PURE WATER' : label === 'ION' ? 'ELECTROLYTES' : label === 'THEA' ? 'CHRONO-TEA' : 'AMINO BOOST'}
-        </span>
+<div className="flex flex-col gap-1.5">
+        <span className="font-label-sm text-label-sm uppercase whitespace-normal break-words leading-tight" style={{ color: COLORS['on-surface-variant'] }}>
+          {label === 'H2O' ? 'PURE WATER' : label === 'ION' ? 'ELECTROLYTES' : label === 'THEA' ? 'CHRONO-TEA' : 'AMINO BOOST'
+          }</span>
         <span className="font-title-md text-title-md" style={{ color: isSelected ? color : COLORS['on-surface'], textShadow: isSelected ? `0 0 8px ${color}80` : 'none' }}>
           +{amount} ML
         </span>
@@ -221,7 +220,6 @@ export default function HydrationTracker() {
   );
   const totalToday = todayEntries.reduce((sum, e) => sum + e.amount, 0);
   const progress = Math.min(100, (totalToday / goal) * 100);
-  const remaining = Math.max(0, goal - totalToday);
 
   const addIntake = useCallback((amount) => {
     if (!amount || amount <= 0) return;
@@ -298,8 +296,8 @@ export default function HydrationTracker() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background: `
-            radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,180,171,0.08) 0%, transparent 70%),
-            radial-gradient(ellipse 60% 40% at 0% 100%, rgba(0,219,233,0.04) 0%, transparent 60%)
+            radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,255,255,0.05) 0%, transparent 70%),
+            radial-gradient(ellipse 60% 40% at 0% 100%, rgba(255,255,255,0.03) 0%, transparent 60%)
           `,
         }}
       />
@@ -386,22 +384,6 @@ export default function HydrationTracker() {
             </div>
           </form>
         )}
-
-        {/* TOP TELEMETRY STATUS BAR */}
-        <div className="flex items-center justify-between pt-2">
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
-            <span className="font-label-sm text-label-sm uppercase tracking-widest" style={{ color: COLORS['on-surface-variant'] }}>
-              MODULE // HYDRA-04
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 px-3 py-0.5 rounded" style={{ background: COLORS['surface-container-high'] }}>
-            <span className="material-symbols-outlined text-secondary text-[13px]">bolt</span>
-            <span className="font-label-sm text-label-sm tracking-wider" style={{ color: COLORS['on-surface'] }}>
-              SYSTEM: OPTIMAL
-            </span>
-          </div>
-        </div>
 
         {/* CORE METRIC READOUT PANEL */}
         <GlassCard className="p-6" glow={progress >= 100}>
@@ -523,7 +505,7 @@ export default function HydrationTracker() {
             </div>
             <div className="flex items-center justify-between font-label-sm text-label-sm" style={{ color: COLORS['on-surface-variant'] }}>
               <span>08:00</span>
-              <span className="text-secondary tracking-widest font-bold">20:30 CUTOFF</span>
+              <span className="tracking-widest font-bold" style={{ color: COLORS['on-surface-variant'] }}>20:30 CUTOFF</span>
               <span>23:00</span>
             </div>
           </div>
@@ -532,7 +514,7 @@ export default function HydrationTracker() {
         {/* CUT-OFF COUNTDOWN TELEMETRY BANNER */}
         <div className="flex items-center justify-between p-4 rounded-xl" style={{ background: COLORS['surface-container'], border: `1px solid ${COLORS.outline}` }}>
           <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-secondary text-[24px]">bedtime</span>
+            <span className="material-symbols-outlined text-[24px]" style={{ color: COLORS['on-surface-variant'] }}>bedtime</span>
             <div className="flex flex-col">
               <span className="font-label-sm text-label-sm uppercase tracking-widest" style={{ color: COLORS['on-surface-variant'] }}>
                 HYDRA-HALT PROTOCOL

@@ -5,7 +5,13 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores([
+    'dist',
+    '.vercel',
+    'dev-dist',
+    'src-tauri/target',
+    'node_modules',
+  ]),
   {
     files: ['**/*.{js,jsx}'],
     extends: [
