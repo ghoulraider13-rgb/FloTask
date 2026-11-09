@@ -609,12 +609,14 @@ export default function HydrationTracker() {
           </div>
 
           {todayEntries.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center" style={{ color: COLORS['on-surface-variant'] }}>
-              <span className="material-symbols-outlined text-6xl mb-4" style={{ opacity: 0.3 }}>
-                water_drop
-              </span>
-              <p className="text-sm">No water logged yet</p>
-              <p className="text-xs mt-1">Tap a quick dose or enter a custom amount</p>
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-12 h-12 rounded-full border border-surface-4 bg-surface-2/60 flex items-center justify-center mb-3">
+                <svg className="w-5 h-5 text-ink-faint" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 2.66l.66.66c2.34 2.3 6.34 5.87 6.34 8.68 0 3.32-2.68 6-6 6s-6-2.68-6-6c0-2.81 4-6.38 6-8.68l.66-.66z" />
+                </svg>
+              </div>
+              <p className="text-xs font-mono font-bold text-ink-soft tracking-wider uppercase">NO FLUID LOGS TODAY</p>
+              <p className="text-3xs text-ink-line font-mono mt-1">Tap a quick dose or register custom amount</p>
             </div>
           ) : (
             <div className="space-y-2 max-h-64 overflow-y-auto pr-1">

@@ -889,8 +889,14 @@ export default function SleepTracker() {
               </div>
 
               {sessions.length === 0 ? (
-                <div className="text-center py-12" style={{ color: COLORS['on-surface-variant'] }}>
-                  No sessions recorded yet.
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="w-12 h-12 rounded-full border border-surface-4 bg-surface-2/60 flex items-center justify-center mb-3">
+                    <svg className="w-5 h-5 text-ink-faint" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                    </svg>
+                  </div>
+                  <p className="text-xs font-mono font-bold text-ink-soft tracking-wider uppercase">NO SESSIONS RECORDED</p>
+                  <p className="text-3xs text-ink-line font-mono mt-1">Complete a sleep session to populate telemetry</p>
                 </div>
               ) : (
                 <div className="space-y-2">

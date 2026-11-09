@@ -3,7 +3,7 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 import { useReminders, fireBrowserNotification } from './hooks/useReminders';
 import { createTask, actionToTaskOrAlarm } from './utils/taskHelpers';
 import { parseActions } from './utils/nlm';
-import { playGentleChime, playStandardAlarm, playEnforcerAlarm } from './utils/audioHelpers';
+import { playGentleChime, playStandardAlarm, playEnforcerAlarm, playMechanicalClick } from './utils/audioHelpers';
 
 import ReactiveGrid from './components/ReactiveGrid';
 import TimerHub from './components/TimerHub';
@@ -102,6 +102,10 @@ export default function App() {
 
   // ── Task CRUD ─────────────────────────────────────────────────
   const handleAddTask = useCallback((title, options = {}) => {
+    playMechanicalClick();
+    if (typeof navigator !== 'undefined') {
+      navigator.vibrate?.([50]);
+    }
     setTasks((prev) => [createTask(title, options), ...prev]);
   }, [setTasks]);
 
@@ -145,7 +149,7 @@ export default function App() {
   const handleNlmText = useCallback(async (text) => {
     const actions = await parseActions(text);
     if (!actions || actions.length === 0) {
-      handleAddTask(text, {});
+      handleAddTask(text, { isAgentCreated: true });
       return 1;
     }
     return handleNlmActions(actions);
