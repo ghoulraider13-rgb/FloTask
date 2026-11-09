@@ -31,9 +31,13 @@ export default function App() {
   // Quick access bar state
   const [activeSection, setActiveSection] = useState('tasks');
 
-  // ── Cursor glow (direct DOM — zero re-renders) ───────────────────
+  // ── Cursor glow (desktop fine-pointer only — zero re-renders) ───
   const glowRef = useRef(null);
   useEffect(() => {
+    const isFinePointer = typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!isFinePointer || reducedMotion) return;
+
     const glow = glowRef.current;
     if (!glow) return;
     const onMove = (e) => {
@@ -42,7 +46,7 @@ export default function App() {
       const over = !!el?.closest('button, input, [contenteditable], textarea, a, label, select');
       glow.style.opacity = over ? '1' : '0.45';
       glow.style.background = over
-        ? 'radial-gradient(circle, rgba(0,255,255,0.13) 0%, rgba(255,255,255,0.07) 40%, transparent 70%)'
+        ? 'radial-gradient(circle, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 40%, transparent 70%)'
         : 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%)';
     };
     window.addEventListener('mousemove', onMove, { passive: true });
@@ -198,13 +202,13 @@ export default function App() {
       />
 
       {/* ── Single responsive layout: one column on phones, auto-fit grid above ── */}
-      <main className="app-shell relative z-10 max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="app-shell relative z-10 max-w-shell mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* ── Header ──────────────────────────────────────────── */}
         <header className="text-center mb-8 md:mb-12">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-[0.35em] text-white uppercase font-mono">
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-hero text-ink-primary uppercase font-mono">
             FLOTASK
           </h1>
-          <p className="text-[11px] text-gray-500 mt-3 tracking-[0.4em] uppercase font-mono">
+          <p className="text-2xs text-ink-soft mt-3 tracking-tagline uppercase font-mono">
             FOCUS · FLOW · FINISH
           </p>
         </header>
@@ -214,7 +218,7 @@ export default function App() {
 
           {/* Section 1: Tasks */}
           <section id="tasks" className="nothing-card scroll-mt-28 md:scroll-mt-20 p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="tasks-heading">
-            <h2 id="tasks-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
+            <h2 id="tasks-heading" className="text-2xs font-bold text-ink-soft tracking-label uppercase self-start">
               TASKS
             </h2>
             <TaskList
@@ -229,7 +233,7 @@ export default function App() {
 
           {/* Section 2: Notes (Scratchpad) */}
           <section id="notes" className="nothing-card scroll-mt-28 md:scroll-mt-20 p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="notes-heading">
-            <h2 id="notes-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
+            <h2 id="notes-heading" className="text-2xs font-bold text-ink-soft tracking-label uppercase self-start">
               NOTES
             </h2>
             <RichScratchpad onNlmActions={handleNlmActions} />
@@ -237,7 +241,7 @@ export default function App() {
 
           {/* Section 3: Focus (Timer + Stopwatch) */}
           <section id="focus" className="nothing-card scroll-mt-28 md:scroll-mt-20 p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="focus-heading">
-            <h2 id="focus-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
+            <h2 id="focus-heading" className="text-2xs font-bold text-ink-soft tracking-label uppercase self-start">
               FOCUS
             </h2>
             <TimerHub />
@@ -246,7 +250,7 @@ export default function App() {
 
           {/* Section 4: Alarms */}
           <section id="alarms" className="nothing-card scroll-mt-28 md:scroll-mt-20 p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="alarms-heading">
-            <h2 id="alarms-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
+            <h2 id="alarms-heading" className="text-2xs font-bold text-ink-soft tracking-label uppercase self-start">
               ALARMS
             </h2>
             <AlarmsHub
@@ -258,7 +262,7 @@ export default function App() {
 
           {/* Section 5: Hydration */}
           <section id="hydration" className="nothing-card scroll-mt-28 md:scroll-mt-20 p-5 sm:p-6" aria-labelledby="hydration-heading">
-            <h2 id="hydration-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase mb-4">
+            <h2 id="hydration-heading" className="text-2xs font-bold text-ink-soft tracking-label uppercase mb-4">
               HYDRATION TRACKER
             </h2>
             <HydrationTracker />
@@ -266,7 +270,7 @@ export default function App() {
 
           {/* Section 6: Sleep */}
           <section id="sleep" className="nothing-card scroll-mt-28 md:scroll-mt-20 p-5 sm:p-6" aria-labelledby="sleep-heading">
-            <h2 id="sleep-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase mb-4">
+            <h2 id="sleep-heading" className="text-2xs font-bold text-ink-soft tracking-label uppercase mb-4">
               SLEEP TRACKER
             </h2>
             <SleepTracker />
@@ -276,4 +280,4 @@ export default function App() {
       </main>
     </div>
   );
-}// test change
+}

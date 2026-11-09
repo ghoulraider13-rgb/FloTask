@@ -35,9 +35,9 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
   };
 
   const intensityColor = {
-    low: 'border-gray-700',
-    medium: 'border-gray-600',
-    high: 'border-red-500/50',
+    low: 'border-surface-4',
+    medium: 'border-surface-5',
+    high: 'border-accent-red/50',
   };
 
   const getDaysInMonth = (date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -64,8 +64,8 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
       <button
         key={`day-${d}`}
         onClick={() => handleDateSelect(d)}
-        className={`w-6 h-6 flex items-center justify-center text-[10px] rounded-full transition-all font-mono hover:bg-gray-800 ${
-          isToday ? 'bg-white text-black font-bold' : 'text-gray-400'
+        className={`w-6 h-6 flex items-center justify-center text-3xs rounded-full transition-all font-mono hover:bg-surface-4 ${
+          isToday ? 'bg-white text-black font-bold' : 'text-ink-muted'
         }`}
       >
         {d}
@@ -76,7 +76,7 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
   return (
     <div className="flex flex-col gap-1 h-full">
       <div className="flex items-center justify-between">
-        <h3 className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">ALARMS</h3>
+        <h3 className="text-2xs font-bold text-ink-soft tracking-label uppercase self-start">ALARMS</h3>
       </div>
 
       {/* Alarm pills list */}
@@ -88,28 +88,28 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
           >
             {/* Intensity dot */}
             <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
-              alarm.intensity === 'high' ? 'bg-red-500 animate-pulse-slow' :
-              alarm.intensity === 'medium' ? 'bg-gray-400' : 'bg-gray-600'
+              alarm.intensity === 'high' ? 'bg-accent-red animate-pulse-slow' :
+              alarm.intensity === 'medium' ? 'bg-ink-muted' : 'bg-ink-faint'
             }`} />
 
             {/* Time */}
-            <span className="text-sm font-bold text-white font-dotmatrix tracking-[0.1em]">
+            <span className="text-sm font-bold text-white font-dotmatrix tracking-time">
               {formatAlarmTime(alarm.dateTime)}
             </span>
 
             {/* Label and Date */}
-            <span className="text-[10px] text-gray-500 font-dotmatrix uppercase truncate max-w-[150px] flex items-baseline ml-auto">
+            <span className="text-3xs text-ink-soft font-dotmatrix uppercase truncate max-w-[150px] flex items-baseline ml-auto">
               {alarm.label && alarm.label !== 'Alarm' ? alarm.label : ''}
-              <span className="text-[10px] opacity-60 ml-2 font-mono tracking-widest">- {formatAlarmDate(alarm.dateTime)}</span>
+              <span className="text-3xs opacity-60 ml-2 font-mono tracking-widest">- {formatAlarmDate(alarm.dateTime)}</span>
             </span>
 
             {/* Custom Toggle Symbol */}
-            <span className="text-white text-[10px] tracking-widest pl-1.5 font-dotmatrix">⏽</span>
+            <span className="text-white text-3xs tracking-widest pl-1.5 font-dotmatrix">⏽</span>
 
             {/* Delete — always visible (mobile has no hover) */}
             <button
               onClick={() => { playMechanicalClick(); onDelete(alarm.id); }}
-              className="text-gray-600 hover:text-red-500 transition-all ml-1 p-1"
+              className="text-ink-faint hover:text-accent-red transition-all ml-1 p-1"
               title="Remove"
               aria-label="Remove alarm"
             >
@@ -125,10 +125,10 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
         {/* Add button */}
         <button
           onClick={() => { playMechanicalClick(); setShowForm(!showForm); }}
-          className={`px-4 py-2 text-xs font-dotmatrix tracking-wider rounded-full border border-gray-700 flex items-center gap-2 transition-all duration-200 ${
+          className={`px-4 py-2 text-xs font-dotmatrix tracking-wider rounded-full border border-surface-4 flex items-center gap-2 transition-all duration-200 ${
             showForm
               ? 'bg-white text-black border-white'
-              : 'bg-transparent text-white hover:border-gray-500 hover:bg-gray-900'
+              : 'bg-transparent text-white hover:border-surface-5 hover:bg-surface-2'
           }`}
           title="Add alarm"
         >
@@ -136,7 +136,6 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
         </button>
       </div>
 
-      {/* Inline add form */}
       {showForm && (
         <form onSubmit={handleAdd} className="mt-4 flex flex-wrap items-center gap-3 animate-fade-in">
           <input
@@ -158,7 +157,7 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
           <button
             type="submit"
             disabled={!dateTime}
-            className="btn-pill-primary px-6 py-2 text-[10px] disabled:opacity-30 disabled:cursor-not-allowed"
+            className="btn-pill-primary px-6 py-2 text-3xs disabled:opacity-30 disabled:cursor-not-allowed"
           >
             SET
           </button>
@@ -166,19 +165,19 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
       )}
 
       {/* Mini Calendar */}
-      <div className="mt-auto pt-4 border border-gray-800 rounded-xl p-4 bg-[#050505] lg:max-w-[280px]">
+      <div className="mt-auto pt-4 border border-surface-5 rounded-xl p-4 bg-surface-deep lg:max-w-[280px]">
         <div className="flex items-center justify-between mb-4">
           <span className="text-xs font-bold text-white uppercase tracking-widest font-mono">
             {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
           </span>
           <div className="flex gap-2">
-            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))} className="text-gray-500 hover:text-white">◀</button>
-            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))} className="text-gray-500 hover:text-white">▶</button>
+            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))} className="text-ink-soft hover:text-white">◀</button>
+            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))} className="text-ink-soft hover:text-white">▶</button>
           </div>
         </div>
         <div className="grid grid-cols-7 gap-1 text-center mb-2">
           {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-            <span key={i} className="text-[9px] text-gray-600 font-mono tracking-widest">{day}</span>
+            <span key={i} className="text-4xs text-ink-faint font-mono tracking-widest">{day}</span>
           ))}
         </div>
         <div className="grid grid-cols-7 gap-1 place-items-center">

@@ -1,7 +1,8 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { playMechanicalClick } from '../utils/audioHelpers';
+import { DRAW_COLORS } from '../utils/drawConstants';
 
-const COLORS = ['#ffffff', '#22d3ee', '#a3e635', '#f472b6', '#fbbf24'];
+const COLORS = DRAW_COLORS;
 const WIDTHS = [2, 4, 8];
 const MAX_UNDO = 12;
 
@@ -153,20 +154,20 @@ export default function DrawPad({ onInsert, onCancel }) {
   return (
     <div className="flex flex-col flex-1 min-h-[220px]">
       {/* ── Tool row ────────────────────────────────────────────── */}
-      <div className="flex items-center gap-1.5 px-5 py-2 border-b border-gray-800 flex-wrap">
+      <div className="flex items-center gap-1.5 px-5 py-2 border-b border-surface-5 flex-wrap">
         {COLORS.map((c) => (
           <button
             key={c}
             type="button"
             onClick={() => { playMechanicalClick(); setColor(c); setErasing(false); }}
             className={`w-5 h-5 rounded-full border transition-all duration-150 ${
-              color === c && !erasing ? 'border-white scale-110' : 'border-gray-700 hover:border-gray-400'
+              color === c && !erasing ? 'border-white scale-110' : 'border-surface-4 hover:border-surface-5'
             }`}
             style={{ backgroundColor: c }}
             title={`Pen ${c}`}
           />
         ))}
-        <div className="w-px h-5 bg-gray-800 mx-1" />
+        <div className="w-px h-5 bg-surface-5 mx-1" />
         {WIDTHS.map((w) => (
           <button
             key={w}
@@ -178,17 +179,17 @@ export default function DrawPad({ onInsert, onCancel }) {
             title={`Stroke ${w}px`}
           >
             <span
-              className="rounded-full bg-gray-300"
+              className="rounded-full bg-ink-secondary"
               style={{ width: w + 2, height: w + 2, backgroundColor: color }}
             />
           </button>
         ))}
-        <div className="w-px h-5 bg-gray-800 mx-1" />
+        <div className="w-px h-5 bg-surface-5 mx-1" />
         <button
           type="button"
           onClick={() => { playMechanicalClick(); setErasing((v) => !v); }}
-          className={`px-2 h-7 rounded-md text-[9px] font-bold tracking-widest transition-all duration-200 ${
-            erasing ? 'bg-white text-black' : 'text-gray-500 hover:text-white hover:bg-surface-3'
+          className={`px-2 h-7 rounded-md text-4xs font-bold tracking-widest transition-all duration-200 ${
+            erasing ? 'bg-white text-black' : 'text-ink-soft hover:text-white hover:bg-surface-3'
           }`}
           title="Eraser"
         >
@@ -198,7 +199,7 @@ export default function DrawPad({ onInsert, onCancel }) {
           type="button"
           onClick={handleUndo}
           disabled={!canUndo}
-          className="px-2 h-7 rounded-md text-[9px] font-bold tracking-widest text-gray-500 hover:text-white hover:bg-surface-3 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+          className="px-2 h-7 rounded-md text-4xs font-bold tracking-widest text-ink-soft hover:text-white hover:bg-surface-3 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
           title="Undo last stroke"
         >
           UNDO
@@ -206,7 +207,7 @@ export default function DrawPad({ onInsert, onCancel }) {
         <button
           type="button"
           onClick={handleClear}
-          className="px-2 h-7 rounded-md text-[9px] font-bold tracking-widest text-gray-500 hover:text-red-400 hover:bg-surface-3 transition-all duration-200"
+          className="px-2 h-7 rounded-md text-4xs font-bold tracking-widest text-ink-soft hover:text-accent-red hover:bg-surface-3 transition-all duration-200"
           title="Clear canvas"
         >
           CLEAR
@@ -233,13 +234,13 @@ export default function DrawPad({ onInsert, onCancel }) {
       </div>
 
       {/* ── Actions ─────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-5 py-3 border-t border-gray-800">
-        <span className="text-[10px] text-gray-600 font-mono">SKETCH → PNG → NOTE</span>
+      <div className="flex items-center justify-between px-5 py-3 border-t border-surface-5">
+        <span className="text-3xs text-ink-faint font-mono">SKETCH → PNG → NOTE</span>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => { playMechanicalClick(); onCancel(); }}
-            className="btn-pill px-4 py-1.5 text-[10px] text-gray-400 hover:text-white"
+            className="btn-pill px-4 py-1.5 text-3xs text-ink-muted hover:text-white"
           >
             CANCEL
           </button>
@@ -247,7 +248,7 @@ export default function DrawPad({ onInsert, onCancel }) {
             type="button"
             onClick={handleInsert}
             disabled={!hasInk}
-            className="btn-pill px-5 py-1.5 text-[10px] bg-white text-black font-bold hover:bg-gray-200 border-transparent disabled:opacity-30 disabled:cursor-not-allowed"
+            className="btn-pill px-5 py-1.5 text-3xs bg-white text-black font-bold hover:bg-ink-secondary border-transparent disabled:opacity-30 disabled:cursor-not-allowed"
           >
             INSERT
           </button>

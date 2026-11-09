@@ -18,30 +18,30 @@ const PRESET_MIN = [15, 30, 45, 60, 90, 120];
 const MOVEMENT_THRESHOLD = 1.5;
 const SAMPLE_INTERVAL = 2000;
 
-// Monochrome Glyph color tokens (same as HydrationTracker)
+// Monochrome Glyph color tokens (same as HydrationTracker, mapped to CSS variables)
 const COLORS = {
-  surface: '#121414',
-  'surface-dim': '#121414',
-  'surface-bright': '#383939',
-  'surface-container-lowest': '#0d0e0f',
-  'surface-container-low': '#1b1c1c',
-  'surface-container': '#1f2020',
-  'surface-container-high': '#292a2a',
-  'surface-container-highest': '#343535',
-  'on-surface': '#e3e2e2',
-  'on-surface-variant': '#a0a0a0',
-  outline: '#555555',
-  'outline-variant': '#333333',
-  primary: '#ffffff',
-  'on-primary': '#000000',
-  'primary-container': '#e0e0e0',
-  secondary: '#cccccc',
-  'on-secondary': '#000000',
-  'secondary-container': '#aaaaaa',
-  tertiary: '#ffffff',
-  'on-tertiary': '#000000',
-  'tertiary-container': '#e0e0e0',
-  error: '#ffffff',
+  surface: 'var(--surface-1)',
+  'surface-dim': 'var(--surface-1)',
+  'surface-bright': 'var(--surface-5)',
+  'surface-container-lowest': 'var(--surface-deep)',
+  'surface-container-low': 'var(--surface-2)',
+  'surface-container': 'var(--surface-3)',
+  'surface-container-high': 'var(--surface-4)',
+  'surface-container-highest': 'var(--surface-5)',
+  'on-surface': 'var(--ink-secondary)',
+  'on-surface-variant': 'var(--ink-muted)',
+  outline: 'var(--ink-faint)',
+  'outline-variant': 'var(--ink-disabled)',
+  primary: 'var(--ink-primary)',
+  'on-primary': 'var(--surface-0)',
+  'primary-container': 'var(--ink-secondary)',
+  secondary: 'var(--ink-tertiary)',
+  'on-secondary': 'var(--surface-0)',
+  'secondary-container': 'var(--ink-muted)',
+  tertiary: 'var(--ink-primary)',
+  'on-tertiary': 'var(--surface-0)',
+  'tertiary-container': 'var(--ink-secondary)',
+  error: 'var(--accent-red)',
 };
 
 function fmtMs(ms) {
@@ -706,7 +706,7 @@ export default function SleepTracker() {
                 <div className="flex flex-col gap-2 relative w-full">
                   {/* AWAKE LANE */}
                   <div className="flex items-center h-4 relative">
-                    <span className="font-label-sm text-[8px] uppercase tracking-tighter w-9" style={{ color: COLORS['on-surface-variant'] }}>
+                    <span className="font-label-sm text-4xs uppercase tracking-tighter w-9" style={{ color: COLORS['on-surface-variant'] }}>
                       AWK
                     </span>
                     <div className="flex-1 h-3 relative rounded" style={{ background: 'rgba(255,255,255,0.05)' }}>
@@ -717,7 +717,7 @@ export default function SleepTracker() {
 
                   {/* REM LANE (Primary Accent) */}
                   <div className="flex items-center h-5 relative">
-                    <span className="font-label-sm text-[8px] uppercase tracking-tighter w-9" style={{ color: COLORS['on-surface'] }}>
+                    <span className="font-label-sm text-4xs uppercase tracking-tighter w-9" style={{ color: COLORS['on-surface'] }}>
                       REM
                     </span>
                     <div className="flex-1 h-4 relative rounded" style={{ background: 'rgba(255,255,255,0.05)' }}>
@@ -729,7 +729,7 @@ export default function SleepTracker() {
 
                   {/* LIGHT SLEEP LANE (Secondary Accent) */}
                   <div className="flex items-center h-5 relative">
-                    <span className="font-label-sm text-[8px] uppercase tracking-tighter w-9" style={{ color: COLORS['on-surface-variant'] }}>
+                    <span className="font-label-sm text-4xs uppercase tracking-tighter w-9" style={{ color: COLORS['on-surface-variant'] }}>
                       LIGHT
                     </span>
                     <div className="flex-1 h-4 relative rounded" style={{ background: 'rgba(255,255,255,0.05)' }}>
@@ -741,7 +741,7 @@ export default function SleepTracker() {
 
                   {/* DEEP SLEEP LANE (Tertiary Accent) */}
                   <div className="flex items-center h-5 relative">
-                    <span className="font-label-sm text-[8px] uppercase tracking-tighter w-9" style={{ color: COLORS['on-surface'] }}>
+                    <span className="font-label-sm text-4xs uppercase tracking-tighter w-9" style={{ color: COLORS['on-surface'] }}>
                       DEEP
                     </span>
                     <div className="flex-1 h-4 relative rounded" style={{ background: 'rgba(255,255,255,0.05)' }}>
@@ -754,18 +754,18 @@ export default function SleepTracker() {
 
                 {/* Time Ticks */}
                 <div className="flex justify-between items-center pl-9 pt-1" style={{ color: COLORS['on-surface-variant'] }}>
-                  <span className="font-label-sm text-[8px]">23:15</span>
-                  <span className="font-label-sm text-[8px]">01:00</span>
-                  <span className="font-label-sm text-[8px]">03:00</span>
-                  <span className="font-label-sm text-[8px]">05:00</span>
-                  <span className="font-label-sm text-[8px]">07:03</span>
+                  <span className="font-label-sm text-4xs">23:15</span>
+                  <span className="font-label-sm text-4xs">01:00</span>
+                  <span className="font-label-sm text-4xs">03:00</span>
+                  <span className="font-label-sm text-4xs">05:00</span>
+                  <span className="font-label-sm text-4xs">07:03</span>
                 </div>
 
                 {/* Hammock Curve: Nocturnal Heart Rate Dip */}
                 <div className="mt-2 pt-2 p-2 rounded" style={{ background: 'rgba(255,255,255,0.02)' }}>
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[14px]" style={{ color: COLORS['on-surface'] }}>vital_signs</span>
+                      <span className="material-symbols-outlined text-sm" style={{ color: COLORS['on-surface'] }}>vital_signs</span>
                       <span className="font-label-sm text-label-sm uppercase" style={{ color: COLORS['on-surface-variant'] }}>
                         RHR DIP // HAMMOCK DYNAMICS
                       </span>
@@ -792,9 +792,9 @@ export default function SleepTracker() {
                   </div>
 
                   <div className="flex justify-between items-center pt-1" style={{ color: COLORS['on-surface-variant'] }}>
-                    <span className="font-label-sm text-[8px]">SLEEP ONSET: 64 BPM</span>
-                    <span className="font-label-sm text-[8px] font-bold" style={{ color: COLORS['on-surface'] }}>NADIR 03:42 (-20.3%)</span>
-                    <span className="font-label-sm text-[8px]">WAKE: 59 BPM</span>
+                    <span className="font-label-sm text-4xs">SLEEP ONSET: 64 BPM</span>
+                    <span className="font-label-sm text-4xs font-bold" style={{ color: COLORS['on-surface'] }}>NADIR 03:42 (-20.3%)</span>
+                    <span className="font-label-sm text-4xs">WAKE: 59 BPM</span>
                   </div>
                 </div>
               </div>
@@ -847,7 +847,7 @@ export default function SleepTracker() {
                   color: COLORS['on-surface'],
                 }}
               >
-                <span className="material-symbols-outlined text-[18px]">history</span>
+                <span className="material-symbols-outlined text-lg">history</span>
                 <span className="font-label-md text-label-md font-bold uppercase tracking-widest">HISTORY</span>
               </button>
 

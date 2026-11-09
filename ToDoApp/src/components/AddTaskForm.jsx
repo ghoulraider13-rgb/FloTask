@@ -119,7 +119,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="flex items-end gap-3">
-        <div className="flex-1 min-w-0 flex items-center gap-2 border-b border-gray-800">
+        <div className="flex-1 min-w-0 flex items-center gap-2 border-b border-surface-5">
           <input
             id="add-task-input"
             type="text"
@@ -139,7 +139,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
             className={`p-2.5 rounded-full transition-all duration-200 flex-shrink-0 ${
               isListening
                 ? 'bg-white text-black animate-pulse'
-                : 'text-gray-600 hover:text-gray-400'
+                : 'text-ink-faint hover:text-ink-tertiary'
             } ${!voiceSupported ? 'opacity-30 cursor-not-allowed' : ''}`}
             title={voiceSupported
               ? (isListening ? 'Stop — creating task' : 'Speak a task — e.g. “walk the dog tomorrow at 6pm”')
@@ -156,7 +156,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
             className={`p-2.5 rounded-full transition-all duration-200 flex-shrink-0 ${
               showOptions
                 ? 'bg-white text-black'
-                : 'text-gray-600 hover:text-gray-400'
+                : 'text-ink-faint hover:text-ink-tertiary'
             }`}
             title="Manual reminder options (bypass NLM)"
           >
@@ -169,14 +169,14 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
           id="add-task-button"
           type="submit"
           disabled={!title.trim() || parsing}
-          className="btn-pill px-6 py-2.5 text-[11px] bg-white text-black font-bold hover:bg-gray-200 border-transparent disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0"
+          className="btn-pill px-6 py-2.5 text-2xs bg-white text-black font-bold hover:bg-ink-secondary border-transparent disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0"
         >
           {parsing ? '···' : '+ ADD'}
         </button>
       </div>
 
       {voiceError && (
-        <p className="text-[10px] text-red-400 font-mono">{voiceError}</p>
+        <p className="text-3xs text-accent-red font-mono">{voiceError}</p>
       )}
 
       {showOptions && (

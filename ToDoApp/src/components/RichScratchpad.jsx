@@ -12,12 +12,7 @@ import { parseActions } from '../utils/nlm';
 import DrawPad from './DrawPad';
 
 export default function RichScratchpad({ onNlmActions }) {
-  const [initialHtml] = useState(() => {
-    try {
-      const stored = window.localStorage.getItem('scratchpad-rich');
-      return stored ? JSON.parse(stored) : '';
-    } catch { return ''; }
-  });
+  const [savedHtml, setSavedHtml] = useLocalStorage('scratchpad-rich', '');
   const [notes, setNotes] = useLocalStorage('saved-notes', []);
   const [isShrinking, setIsShrinking] = useState(false);
   const [processedItems, setProcessedItems] = useLocalStorage('nlm-processed', []);
@@ -30,10 +25,10 @@ export default function RichScratchpad({ onNlmActions }) {
   const [drawing, setDrawing] = useState(false);
 
   useEffect(() => {
-    if (editorRef.current && initialHtml && !editorRef.current.innerHTML) {
-      editorRef.current.innerHTML = initialHtml;
+    if (editorRef.current && savedHtml && !editorRef.current.innerHTML) {
+      editorRef.current.innerHTML = savedHtml;
     }
-  }, [initialHtml]);
+  }, [savedHtml]);
 
   const flashAgentIndicator = useCallback(() => {
     const saveIndicator = document.getElementById('save-indicator');
@@ -94,14 +89,14 @@ export default function RichScratchpad({ onNlmActions }) {
           codeBlocks.forEach((block) => Prism.highlightElement(block));
         }
 
-        window.localStorage.setItem('scratchpad-rich', JSON.stringify(editorRef.current.innerHTML));
+        setSavedHtml(editorRef.current.innerHTML);
       }
       const indicator = document.getElementById('save-indicator');
       if (indicator && indicator.textContent !== 'Agent Executed Actions') {
         indicator.textContent = 'saved';
       }
     }, 2000); // 2 second debounce for NLM API calls
-  }, [analyzeNLM]);
+  }, [analyzeNLM, setSavedHtml]);
 
   // Insert a sketch PNG into the rich editor at the cursor
   const insertSketch = (dataUrl) => {
@@ -109,8 +104,8 @@ export default function RichScratchpad({ onNlmActions }) {
     const img = document.createElement('img');
     img.src = dataUrl;
     img.style.maxWidth = '100%';
-    img.style.borderRadius = '8px';
-    img.style.border = '1px solid #333';
+    img.style.borderRadius = 'var(--radius-input)';
+    img.style.border = '1px solid var(--ink-disabled)';
     img.alt = 'sketch';
     editorRef.current.focus();
     const sel = window.getSelection();
@@ -223,7 +218,7 @@ export default function RichScratchpad({ onNlmActions }) {
         createdAt: new Date().toISOString(),
       }, ...prev]);
       editorRef.current.innerHTML = '';
-      window.localStorage.setItem('scratchpad-rich', JSON.stringify(''));
+      setSavedHtml('');
       setIsShrinking(false);
     }, 400);
   };
@@ -255,30 +250,30 @@ export default function RichScratchpad({ onNlmActions }) {
     <div className="flex flex-col gap-5 h-full relative">
       <div className={`nothing-card flex flex-col flex-1 transition-all duration-400 ${isShrinking ? 'scale-95 opacity-0' : ''}`}>
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
-          <h3 className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase">SCRATCHPAD</h3>
+          <h3 className="text-2xs font-bold text-ink-soft tracking-label uppercase">SCRATCHPAD</h3>
           <div className="flex items-center gap-1.5">
-            <span id="save-indicator" className="text-[9px] text-gray-600 font-mono">
+            <span id="save-indicator" className="text-4xs text-ink-faint font-mono">
               saved
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-1 px-5 pb-3 border-b border-gray-800">
+        <div className="flex items-center gap-1 px-5 pb-3 border-b border-surface-5">
           {toolbarBtns.map(({ cmd, label, cls }) => (
             <button
               key={cmd}
               type="button"
               onClick={() => { playMechanicalClick(); exec(cmd); }}
-              className={`w-8 h-8 rounded-md text-xs text-gray-500 hover:text-white hover:bg-surface-3 transition-all duration-200 flex items-center justify-center ${cls}`}
+              className={`w-8 h-8 rounded-md text-xs text-ink-soft hover:text-white hover:bg-surface-3 transition-all duration-200 flex items-center justify-center ${cls}`}
               title={cmd}
             >
               {label}
             </button>
           ))}
-          <div className="w-px h-5 bg-gray-800 mx-1" />
-          <button type="button" onClick={() => { playMechanicalClick(); exec('formatBlock', '<h3>'); }} className="w-8 h-8 rounded-md text-[10px] font-bold text-gray-500 hover:text-white hover:bg-surface-3 transition-all">H</button>
-          <button type="button" onClick={() => { playMechanicalClick(); insertCodeBlock(); }} className="px-2 h-8 rounded-md text-[10px] font-mono text-gray-500 hover:text-white hover:bg-surface-3 transition-all">{'</>'}</button>
-          <button type="button" onClick={() => { playMechanicalClick(); fileInputRef.current?.click(); }} className="w-8 h-8 rounded-md text-gray-500 hover:text-white hover:bg-surface-3 flex items-center justify-center">
+          <div className="w-px h-5 bg-surface-5 mx-1" />
+          <button type="button" onClick={() => { playMechanicalClick(); exec('formatBlock', '<h3>'); }} className="w-8 h-8 rounded-md text-3xs font-bold text-ink-soft hover:text-white hover:bg-surface-3 transition-all">H</button>
+          <button type="button" onClick={() => { playMechanicalClick(); insertCodeBlock(); }} className="px-2 h-8 rounded-md text-3xs font-mono text-ink-soft hover:text-white hover:bg-surface-3 transition-all">{'</>'}</button>
+          <button type="button" onClick={() => { playMechanicalClick(); fileInputRef.current?.click(); }} className="w-8 h-8 rounded-md text-ink-soft hover:text-white hover:bg-surface-3 flex items-center justify-center">
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V5.25a1.5 1.5 0 00-1.5-1.5H3.75a1.5 1.5 0 00-1.5 1.5v14.25a1.5 1.5 0 001.5 1.5z" /></svg>
           </button>
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
@@ -289,7 +284,7 @@ export default function RichScratchpad({ onNlmActions }) {
             className={`w-8 h-8 rounded-md flex items-center justify-center transition-all duration-200 ${
               drawing
                 ? 'bg-white text-black'
-                : 'text-gray-500 hover:text-white hover:bg-surface-3'
+                : 'text-ink-soft hover:text-white hover:bg-surface-3'
             }`}
             title={drawing ? 'Close draw tool' : 'Draw a sketch — inserted into the note'}
           >
@@ -314,9 +309,9 @@ export default function RichScratchpad({ onNlmActions }) {
           />
         )}
 
-        <div className="flex items-center justify-between px-5 py-4 border-t border-gray-800">
-          <span className="text-[10px] text-gray-600 font-mono">{wordCount} words</span>
-          <button onClick={saveToArchive} className="btn-pill px-6 py-2 text-[10px] bg-white text-black font-bold hover:bg-gray-200 border-transparent">
+        <div className="flex items-center justify-between px-5 py-4 border-t border-surface-5">
+          <span className="text-3xs text-ink-faint font-mono">{wordCount} words</span>
+          <button onClick={saveToArchive} className="btn-pill px-6 py-2 text-3xs bg-white text-black font-bold hover:bg-ink-secondary border-transparent">
             SAVE TO ARCHIVE
           </button>
         </div>

@@ -16,33 +16,33 @@ import { safeUuid } from '../utils/taskHelpers';
 const QUICK_AMOUNTS = [250, 500, 200, 350]; // ml - matching Stitch: H2O, Electrolytes, Chrono-Tea, Amino Boost
 const QUICK_LABELS = ['H2O', 'ION', 'THEA', 'BCAA'];
 const QUICK_ICONS = ['water_drop', 'electric_bolt', 'local_cafe', 'science'];
-const QUICK_COLORS = ['#ffffff', '#e0e0e0', '#a0a0a0', '#ffffff']; // monochrome white/black glow
+const QUICK_COLORS = ['var(--ink-primary)', 'var(--ink-secondary)', 'var(--ink-muted)', 'var(--ink-primary)'];
 const DEFAULT_GOAL = 2800; // ml - matching Stitch
 
-// Monochrome Glyph color tokens
+// Monochrome Glyph color tokens (mapped to CSS variables)
 const COLORS = {
-  surface: '#121414',
-  'surface-dim': '#121414',
-  'surface-bright': '#383939',
-  'surface-container-lowest': '#0d0e0f',
-  'surface-container-low': '#1b1c1c',
-  'surface-container': '#1f2020',
-  'surface-container-high': '#292a2a',
-  'surface-container-highest': '#343535',
-  'on-surface': '#e3e2e2',
-  'on-surface-variant': '#a0a0a0',
-  outline: '#555555',
-  'outline-variant': '#333333',
-  primary: '#ffffff',
-  'on-primary': '#000000',
-  'primary-container': '#e0e0e0',
-  secondary: '#cccccc',
-  'on-secondary': '#000000',
-  'secondary-container': '#aaaaaa',
-  tertiary: '#ffffff',
-  'on-tertiary': '#000000',
-  'tertiary-container': '#e0e0e0',
-  error: '#ffffff',
+  surface: 'var(--surface-1)',
+  'surface-dim': 'var(--surface-1)',
+  'surface-bright': 'var(--surface-5)',
+  'surface-container-lowest': 'var(--surface-deep)',
+  'surface-container-low': 'var(--surface-2)',
+  'surface-container': 'var(--surface-3)',
+  'surface-container-high': 'var(--surface-4)',
+  'surface-container-highest': 'var(--surface-5)',
+  'on-surface': 'var(--ink-secondary)',
+  'on-surface-variant': 'var(--ink-muted)',
+  outline: 'var(--ink-faint)',
+  'outline-variant': 'var(--ink-disabled)',
+  primary: 'var(--ink-primary)',
+  'on-primary': 'var(--surface-0)',
+  'primary-container': 'var(--ink-secondary)',
+  secondary: 'var(--ink-tertiary)',
+  'on-secondary': 'var(--surface-0)',
+  'secondary-container': 'var(--ink-muted)',
+  tertiary: 'var(--ink-primary)',
+  'on-tertiary': 'var(--surface-0)',
+  'tertiary-container': 'var(--ink-secondary)',
+  error: 'var(--accent-red)',
 };
 
 function todayKey() {
@@ -140,7 +140,7 @@ className="group relative p-4 rounded-xl text-left flex flex-col justify-between
     >
       <div className="flex justify-between items-start w-full">
         <div className="w-7 h-7 rounded flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.05)', color: isSelected ? color : COLORS['on-surface-variant'] }}>
-          <span className="material-symbols-outlined text-[16px]">{icon}</span>
+          <span className="material-symbols-outlined text-base">{icon}</span>
         </div>
         <span className="font-label-sm text-label-sm" style={{ color: isSelected ? COLORS['on-surface'] : COLORS['on-surface-variant'] }}>
           #{label}
@@ -176,7 +176,7 @@ function HistoryEntry({ entry, onDelete, index }) {
           background: 'rgba(255,255,255,0.08)',
           border: `1px solid ${COLORS.primary}`,
         }}>
-          <span className="material-symbols-outlined text-[20px]" style={{ color: COLORS.primary }}>
+          <span className="material-symbols-outlined text-xl" style={{ color: COLORS.primary }}>
             water_drop
           </span>
         </div>
@@ -199,7 +199,7 @@ function HistoryEntry({ entry, onDelete, index }) {
         }}
         aria-label={`Remove ${entry.amount} ml`}
       >
-        <span className="material-symbols-outlined text-[18px]">close</span>
+        <span className="material-symbols-outlined text-lg">close</span>
       </button>
     </div>
   );
@@ -514,7 +514,7 @@ export default function HydrationTracker() {
         {/* CUT-OFF COUNTDOWN TELEMETRY BANNER */}
         <div className="flex items-center justify-between p-4 rounded-xl" style={{ background: COLORS['surface-container'], border: `1px solid ${COLORS.outline}` }}>
           <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-[24px]" style={{ color: COLORS['on-surface-variant'] }}>bedtime</span>
+            <span className="material-symbols-outlined text-2xl" style={{ color: COLORS['on-surface-variant'] }}>bedtime</span>
             <div className="flex flex-col">
               <span className="font-label-sm text-label-sm uppercase tracking-widest" style={{ color: COLORS['on-surface-variant'] }}>
                 HYDRA-HALT PROTOCOL
