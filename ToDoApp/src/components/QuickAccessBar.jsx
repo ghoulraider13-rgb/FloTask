@@ -1,13 +1,16 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
- * QuickAccessBar — Desktop-only sticky top bar with section navigation.
+ * QuickAccessBar — sticky top navigation at EVERY width (phone → desktop).
  * Sections: Tasks, Notes, Focus, Alarms, Hydration, Sleep
- * Features:
+ *
+ * - One component, responsive via breakpoints only (no mobile fork):
+ *     < md  → wordmark row + horizontally scrollable pill strip
+ *     ≥ md  → wordmark and pills share a single row
  * - Smooth scroll to sections (honors prefers-reduced-motion)
- * - Scroll-spy highlights active section (IntersectionObserver)
- * - Dropdown/sheet on narrow screens
- * - NOT rendered on mobile (handled by MobileShell bottom tabs)
+ * - Scroll-spy highlights the section in view (IntersectionObserver).
+ *   Scroll-spy is not motion, so it stays on under reduced motion.
+ * - Respects env(safe-area-inset-top) for notched phones.
  */
 const SECTIONS = [
   { id: 'tasks', label: 'TASKS', icon: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
@@ -19,31 +22,23 @@ const SECTIONS = [
 ];
 
 const icon = (path) => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
     <path strokeLinecap="round" strokeLinejoin="round" d={path} />
   </svg>
 );
 
 export default function QuickAccessBar({ activeSection, onSectionClick }) {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
-  const barRef = useRef(null);
-
-  // Scroll-spy: detect active section via IntersectionObserver
+  // Scroll-spy: the section crossing the upper band of the viewport wins.
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) return;
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            onSectionClick(entry.target.id);
-          }
+          if (entry.isIntersecting) onSectionClick(entry.target.id);
         });
       },
-      { rootMargin: '-20% 0px -60% 0px', threshold: 0.1 }
+      { rootMargin: '-20% 0px -60% 0px', threshold: 0 }
     );
 
     SECTIONS.forEach((s) => {
@@ -54,16 +49,17 @@ export default function QuickAccessBar({ activeSection, onSectionClick }) {
     return () => observer.disconnect();
   }, [onSectionClick]);
 
-  // Close dropdown on outside click
+  // Keep the active pill visible inside the horizontal strip on phones.
+  // Scrolls only the strip (never scrollIntoView, which would cancel an
+  // in-flight smooth page scroll in Chromium).
+  const stripRef = useRef(null);
   useEffect(() => {
-    const handleClick = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
+    const strip = stripRef.current;
+    const pill = strip?.querySelector(`[data-nav-pill="${activeSection}"]`);
+    if (!strip || !pill || strip.scrollWidth <= strip.clientWidth) return;
+    const target = pill.offsetLeft - (strip.clientWidth - pill.offsetWidth) / 2;
+    strip.scrollTo({ left: Math.max(0, target) });
+  }, [activeSection]);
 
   const handleSectionClick = (id) => {
     const el = document.getElementById(id);
@@ -72,96 +68,47 @@ export default function QuickAccessBar({ activeSection, onSectionClick }) {
       el.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
     }
     onSectionClick(id);
-    setIsDropdownOpen(false);
   };
 
-  // Don't render on mobile (handled by MobileShell)
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640;
-  if (isMobile) return null;
-
   return (
-    <>
-      <header
-        ref={barRef}
-        className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-gray-900"
-        style={{ height: '56px' }}
-        role="navigation"
-        aria-label="Quick access"
-      >
-        <div className="flex items-center justify-between h-full px-4 sm:px-6 lg:px-8 max-w-[1480px] mx-auto">
-          {/* FLOTASK Wordmark */}
-          <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold tracking-[0.35em] text-white uppercase font-mono">
-              FLOTASK
-            </span>
-          </div>
-
-          {/* Quick Access Menu — Desktop */}
-          <nav className="hidden md:flex items-center gap-1" aria-label="Section navigation">
-            {SECTIONS.map((section) => (
-              <button
-                key={section.id}
-                type="button"
-                onClick={() => handleSectionClick(section.id)}
-                aria-current={activeSection === section.id ? 'page' : undefined}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold tracking-[0.2em] uppercase font-mono transition-all duration-200 ${
-                  activeSection === section.id
-                    ? 'text-white bg-white/10'
-                    : 'text-gray-500 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                {icon(section.icon)}
-                <span>{section.label}</span>
-              </button>
-            ))}
-          </nav>
-
-          {/* Mobile Dropdown Trigger (tablet breakpoint) */}
-          <div className="md:hidden">
-            <button
-              type="button"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              aria-expanded={isDropdownOpen}
-              aria-haspopup="listbox"
-              className="p-2 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-
-            {/* Dropdown Sheet */}
-            {isDropdownOpen && (
-              <div
-                ref={dropdownRef}
-                className="absolute right-4 top-full mt-2 w-48 bg-black/95 backdrop-blur-xl border border-gray-800 rounded-xl shadow-2xl py-2 z-50 animate-fade-in"
-                role="listbox"
-              >
-                {SECTIONS.map((section) => (
-                  <button
-                    key={section.id}
-                    type="button"
-                    onClick={() => handleSectionClick(section.id)}
-                    aria-selected={activeSection === section.id}
-                    role="option"
-                    className={`w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-mono transition-colors ${
-                      activeSection === section.id
-                        ? 'text-white bg-white/10'
-                        : 'text-gray-400 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    <span className="w-5 h-5 flex items-center justify-center">{icon(section.icon)}</span>
-                    <span className="uppercase tracking-wide">{section.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+    <header
+      className="quick-access-bar sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-gray-900"
+      role="navigation"
+      aria-label="Quick access"
+    >
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between md:h-14 px-4 sm:px-6 lg:px-8 max-w-[1480px] mx-auto">
+        {/* FLOTASK Wordmark */}
+        <div className="flex items-center justify-center md:justify-start h-12 md:h-auto">
+          <span className="text-xl md:text-2xl font-bold tracking-hero text-white uppercase font-mono">
+            FLOTASK
+          </span>
         </div>
-      </header>
 
-      {/* Spacer to offset fixed header */}
-      <div className="h-14 md:h-0" aria-hidden="true" />
-    </>
+        {/* Section pills — scrollable strip on phones, inline row on desktop */}
+        <nav
+          ref={stripRef}
+          className="nav-strip relative flex items-center gap-1 overflow-x-auto -mx-4 px-4 sm:-mx-6 sm:px-6 pb-2 md:mx-0 md:px-0 md:pb-0 md:overflow-visible"
+          aria-label="Section navigation"
+        >
+          {SECTIONS.map((section) => (
+            <button
+              key={section.id}
+              type="button"
+              data-nav-pill={section.id}
+              onClick={() => handleSectionClick(section.id)}
+              aria-current={activeSection === section.id ? 'true' : undefined}
+              className={`flex shrink-0 items-center gap-1.5 px-3 min-h-[44px] md:min-h-0 md:py-1.5 rounded-full text-2xs font-bold tracking-caption uppercase font-mono transition-all duration-200 ${
+                activeSection === section.id
+                  ? 'text-white bg-white/10'
+                  : 'text-gray-500 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              {icon(section.icon)}
+              <span>{section.label}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
+    </header>
   );
 }

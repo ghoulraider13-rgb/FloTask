@@ -17,9 +17,8 @@ const EDGE_RATIO = 0.55;   // reveal % beyond which release = delete
  * releasing before springs back. Desktop keeps the exact existing
  * layout — the delete button (hover target) stays as-is there.
  *
- * `data-swipe-to-delete` marks this row so SwipeCarousel never claims
- * the horizontal gesture (the carousel's watchDrag checks the drag
- * target at pointer-down).
+ * `data-swipe-to-delete` marks this row as owning its horizontal
+ * swipe gesture.
  */
 export default function TaskItem({ task, onToggle, onDelete }) {
   const [isExiting, setIsExiting] = useState(false);

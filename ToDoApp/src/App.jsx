@@ -6,7 +6,6 @@ import { parseActions } from './utils/nlm';
 import { playGentleChime, playStandardAlarm, playEnforcerAlarm } from './utils/audioHelpers';
 
 import ReactiveGrid from './components/ReactiveGrid';
-import MobileShell from './components/MobileShell';
 import TimerHub from './components/TimerHub';
 import TaskList from './components/TaskList';
 import StopwatchModule from './components/StopwatchModule';
@@ -149,7 +148,7 @@ export default function App() {
   }, [handleAddTask, handleNlmActions]);
 
   return (
-    <div className="relative min-h-screen" style={{ minHeight: '100vh' }}>
+    <div className="relative min-h-[100dvh]">
       {/* ── Cursor Glow Layer ─────────────────────────────────── */}
       <div
         ref={glowRef}
@@ -192,29 +191,16 @@ export default function App() {
         <EnforcerModal title={enforcerAlert.title} subtext={enforcerAlert.subtext} onDismiss={dismissEnforcer} />
       )}
 
-      {/* ── Quick Access Bar (Desktop only) ── */}
+      {/* ── Quick Access Bar (sticky nav, all widths) ── */}
       <QuickAccessBar
         activeSection={activeSection}
         onSectionClick={setActiveSection}
       />
 
-      {/* ── Layout: MobileShell (≤640px) or responsive single-scroll desktop (≥641px) ── */}
-      <MobileShell
-        tasks={tasks}
-        alarms={alarms}
-        onAddTask={handleAddTask}
-        onToggleTask={handleToggleTask}
-        onDeleteTask={handleDeleteTask}
-        onSetReminder={handleSetReminder}
-        onNlmText={handleNlmText}
-        onAddAlarm={handleAddAlarm}
-        onDeleteAlarm={handleDeleteAlarm}
-        onNlmActions={handleNlmActions}
-      />
-
-      <div className="hidden md:block relative z-10 max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
+      {/* ── Single responsive layout: one column on phones, auto-fit grid above ── */}
+      <main className="app-shell relative z-10 max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* ── Header ──────────────────────────────────────────── */}
-        <header className="text-center mb-12">
+        <header className="text-center mb-8 md:mb-12">
           <h1 className="text-4xl sm:text-5xl font-bold tracking-[0.35em] text-white uppercase font-mono">
             FLOTASK
           </h1>
@@ -224,10 +210,10 @@ export default function App() {
         </header>
 
         {/* ── Unified Document Flow Grid ──────────────────────── */}
-        <div className="dashboard-grid grid gap-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
+        <div className="dashboard-grid grid gap-10" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))' }}>
 
           {/* Section 1: Tasks */}
-          <section id="tasks" className="nothing-card p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="tasks-heading">
+          <section id="tasks" className="nothing-card scroll-mt-28 md:scroll-mt-20 p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="tasks-heading">
             <h2 id="tasks-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
               TASKS
             </h2>
@@ -242,7 +228,7 @@ export default function App() {
           </section>
 
           {/* Section 2: Notes (Scratchpad) */}
-          <section id="notes" className="nothing-card p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="notes-heading">
+          <section id="notes" className="nothing-card scroll-mt-28 md:scroll-mt-20 p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="notes-heading">
             <h2 id="notes-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
               NOTES
             </h2>
@@ -250,7 +236,7 @@ export default function App() {
           </section>
 
           {/* Section 3: Focus (Timer + Stopwatch) */}
-          <section id="focus" className="nothing-card p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="focus-heading">
+          <section id="focus" className="nothing-card scroll-mt-28 md:scroll-mt-20 p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="focus-heading">
             <h2 id="focus-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
               FOCUS
             </h2>
@@ -259,7 +245,7 @@ export default function App() {
           </section>
 
           {/* Section 4: Alarms */}
-          <section id="alarms" className="nothing-card p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="alarms-heading">
+          <section id="alarms" className="nothing-card scroll-mt-28 md:scroll-mt-20 p-5 sm:p-6 flex flex-col gap-6" aria-labelledby="alarms-heading">
             <h2 id="alarms-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase self-start">
               ALARMS
             </h2>
@@ -271,7 +257,7 @@ export default function App() {
           </section>
 
           {/* Section 5: Hydration */}
-          <section id="hydration" className="nothing-card p-5 sm:p-6" aria-labelledby="hydration-heading">
+          <section id="hydration" className="nothing-card scroll-mt-28 md:scroll-mt-20 p-5 sm:p-6" aria-labelledby="hydration-heading">
             <h2 id="hydration-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase mb-4">
               HYDRATION TRACKER
             </h2>
@@ -279,7 +265,7 @@ export default function App() {
           </section>
 
           {/* Section 6: Sleep */}
-          <section id="sleep" className="nothing-card p-5 sm:p-6" aria-labelledby="sleep-heading">
+          <section id="sleep" className="nothing-card scroll-mt-28 md:scroll-mt-20 p-5 sm:p-6" aria-labelledby="sleep-heading">
             <h2 id="sleep-heading" className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase mb-4">
               SLEEP TRACKER
             </h2>
@@ -287,7 +273,7 @@ export default function App() {
           </section>
 
         </div>
-      </div>
+      </main>
     </div>
   );
 }// test change

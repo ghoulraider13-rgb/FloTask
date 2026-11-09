@@ -33,4 +33,3 @@ playwright-report/
 *.trace.zip
 
 # Playwright config
-playwright.config.ts
