@@ -37,6 +37,7 @@ export const createTask = (title, options = {}) => ({
   priority: options.priority ?? 'normal',
   category: options.category ?? 'general',
   isAgentCreated: options.isAgentCreated ?? false,
+  confidence: options.confidence ?? (options.isAgentCreated ? 'high' : null), // 'low' | 'medium' | 'high'
   recurrence: options.recurrence ?? '',                 // RRULE string e.g. 'FREQ=DAILY'
   parentId: options.parentId ?? null,                   // parent task ID for dependencies/subtasks
 });
@@ -44,7 +45,7 @@ export const createTask = (title, options = {}) => ({
 /**
  * Create a standalone alarm.
  */
-export const createAlarm = (label, dateTime, intensity = 'medium', isAgentCreated = false, recurrence = '') => ({
+export const createAlarm = (label, dateTime, intensity = 'medium', isAgentCreated = false, recurrence = '', confidence = null) => ({
   id: safeUuid(),
   label: String(label).trim() || 'Alarm',
   dateTime,           // ISO string
@@ -52,6 +53,7 @@ export const createAlarm = (label, dateTime, intensity = 'medium', isAgentCreate
   fired: false,
   createdAt: new Date().toISOString(),
   isAgentCreated,
+  confidence: confidence ?? (isAgentCreated ? 'high' : null),
   recurrence,         // RRULE string e.g. 'FREQ=DAILY'
 });
 
@@ -91,12 +93,13 @@ export const toLocalInputValue = (date) => {
 export const actionToTaskOrAlarm = (action) => {
   if (!action?.title) return null;
   const due = parseLocalDateTime(action.dueDateTime);
+  const confidence = action.confidence || 'high';
   if (action.type === 'alarm') {
     // An explicitly requested alarm must ring audibly — floor at medium.
     const intensity = action.intensity === 'high' ? 'high' : 'medium';
     return {
       kind: 'alarm',
-      alarm: createAlarm(action.title, due || new Date(Date.now() + 3600000).toISOString(), intensity, true),
+      alarm: createAlarm(action.title, due || new Date(Date.now() + 3600000).toISOString(), intensity, true, '', confidence),
     };
   }
   // A task with a due time implies at least a standard alarm too.
@@ -109,6 +112,7 @@ export const actionToTaskOrAlarm = (action) => {
       intensity,
       priority: (action.priority || 'normal').toLowerCase(),
       isAgentCreated: true,
+      confidence,
     }),
   };
 };

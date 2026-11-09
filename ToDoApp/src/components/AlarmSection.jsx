@@ -123,6 +123,25 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
               </span>
             )}
 
+            {/* Confidence indicator on agent-created alarms */}
+            {alarm.isAgentCreated && (
+              <span
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-surface-4 border border-surface-5 text-4xs font-mono uppercase text-ink-muted shrink-0"
+                title={`Agent alarm (Confidence: ${(alarm.confidence || 'high').toUpperCase()})`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    alarm.confidence === 'low'
+                      ? 'bg-transparent border border-ink-faint'
+                      : alarm.confidence === 'medium'
+                        ? 'bg-ink-muted border border-ink-secondary'
+                        : 'bg-ink-primary'
+                  }`}
+                />
+                <span className="font-dotmatrix text-4xs">AI</span>
+              </span>
+            )}
+
             {/* Label and Date */}
             <span className="text-3xs text-ink-soft font-dotmatrix uppercase truncate max-w-[150px] flex items-baseline ml-auto">
               {alarm.label && alarm.label !== 'Alarm' ? alarm.label : ''}

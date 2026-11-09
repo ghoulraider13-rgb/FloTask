@@ -6,8 +6,8 @@ FloTask is executing a structured multi-phase enhancement program:
 - **Phase P2: Layout Unification & Mobile Rebuild** (Complete — PR #23, merged)
 - **Phase P0: Hygiene, Tokenization & Architecture** (Complete — PR #24)
 - **Phase P1: Visual Polish & Micro-Interactions** (Complete — PR #25)
-- **Phase P3: Features & Recurrence** (Complete — Current PR)
-- **Phase P4: Voice & Agent UX** (Deferred to separate spec)
+- **Phase P3: Features & Recurrence** (Complete — PR #26)
+- **Phase P4: Voice & Agent UX** (Complete — Current PR)
 
 ---
 
@@ -91,12 +91,17 @@ FloTask is executing a structured multi-phase enhancement program:
   - Quick keys (`N` task input, `A` alarms, `T` timer, `S` scratchpad, `H` hydration, `L` sleep).
 - **Automated Verification**:
   - Added `tests/features-p3.spec.ts`. All 40 Playwright tests passing.
+- **Delivered**: PR #26 opened and verified.
 
----
-
-## 3. Future Roadmap (Deferred to Separate Spec)
-
-### Phase P4: Voice & Agent UX
-- Voice feedback chime on successful parse; error toast on failure.
-- NLM confidence indicator (ink tone dots: primary/secondary/muted; no red dots).
-- Offline NLM response caching (store last 50 server responses in local cache).
+### Phase P4 — Voice & Agent UX
+- **Voice Feedback**:
+  - Acoustic chime (`playGentleChime()`) plays on successful voice parsing and task/alarm creation.
+  - Error notification toast displays informative message when speech parsing or agent execution fails.
+- **NLM Confidence Indicator**:
+  - Monochrome ink-tone confidence badge rendered on all agent-created items (`AI` with dot indicator).
+  - Strictly uses ink tokens: solid white dot (`bg-ink-primary`) for high confidence, muted dot (`bg-ink-muted`) for medium confidence, faint hollow dot (`border border-ink-faint`) for low confidence. Red is strictly avoided.
+- **Offline NLM Caching & Fallback**:
+  - Local FIFO cache of up to 50 previous NLM query responses stored in `flotask-nlm-cache`.
+  - Seamless offline mode: automatically answers identical queries from cache with medium confidence tag, and falls back to offline rule parser with low confidence tag.
+- **Automated Verification**:
+  - Added `tests/features-p4.spec.ts`. All 44 Playwright tests passing across mobile and desktop.

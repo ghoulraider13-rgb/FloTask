@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import IntensitySelector from './IntensitySelector';
-import { playMechanicalClick } from '../utils/audioHelpers';
+import { playMechanicalClick, playGentleChime } from '../utils/audioHelpers';
 import { toLocalInputValue } from '../utils/taskHelpers';
 import { RECURRENCE_PRESETS } from '../utils/recurrence';
 import useVoiceInput from '../hooks/useVoiceInput';
@@ -39,6 +39,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
         } else {
           onAddTask(trimmed, {});
           navigator.vibrate?.([50]);
+          playGentleChime();
         }
       } catch (e) {
         console.error('Voice task creation failed:', e?.message || e);
