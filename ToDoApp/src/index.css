@@ -107,6 +107,26 @@ body {
   padding-right: env(safe-area-inset-right, 0px);
 }
 
+/* ─── Layout shell (one layout for every width) ─────────────────── */
+/* Sticky nav clears the notch / status bar when installed as a PWA. */
+.quick-access-bar {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Page content clears the home indicator. */
+.app-shell {
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* Phone pill strip scrolls horizontally without a visible scrollbar. */
+.nav-strip {
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.nav-strip::-webkit-scrollbar {
+  display: none;
+}
+
 /* ─── Card ──────────────────────────────────────────────────────── */
 @layer components {
   .nothing-card {

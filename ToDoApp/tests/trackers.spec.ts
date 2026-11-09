@@ -107,43 +107,27 @@ test.describe('SleepTracker Functionality', () => {
 });
 
 test.describe('Cross-Platform Consistency', () => {
-  // The desktop half of each check needs the desktop tree visible — run on
-  // desktop projects only (each test switches viewport internally).
+  // One layout for every width: the same section/component must exist at
+  // desktop AND phone widths. Each test switches viewport internally.
   test.skip(({ viewport }) => (viewport?.width ?? 0) < 700, 'Run on desktop projects');
 
-  test('desktop and mobile should share same HydrationTracker component', async ({ page }) => {
-    // Desktop
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
+  for (const { id, marker } of [
+    { id: 'hydration', marker: 'HYDRA-04' },
+    { id: 'sleep', marker: 'SLEEP TRACKER' },
+  ]) {
+    test(`desktop and mobile render the same ${id} section`, async ({ page }) => {
+      await page.goto('/');
+      await page.waitForLoadState('networkidle');
+      await expect(page.locator(`section#${id}`).locator(`text=${marker}`).first()).toBeVisible();
 
-    await expect(page.locator('section#hydration').locator('text=HYDRA-04').first()).toBeVisible();
+      await page.setViewportSize({ width: 375, height: 667 });
+      await page.waitForTimeout(300);
 
-    // Mobile viewport
-    await page.setViewportSize({ width: 375, height: 667 });
-    await page.waitForTimeout(500);
-
-    await page.locator('button:has-text("Health")').click();
-    await page.waitForTimeout(500);
-
-    await expect(page.locator('text=HYDRA-04').first()).toBeVisible();
-  });
-
-  test('desktop and mobile should share same SleepTracker component', async ({ page }) => {
-    // Desktop
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
-    await expect(page.locator('section#sleep').locator('text=SLEEP TRACKER').first()).toBeVisible();
-
-    // Mobile viewport
-    await page.setViewportSize({ width: 375, height: 667 });
-    await page.waitForTimeout(500);
-
-    await page.locator('button:has-text("Health")').click();
-    await page.waitForTimeout(500);
-    await page.locator('button[role="tab"]:has-text("SLEEP")').click();
-    await page.waitForTimeout(500);
-
-    await expect(page.locator('text=SLEEP TRACKER').first()).toBeVisible();
-  });
+      const nav = page.locator('header[role="navigation"][aria-label="Quick access"]');
+      await nav.locator(`button[data-nav-pill="${id}"]`).click();
+      await page.waitForTimeout(900);
+      await expect(page.locator(`section#${id}`)).toBeInViewport();
+      await expect(page.locator(`section#${id}`).locator(`text=${marker}`).first()).toBeVisible();
+    });
+  }
 });
