@@ -21,11 +21,73 @@
  *     { type:'task'|'alarm', title, dueDateTime, priority, intensity }
  */
 
+const CACHE_KEY = 'flotask-nlm-cache';
+const MAX_CACHE_SIZE = 50;
+
+/**
+ * Retrieve cached actions for an identical query when offline or endpoint fails.
+ */
+export function getCachedActions(text) {
+  if (typeof window === 'undefined') return null;
+  const key = text.trim().toLowerCase();
+  try {
+    const raw = window.localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const cache = JSON.parse(raw);
+    if (!Array.isArray(cache)) return null;
+    const match = cache.find((item) => item.query === key);
+    if (match && Array.isArray(match.actions)) {
+      return match.actions.map((a) => ({ ...a, confidence: 'medium', source: 'cache' }));
+    }
+  } catch { /* ignore cache read errors */ }
+  return null;
+}
+
+/**
+ * Store parsed actions in local cache (FIFO capped at 50 entries).
+ */
+export function setCachedActions(text, actions) {
+  if (typeof window === 'undefined' || !actions || actions.length === 0) return;
+  const key = text.trim().toLowerCase();
+  try {
+    const raw = window.localStorage.getItem(CACHE_KEY);
+    const cache = raw ? JSON.parse(raw) : [];
+    const filtered = Array.isArray(cache) ? cache.filter((item) => item.query !== key) : [];
+    filtered.unshift({
+      query: key,
+      actions: actions.map((a) => ({
+        type: a.type,
+        title: a.title,
+        dueDateTime: a.dueDateTime,
+        priority: a.priority,
+        intensity: a.intensity,
+      })),
+      timestamp: Date.now(),
+    });
+    if (filtered.length > MAX_CACHE_SIZE) {
+      filtered.length = MAX_CACHE_SIZE;
+    }
+    window.localStorage.setItem(CACHE_KEY, JSON.stringify(filtered));
+  } catch { /* ignore cache write errors */ }
+}
+
 /**
  * Send free-form text to /api/chat and return a normalized action list.
+ * Includes offline caching of the last 50 queries and rule-based fallback.
  */
 export async function parseActions(text) {
   if (!text || !text.trim()) return [];
+
+  const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
+  if (isOffline) {
+    const cached = getCachedActions(text);
+    if (cached) return cached;
+    const local = parseActionsLocal(text);
+    if (local && local.length > 0) {
+      return local.map((a) => ({ ...a, confidence: 'low', source: 'offline-rule' }));
+    }
+    return null;
+  }
 
   const payload = {
     text: text.trim(),
@@ -42,17 +104,39 @@ export async function parseActions(text) {
     });
   } catch (err) {
     console.error('NLM endpoint unreachable:', err?.message || err);
+    const cached = getCachedActions(text);
+    if (cached) return cached;
+    const local = parseActionsLocal(text);
+    if (local && local.length > 0) {
+      return local.map((a) => ({ ...a, confidence: 'low', source: 'offline-rule' }));
+    }
     return null;
   }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     console.error('NLM parse failed:', err.error || `HTTP ${res.status}`);
+    const cached = getCachedActions(text);
+    if (cached) return cached;
+    const local = parseActionsLocal(text);
+    if (local && local.length > 0) {
+      return local.map((a) => ({ ...a, confidence: 'low', source: 'offline-rule' }));
+    }
     return null;
   }
 
   const data = await res.json().catch(() => ({}));
-  const actions = Array.isArray(data?.actions) ? data.actions : [];
+  const rawActions = Array.isArray(data?.actions) ? data.actions : [];
+  const actions = rawActions.map((a) => ({
+    ...a,
+    confidence: a.confidence || 'high',
+    source: 'server',
+  }));
+
+  if (actions.length > 0) {
+    setCachedActions(text, actions);
+  }
+
   return actions;
 }
 

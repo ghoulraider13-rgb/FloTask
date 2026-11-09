@@ -189,6 +189,24 @@ export default function TaskItem({
                 </span>
               )}
 
+              {task.isAgentCreated && !task.completed && (
+                <span
+                  className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full bg-surface-2 border border-surface-4 text-4xs font-mono uppercase text-ink-muted"
+                  title={`Agent confidence: ${(task.confidence || 'high').toUpperCase()}`}
+                >
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      task.confidence === 'low'
+                        ? 'bg-transparent border border-ink-faint'
+                        : task.confidence === 'medium'
+                          ? 'bg-ink-muted border border-ink-secondary'
+                          : 'bg-ink-primary'
+                    }`}
+                  />
+                  <span className="font-dotmatrix text-4xs">AI</span>
+                </span>
+              )}
+
               {blockedNotice && (
                 <span className="text-4xs text-accent-red font-mono font-bold tracking-widest uppercase animate-pulse">
                   Blocked by subtasks

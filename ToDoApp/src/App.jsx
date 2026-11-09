@@ -307,12 +307,27 @@ export default function App() {
   }, [handleAddAlarm, handleAddTask]);
 
   const handleNlmText = useCallback(async (text) => {
-    const actions = await parseActions(text);
-    if (!actions || actions.length === 0) {
-      handleAddTask(text, { isAgentCreated: true });
-      return 1;
+    try {
+      const actions = await parseActions(text);
+      if (!actions || actions.length === 0) {
+        handleAddTask(text, { isAgentCreated: true, confidence: 'low' });
+        playGentleChime();
+        return 1;
+      }
+      const count = handleNlmActions(actions);
+      if (count > 0) {
+        playGentleChime();
+      }
+      return count;
+    } catch (err) {
+      console.error('NLM parsing error:', err);
+      setToasts((prev) => [...prev, {
+        id: crypto.randomUUID(),
+        message: 'VOICE PARSE FAILED',
+        subtext: err?.message || 'Could not process audio command',
+      }]);
+      throw err;
     }
-    return handleNlmActions(actions);
   }, [handleAddTask, handleNlmActions]);
 
   return (
