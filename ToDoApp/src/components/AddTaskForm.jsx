@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import IntensitySelector from './IntensitySelector';
 import { playMechanicalClick } from '../utils/audioHelpers';
 import { toLocalInputValue } from '../utils/taskHelpers';
+import { RECURRENCE_PRESETS } from '../utils/recurrence';
 import useVoiceInput from '../hooks/useVoiceInput';
 
 export default function AddTaskForm({ onAddTask, onNlmText }) {
@@ -9,6 +10,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
   const [showOptions, setShowOptions] = useState(false);
   const [reminderDateTime, setReminderDateTime] = useState('');
   const [intensity, setIntensity] = useState('low');
+  const [recurrence, setRecurrence] = useState('');
   const [parsing, setParsing] = useState(false);
 
   // Guards against double-processing the same utterance — e.g. a duplicate
@@ -63,6 +65,7 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
     setTitle('');
     setReminderDateTime('');
     setIntensity('low');
+    setRecurrence('');
     setShowOptions(false);
   };
 
@@ -72,11 +75,12 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
     playMechanicalClick();
 
     // Manual reminder options were explicitly set → create directly (no NLM)
-    const manualOptions = showOptions && (reminderDateTime || intensity !== 'low');
+    const manualOptions = showOptions && (reminderDateTime || intensity !== 'low' || recurrence);
     if (manualOptions) {
       onAddTask(trimmed, {
         reminderDateTime: reminderDateTime ? new Date(reminderDateTime).toISOString() : null,
         intensity,
+        recurrence,
       });
       navigator.vibrate?.([50]);
     } else if (onNlmText) {
@@ -200,6 +204,18 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
             min={minDateTime}
             className="nothing-input-bordered flex-1 min-w-[160px] text-xs"
           />
+          <select
+            value={recurrence}
+            onChange={(e) => setRecurrence(e.target.value)}
+            className="nothing-input-bordered text-xs bg-surface-2 font-mono uppercase text-ink-primary"
+            aria-label="Recurrence frequency"
+          >
+            {RECURRENCE_PRESETS.map((p) => (
+              <option key={p.id} value={p.id} className="bg-surface-1 text-ink-primary">
+                {p.label === 'NONE' ? 'DOES NOT REPEAT' : `REPEAT ${p.label}`}
+              </option>
+            ))}
+          </select>
           <IntensitySelector value={intensity} onChange={setIntensity} compact />
         </div>
       )}

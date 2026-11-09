@@ -5,8 +5,8 @@
 FloTask is executing a structured multi-phase enhancement program:
 - **Phase P2: Layout Unification & Mobile Rebuild** (Complete — PR #23, merged)
 - **Phase P0: Hygiene, Tokenization & Architecture** (Complete — PR #24)
-- **Phase P1: Visual Polish & Micro-Interactions** (Complete — Current PR)
-- **Phase P3: Features & Recurrence** (Deferred to separate spec)
+- **Phase P1: Visual Polish & Micro-Interactions** (Complete — PR #25)
+- **Phase P3: Features & Recurrence** (Complete — Current PR)
 - **Phase P4: Voice & Agent UX** (Deferred to separate spec)
 
 ---
@@ -68,18 +68,33 @@ FloTask is executing a structured multi-phase enhancement program:
   - Added asynchronous NLM parse skeleton row in `AddTaskForm`.
 - **Consistent Empty States**:
   - Designed monochrome illustrated SVG empty states with circular wells and Nothing OS typography across `TaskList`, `AlarmSection`, `SavedNotes`, `HydrationTracker`, and `SleepTracker`.
+- **Delivered**: PR #25 opened and verified.
+
+### Phase P3 — Feature Enhancements
+- **Recurring Tasks & Alarms**:
+  - Lightweight RRULE utility in `src/utils/recurrence.js` supporting `DAILY`, `WEEKDAYS`, `WEEKLY`, and `MONTHLY`.
+  - `↻` recurrence badge with frequency label in DotGothic16 / dotmatrix font.
+  - Auto-scheduling: Completing a recurring task generates the next scheduled instance with wall-clock time preserved. Recurring alarms reschedule to next occurrence when fired.
+- **Task Dependencies & Subtasks**:
+  - Subtask creation (`+ SUBTASK` button and inline input).
+  - Hierarchical rendering with branch connector (`↳`) and indentation.
+  - Parent blocking: prevents marking a parent task complete when incomplete subtasks exist, displaying a subtle pulsed warning.
+- **Focus Sessions History**:
+  - Local persistence of completed Pomodoro work intervals in `focus-history`.
+  - Monochrome 7-day SVG bar chart in `TimerHub` with ruled horizontal grid lines, daily minute totals, and weekly summary.
+- **Export / Import JSON**:
+  - Utility in `src/utils/backup.js` for full JSON export and validation/restore across all 8 localStorage stores.
+  - Seamless download and upload with immediate reactive `storage` event broadcast.
+- **Keyboard Shortcuts & Command Palette**:
+  - Shortcuts modal (`ShortcutsModal.jsx`) triggered by `?` or quick nav button.
+  - Command palette (`CommandPalette.jsx`) triggered by `⌘K` / `Ctrl+K` with fuzzy filtering, keyboard navigation, and direct action triggers.
+  - Quick keys (`N` task input, `A` alarms, `T` timer, `S` scratchpad, `H` hydration, `L` sleep).
+- **Automated Verification**:
+  - Added `tests/features-p3.spec.ts`. All 40 Playwright tests passing.
 
 ---
 
-## 3. Future Roadmaps (Deferred to Separate Specs)
-
-### Phase P3: Feature Enhancements
-- Recurring tasks & alarms (lightweight RRULE-compatible utility; `↻` badge in `DotGothic16`).
-- Task dependencies / subtasks (blocking connectors in `TaskList`).
-- Focus session history (local monochrome SVG/canvas Pomodoro chart).
-- Full JSON export & import (backup/restore tasks, alarms, notes).
-- Keyboard shortcuts (`?` overlay, `n` new task, `a` alarm, `t` timer, `s` scratchpad).
-- Command palette (`⌘K` / `Ctrl+K` searchable action runner).
+## 3. Future Roadmap (Deferred to Separate Spec)
 
 ### Phase P4: Voice & Agent UX
 - Voice feedback chime on successful parse; error toast on failure.

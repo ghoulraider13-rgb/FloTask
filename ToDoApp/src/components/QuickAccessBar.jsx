@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { playMechanicalClick } from '../utils/audioHelpers';
 
 /**
  * QuickAccessBar — sticky top navigation at EVERY width (phone → desktop).
@@ -9,7 +10,6 @@ import { useEffect, useRef } from 'react';
  *     ≥ md  → wordmark and pills share a single row
  * - Smooth scroll to sections (honors prefers-reduced-motion)
  * - Scroll-spy highlights the section in view (IntersectionObserver).
- *   Scroll-spy is not motion, so it stays on under reduced motion.
  * - Respects env(safe-area-inset-top) for notched phones.
  */
 const SECTIONS = [
@@ -27,7 +27,12 @@ const icon = (path) => (
   </svg>
 );
 
-export default function QuickAccessBar({ activeSection, onSectionClick }) {
+export default function QuickAccessBar({
+  activeSection,
+  onSectionClick,
+  onOpenCommandPalette,
+  onOpenShortcuts,
+}) {
   // Scroll-spy: the section crossing the upper band of the viewport wins.
   useEffect(() => {
     if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return;
@@ -50,8 +55,6 @@ export default function QuickAccessBar({ activeSection, onSectionClick }) {
   }, [onSectionClick]);
 
   // Keep the active pill visible inside the horizontal strip on phones.
-  // Scrolls only the strip (never scrollIntoView, which would cancel an
-  // in-flight smooth page scroll in Chromium).
   const stripRef = useRef(null);
   useEffect(() => {
     const strip = stripRef.current;
@@ -78,36 +81,88 @@ export default function QuickAccessBar({ activeSection, onSectionClick }) {
     >
       <div className="flex flex-col md:flex-row md:items-center md:justify-between md:h-14 px-4 sm:px-6 lg:px-8 max-w-shell mx-auto">
         {/* FLOTASK Wordmark */}
-        <div className="flex items-center justify-center md:justify-start h-12 md:h-auto">
+        <div className="flex items-center justify-between md:justify-start h-12 md:h-auto">
           <span className="text-xl md:text-2xl font-bold tracking-hero text-ink-primary uppercase font-mono">
             FLOTASK
           </span>
+
+          {/* Quick Action buttons for small screens */}
+          <div className="flex md:hidden items-center gap-1">
+            <button
+              type="button"
+              onClick={() => { playMechanicalClick(); onOpenCommandPalette?.(); }}
+              className="p-2 text-ink-soft hover:text-ink-primary rounded-full hover:bg-white/10"
+              title="Command Palette"
+              aria-label="Open command palette"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => { playMechanicalClick(); onOpenShortcuts?.(); }}
+              className="w-8 h-8 flex items-center justify-center text-xs font-mono text-ink-soft hover:text-ink-primary rounded-full hover:bg-white/10"
+              title="Keyboard shortcuts"
+              aria-label="Show keyboard shortcuts"
+            >
+              ?
+            </button>
+          </div>
         </div>
 
-        {/* Section pills — scrollable strip on phones, inline row on desktop */}
-        <nav
-          ref={stripRef}
-          className="nav-strip relative flex items-center gap-1 overflow-x-auto -mx-4 px-4 sm:-mx-6 sm:px-6 pb-2 md:mx-0 md:px-0 md:pb-0 md:overflow-visible"
-          aria-label="Section navigation"
-        >
-          {SECTIONS.map((section) => (
+        {/* Section pills + desktop shortcuts */}
+        <div className="flex items-center gap-2 overflow-x-auto -mx-4 px-4 sm:-mx-6 sm:px-6 pb-2 md:mx-0 md:px-0 md:pb-0 md:overflow-visible">
+          <nav
+            ref={stripRef}
+            className="nav-strip relative flex items-center gap-1"
+            aria-label="Section navigation"
+          >
+            {SECTIONS.map((section) => (
+              <button
+                key={section.id}
+                type="button"
+                data-nav-pill={section.id}
+                onClick={() => handleSectionClick(section.id)}
+                aria-current={activeSection === section.id ? 'true' : undefined}
+                className={`flex shrink-0 items-center gap-1.5 px-3 min-h-[44px] md:min-h-0 md:py-1.5 rounded-full text-2xs font-bold tracking-caption uppercase font-mono transition-all duration-200 ${
+                  activeSection === section.id
+                    ? 'text-ink-primary bg-white/10'
+                    : 'text-ink-soft hover:text-ink-primary hover:bg-white/5'
+                }`}
+              >
+                {icon(section.icon)}
+                <span>{section.label}</span>
+              </button>
+            ))}
+          </nav>
+
+          {/* Desktop shortcuts / command palette triggers */}
+          <div className="hidden md:flex items-center gap-1 pl-2 border-l border-surface-5 shrink-0">
             <button
-              key={section.id}
               type="button"
-              data-nav-pill={section.id}
-              onClick={() => handleSectionClick(section.id)}
-              aria-current={activeSection === section.id ? 'true' : undefined}
-              className={`flex shrink-0 items-center gap-1.5 px-3 min-h-[44px] md:min-h-0 md:py-1.5 rounded-full text-2xs font-bold tracking-caption uppercase font-mono transition-all duration-200 ${
-                activeSection === section.id
-                  ? 'text-ink-primary bg-white/10'
-                  : 'text-ink-soft hover:text-ink-primary hover:bg-white/5'
-              }`}
+              onClick={() => { playMechanicalClick(); onOpenCommandPalette?.(); }}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-2xs font-mono text-ink-soft hover:text-ink-primary hover:bg-white/10 transition-colors"
+              title="Command Palette (⌘K / Ctrl+K)"
+              aria-label="Open command palette"
             >
-              {icon(section.icon)}
-              <span>{section.label}</span>
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+              <kbd className="px-1 py-0.2 rounded bg-surface-3 text-ink-muted text-4xs font-bold">⌘K</kbd>
             </button>
-          ))}
-        </nav>
+
+            <button
+              type="button"
+              onClick={() => { playMechanicalClick(); onOpenShortcuts?.(); }}
+              className="w-7 h-7 flex items-center justify-center rounded-full text-xs font-mono text-ink-soft hover:text-ink-primary hover:bg-white/10 transition-colors"
+              title="Keyboard shortcuts (?)"
+              aria-label="Show keyboard shortcuts"
+            >
+              ?
+            </button>
+          </div>
+        </div>
       </div>
     </header>
   );
