@@ -72,14 +72,14 @@ export default function QuickAccessBar({ activeSection, onSectionClick }) {
 
   return (
     <header
-      className="quick-access-bar sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-gray-900"
+      className="quick-access-bar sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-surface-5"
       role="navigation"
       aria-label="Quick access"
     >
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between md:h-14 px-4 sm:px-6 lg:px-8 max-w-[1480px] mx-auto">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between md:h-14 px-4 sm:px-6 lg:px-8 max-w-shell mx-auto">
         {/* FLOTASK Wordmark */}
         <div className="flex items-center justify-center md:justify-start h-12 md:h-auto">
-          <span className="text-xl md:text-2xl font-bold tracking-hero text-white uppercase font-mono">
+          <span className="text-xl md:text-2xl font-bold tracking-hero text-ink-primary uppercase font-mono">
             FLOTASK
           </span>
         </div>
@@ -99,8 +99,8 @@ export default function QuickAccessBar({ activeSection, onSectionClick }) {
               aria-current={activeSection === section.id ? 'true' : undefined}
               className={`flex shrink-0 items-center gap-1.5 px-3 min-h-[44px] md:min-h-0 md:py-1.5 rounded-full text-2xs font-bold tracking-caption uppercase font-mono transition-all duration-200 ${
                 activeSection === section.id
-                  ? 'text-white bg-white/10'
-                  : 'text-gray-500 hover:text-white hover:bg-white/5'
+                  ? 'text-ink-primary bg-white/10'
+                  : 'text-ink-soft hover:text-ink-primary hover:bg-white/5'
               }`}
             >
               {icon(section.icon)}

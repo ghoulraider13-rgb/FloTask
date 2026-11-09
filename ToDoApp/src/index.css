@@ -41,6 +41,10 @@
   --accent-focus: #00d4aa;
   --accent-intensity-low: #4a4a4a;
 
+  /* Scrims */
+  --scrim: rgba(0, 0, 0, 0.8);
+  --scrim-strong: rgba(0, 0, 0, 0.9);
+
   /* Typography */
   --font-mono: 'Space Mono', 'Roboto Mono', 'JetBrains Mono', monospace;
   --font-dotmatrix: 'DotGothic16', 'Space Mono', monospace;
@@ -197,7 +201,7 @@ body {
 
   .btn-pill-primary:active {
     transform: translateY(0) scale(0.97);
-    background: #ccc;
+    background: var(--ink-tertiary);
   }
 
   .btn-pill-primary:disabled {
@@ -273,7 +277,7 @@ body {
 }
 
 .task-checkbox:hover {
-  border-color: #888;
+  border-color: var(--ink-soft);
 }
 
 .task-checkbox:checked {
@@ -372,7 +376,7 @@ body {
   line-height: 1.6;
   overflow-x: auto;
   margin: 8px 0;
-  color: #aaa;
+  color: var(--ink-muted);
 }
 
 .rich-editor code,
@@ -382,7 +386,7 @@ body {
   padding: 2px 6px;
   border-radius: 3px;
   font-size: 0.85em;
-  color: #ddd;
+  color: var(--ink-secondary);
 }
 
 .rich-editor pre code,
@@ -693,12 +697,12 @@ code[class*="language-"] {
 .token.url,
 .language-css .token.string,
 .style .token.string {
-  color: #777777;
+  color: var(--ink-soft);
 }
 
 .token.function,
 .token.class-name {
-  color: #aaaaaa;
+  color: var(--ink-muted);
 }
 
 .token.keyword {

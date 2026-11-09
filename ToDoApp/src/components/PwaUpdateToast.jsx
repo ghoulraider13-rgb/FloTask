@@ -22,20 +22,20 @@ export default function PwaUpdateToast() {
 
   return (
     <div role="status" className="fixed bottom-4 left-4 z-[9999] nothing-card px-4 py-3 flex items-center gap-3 animate-fade-in">
-      <span className="text-[10px] font-mono text-gray-400">
+      <span className="text-3xs font-mono text-ink-muted">
         {needRefresh ? 'NEW VERSION AVAILABLE' : 'OFFLINE READY'}
       </span>
       <button
         type="button"
         onClick={() => updateServiceWorker(true)}
-        className="btn-pill px-4 py-1.5 text-[10px] bg-white text-black font-bold hover:bg-gray-200 border-transparent"
+        className="btn-pill px-4 py-1.5 text-3xs bg-white text-black font-bold hover:bg-ink-secondary border-transparent"
       >
         RELOAD
       </button>
       <button
         type="button"
         onClick={() => { if (needRefresh) setNeedRefresh(false); else setOfflineReady(false); }}
-        className="text-[10px] font-mono text-gray-600 hover:text-white ml-1"
+        className="text-3xs font-mono text-ink-faint hover:text-white ml-1"
       >
         ✕
       </button>

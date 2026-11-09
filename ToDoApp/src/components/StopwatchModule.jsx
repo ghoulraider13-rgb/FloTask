@@ -60,17 +60,17 @@ export default function StopwatchModule() {
     <div
       className={`transition-all duration-300 p-5 rounded-sm flex flex-col gap-4
         ${isRunning
-          ? 'border border-red-500 shadow-[0_0_14px_rgba(239,68,68,0.35)] bg-[rgba(10,10,10,0.65)] backdrop-blur-md'
-          : 'border border-gray-800 shadow-[0_0_8px_rgba(255,255,255,0.04)] bg-[rgba(10,10,10,0.5)] backdrop-blur-md'
+          ? 'border border-accent-red shadow-recording bg-surface-glass-active backdrop-blur-md'
+          : 'border border-surface-5 shadow-glass bg-surface-glass-idle backdrop-blur-md'
         }`}
     >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-[11px] font-bold text-gray-500 tracking-[0.3em] uppercase font-dotmatrix">
+        <h3 className="text-2xs font-bold text-ink-soft tracking-label uppercase font-dotmatrix">
           STOPWATCH
         </h3>
         {isRunning && (
-          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-accent-red animate-pulse" />
         )}
       </div>
 
@@ -79,10 +79,10 @@ export default function StopwatchModule() {
 
         {/* ── Digital Display ── */}
         <div className="flex flex-col leading-none">
-          <span className={`text-3xl font-dotmatrix tracking-widest leading-none transition-colors duration-300 ${isRunning ? 'text-white' : 'text-gray-400'}`}>
+          <span className={`text-3xl font-dotmatrix tracking-widest leading-none transition-colors duration-300 ${isRunning ? 'text-white' : 'text-ink-muted'}`}>
             {hrs > 0 ? `${pad(hrs)}:` : ''}{pad(mins)}:{pad(secs)}
           </span>
-          <span className="text-xs font-dotmatrix text-gray-600 mt-1 tracking-[0.2em]">
+          <span className="text-xs font-dotmatrix text-ink-faint mt-1 tracking-caption">
             .{pad(ms)}
           </span>
         </div>
@@ -90,7 +90,7 @@ export default function StopwatchModule() {
         {/* ── Analog Clock Face ── */}
         <svg width="68" height="68" viewBox="0 0 68 68" className="flex-shrink-0">
           {/* Disk */}
-          <circle cx="34" cy="34" r="32" fill="#0d0d0d" stroke="#2a2a2a" strokeWidth="1.5" />
+          <circle cx="34" cy="34" r="32" fill="var(--surface-1)" stroke="var(--surface-5)" strokeWidth="1.5" />
           {/* Tick marks */}
           {[...Array(12)].map((_, i) => {
             const angle = toRad((i / 12) * 360 + 90);
@@ -100,7 +100,7 @@ export default function StopwatchModule() {
                 key={i}
                 x1={34 + r1 * Math.cos(angle)} y1={34 + r1 * Math.sin(angle)}
                 x2={34 + r2 * Math.cos(angle)} y2={34 + r2 * Math.sin(angle)}
-                stroke={i === 0 ? '#555' : '#333'} strokeWidth={i % 3 === 0 ? 1.5 : 1}
+                stroke={i === 0 ? 'var(--ink-faint)' : 'var(--ink-disabled)'} strokeWidth={i % 3 === 0 ? 1.5 : 1}
               />
             );
           })}
@@ -109,17 +109,17 @@ export default function StopwatchModule() {
             x1="34" y1="34"
             x2={34 + 18 * Math.cos(toRad(minuteDeg))}
             y2={34 + 18 * Math.sin(toRad(minuteDeg))}
-            stroke="#888" strokeWidth="2" strokeLinecap="round"
+            stroke="var(--ink-muted)" strokeWidth="2" strokeLinecap="round"
           />
           {/* Second hand */}
           <line
             x1="34" y1="34"
             x2={34 + 25 * Math.cos(toRad(secondDeg))}
             y2={34 + 25 * Math.sin(toRad(secondDeg))}
-            stroke={isRunning ? '#ef4444' : '#666'} strokeWidth="1.5" strokeLinecap="round"
+            stroke={isRunning ? 'var(--accent-red)' : 'var(--ink-soft)'} strokeWidth="1.5" strokeLinecap="round"
           />
           {/* Centre pip */}
-          <circle cx="34" cy="34" r="2.5" fill={isRunning ? '#ef4444' : '#fff'} />
+          <circle cx="34" cy="34" r="2.5" fill={isRunning ? 'var(--accent-red)' : 'var(--ink-primary)'} />
         </svg>
       </div>
 
@@ -127,17 +127,17 @@ export default function StopwatchModule() {
       <div className="flex items-center gap-3">
         <button
           onClick={isRunning ? handleStop : handleStart}
-          className={`btn-pill font-dotmatrix text-[10px] px-5 py-2 transition-all duration-200 ${
+          className={`btn-pill font-dotmatrix text-3xs px-5 py-2 transition-all duration-200 ${
             isRunning
-              ? 'border-red-500 text-red-400 hover:bg-red-500 hover:text-white shadow-[0_0_8px_rgba(239,68,68,0.4)]'
-              : 'border-gray-700 text-white hover:border-white hover:bg-white hover:text-black'
+              ? 'border-accent-red text-accent-red hover:bg-accent-red hover:text-white shadow-recording'
+              : 'border-surface-4 text-white hover:border-white hover:bg-white hover:text-black'
           }`}
         >
           {isRunning ? 'STOP ⏹' : 'START ⏵'}
         </button>
         <button
           onClick={handleReset}
-          className="btn-pill font-dotmatrix text-[10px] px-5 py-2 border-gray-800 text-gray-600 hover:border-gray-500 hover:text-white"
+          className="btn-pill font-dotmatrix text-3xs px-5 py-2 border-surface-5 text-ink-faint hover:border-surface-4 hover:text-white"
         >
           RESET ↺
         </button>

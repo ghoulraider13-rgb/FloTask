@@ -3,9 +3,9 @@ import { formatDateTime } from '../utils/taskHelpers';
 import { playMechanicalClick } from '../utils/audioHelpers';
 
 const BADGE = {
-  low:    { bg: 'bg-gray-700', text: 'text-gray-400', label: 'L' },
-  medium: { bg: 'bg-gray-600', text: 'text-gray-300', label: 'M' },
-  high:   { bg: 'bg-red-500', text: 'text-white', label: 'H' },
+  low:    { bg: 'bg-surface-4', text: 'text-ink-tertiary', label: 'L' },
+  medium: { bg: 'bg-surface-5', text: 'text-ink-secondary', label: 'M' },
+  high:   { bg: 'bg-accent-red', text: 'text-white', label: 'H' },
 };
 
 const DRAG_THRESHOLD = 56; // px of horizontal travel before reveal
@@ -142,7 +142,7 @@ export default function TaskItem({ task, onToggle, onDelete }) {
             {task.title}
           </span>
           {task.reminderDateTime && !task.completed && (
-            <span className="text-3xs text-gray-500 font-mono mt-0.5 block">
+            <span className="text-3xs text-ink-soft font-mono mt-0.5 block">
               {formatDateTime(task.reminderDateTime)}
             </span>
           )}
@@ -153,7 +153,7 @@ export default function TaskItem({ task, onToggle, onDelete }) {
           <div className="flex items-center gap-1.5">
             {/* Red dot for high intensity */}
             {task.intensity === 'high' && (
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse-slow" />
+              <span className="w-2 h-2 rounded-full bg-accent-red animate-pulse-slow" />
             )}
             <span className={`w-7 h-7 rounded-full ${badge.bg} ${badge.text} text-3xs font-bold flex items-center justify-center`}>
               {badge.label}
@@ -164,7 +164,7 @@ export default function TaskItem({ task, onToggle, onDelete }) {
         {/* Delete — always visible (mobile has no hover) */}
         <button
           onClick={handleDelete}
-          className="p-1.5 -mr-1 text-gray-600 hover:text-red-400 transition-all duration-200"
+          className="p-1.5 -mr-1 text-ink-faint hover:text-accent-red transition-all duration-200"
           title="Delete"
           aria-label={`Delete "${task.title}"`}
         >

@@ -37,20 +37,20 @@ export default function TimerHub() {
   const dashOffset = RING_C * (1 - progress);
 
   let glowFilter = '';
-  let strokeColor = '#fff';
+  let strokeColor = 'var(--ink-primary)';
   if (isRunning) {
     if (timerMode === 'pomodoro' && pomoPhase === 'break') {
-      strokeColor = '#34d399';
+      strokeColor = 'var(--accent-emerald)';
       glowFilter = 'drop-shadow(0 0 15px rgba(52,211,153,0.6))';
     } else if (progress <= 0.5) {
       glowFilter = 'drop-shadow(0 0 8px rgba(255,255,255,0.7))';
-      strokeColor = '#fff';
+      strokeColor = 'var(--ink-primary)';
     } else if (progress <= 0.9) {
       glowFilter = 'drop-shadow(0 0 12px rgba(253,230,138,0.8))'; // warm cream
-      strokeColor = '#fde68a';
+      strokeColor = 'var(--accent-amber)';
     } else {
       glowFilter = 'drop-shadow(0 0 15px rgba(255,255,255,1)) drop-shadow(0 0 25px rgba(255,255,255,0.8))';
-      strokeColor = '#fff';
+      strokeColor = 'var(--ink-primary)';
     }
   }
 
@@ -174,20 +174,20 @@ export default function TimerHub() {
   return (
     <div className="flex flex-col items-center gap-6">
       {/* Section label */}
-      <h3 className="text-[11px] font-dotmatrix text-white tracking-[0.3em] uppercase self-start">
+      <h3 className="text-2xs font-dotmatrix text-ink-primary tracking-label uppercase self-start">
         TIMER MODULE
       </h3>
 
       {/* Mode toggle */}
-      <div className="flex rounded-full border border-gray-700 overflow-hidden bg-black nothing-card">
+      <div className="flex rounded-full border border-surface-4 overflow-hidden bg-black nothing-card">
         {['pomodoro', 'regular'].map((mode) => (
           <button
             key={mode}
             onClick={() => switchTimerMode(mode)}
-            className={`px-6 py-2 text-[10px] font-bold tracking-[0.15em] uppercase transition-all duration-200 ${
+            className={`px-6 py-2 text-3xs font-bold tracking-btn uppercase transition-all duration-200 ${
               timerMode === mode
                 ? 'bg-white text-black'
-                : 'bg-transparent text-gray-500 hover:text-white'
+                : 'bg-transparent text-ink-soft hover:text-white'
             }`}
           >
             {mode === 'pomodoro' ? 'POMODORO' : 'MANUAL'}
@@ -202,8 +202,8 @@ export default function TimerHub() {
             <button
               key={phase}
               onClick={() => switchPomoPhase(phase)}
-              className={`text-[10px] font-bold tracking-[0.2em] font-dotmatrix uppercase transition-colors ${
-                pomoPhase === phase ? 'text-white border-b-2 border-white' : 'text-gray-600 hover:text-gray-400 border-b-2 border-transparent'
+              className={`text-3xs font-bold tracking-caption font-dotmatrix uppercase transition-colors ${
+                pomoPhase === phase ? 'text-white border-b-2 border-white' : 'text-ink-faint hover:text-ink-tertiary border-b-2 border-transparent'
               }`}
             >
               {phase === 'work' ? 'WORK PHASE' : 'REST PHASE'}
@@ -218,7 +218,7 @@ export default function TimerHub() {
           {/* Rotate only the circles so foreignObject remains unrotated */}
           <g style={{ transformOrigin: 'center', transform: 'rotate(-90deg)' }}>
             {/* Subtle Track */}
-            <circle cx="100" cy="100" r={RING_R} fill="none" stroke="#222" strokeWidth="2" />
+            <circle cx="100" cy="100" r={RING_R} fill="none" stroke="var(--surface-4)" strokeWidth="2" />
             {/* Emissive Progress */}
             <circle
               cx="100" cy="100" r={RING_R} fill="none" strokeWidth="4"
@@ -236,7 +236,7 @@ export default function TimerHub() {
           <foreignObject x="0" y="0" width="200" height="200">
             <div className="flex flex-col items-center justify-center w-full h-full pointer-events-auto leading-none pt-2">
               {timerMode === 'regular' && !isRunning ? (
-                <div className="flex items-center justify-center gap-[2px]">
+                <div className="flex items-center justify-center gap-0.5">
                   <input
                     ref={hRef}
                     type="text"
@@ -248,7 +248,7 @@ export default function TimerHub() {
                     onFocus={(e) => e.target.select()}
                     className="w-[1.2em] bg-transparent text-white text-3xl font-mono text-center outline-none p-0 leading-none"
                   />
-                  <span className="text-gray-500 text-3xl font-mono leading-none">:</span>
+                  <span className="text-ink-soft text-3xl font-mono leading-none">:</span>
                   <input
                     ref={mRef}
                     type="text"
@@ -260,7 +260,7 @@ export default function TimerHub() {
                     onFocus={(e) => e.target.select()}
                     className="w-[1.2em] bg-transparent text-white text-3xl font-mono text-center outline-none p-0 leading-none"
                   />
-                  <span className="text-gray-500 text-3xl font-mono leading-none">:</span>
+                  <span className="text-ink-soft text-3xl font-mono leading-none">:</span>
                   <input
                     ref={sRef}
                     type="text"
@@ -279,7 +279,7 @@ export default function TimerHub() {
                 </span>
               )}
               
-              <span className={`text-[10px] font-dotmatrix tracking-[0.25em] mt-3 pointer-events-none ${phaseLabel === 'REST' ? 'text-emerald-400' : 'text-gray-400'}`}>
+              <span className={`text-3xs font-dotmatrix tracking-phase mt-3 pointer-events-none ${phaseLabel === 'REST' ? 'text-accent-emerald' : 'text-ink-muted'}`}>
                 {timerMode === 'regular' && !isRunning ? 'CLICK & TYPE' : phaseLabel}
               </span>
             </div>
@@ -289,7 +289,7 @@ export default function TimerHub() {
 
       {/* Session counter */}
       {timerMode === 'pomodoro' && (
-        <p className="text-[10px] text-gray-600 tracking-wider">
+        <p className="text-3xs text-ink-faint tracking-wider">
           {sessions} SESSION{sessions !== 1 ? 'S' : ''} COMPLETE
         </p>
       )}
@@ -297,15 +297,15 @@ export default function TimerHub() {
       {/* Control buttons */}
       <div className="flex gap-4">
         {!isRunning ? (
-          <button onClick={handleStart} className="btn-pill hover:bg-white hover:text-black hover:border-white font-dotmatrix border border-gray-700">
+          <button onClick={handleStart} className="btn-pill hover:bg-white hover:text-black hover:border-white font-dotmatrix border border-surface-4">
             START ⏵
           </button>
         ) : (
-          <button onClick={handlePause} className="btn-pill hover:bg-white hover:text-black hover:border-white font-dotmatrix border border-gray-700">
+          <button onClick={handlePause} className="btn-pill hover:bg-white hover:text-black hover:border-white font-dotmatrix border border-surface-4">
             PAUSE ⏸
           </button>
         )}
-        <button onClick={handleReset} className="btn-pill hover:bg-white hover:text-black hover:border-white font-dotmatrix border border-gray-700">
+        <button onClick={handleReset} className="btn-pill hover:bg-white hover:text-black hover:border-white font-dotmatrix border border-surface-4">
           RESET ↺
         </button>
       </div>

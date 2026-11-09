@@ -47,6 +47,19 @@ export default {
           focus: '#00d4aa',
           'intensity-low': '#4a4a4a',
         },
+        // Modal scrims
+        scrim: 'rgba(0, 0, 0, 0.8)',
+        'scrim-strong': 'rgba(0, 0, 0, 0.9)',
+        // DrawPad sketch palette
+        draw: {
+          cyan: '#22d3ee',
+          lime: '#a3e635',
+          pink: '#f472b6',
+          amber: '#fbbf24',
+        },
+      },
+      maxWidth: {
+        shell: '1480px',
       },
       // Micro type scale (rem-based so system font scaling works).
       // Line-height intentionally omitted to match the old arbitrary
