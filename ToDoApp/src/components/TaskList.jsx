@@ -25,19 +25,20 @@ export default function TaskList({ tasks, onAddTask, onToggleTask, onDeleteTask,
       {/* Active Tasks */}
       <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
         {active.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-12 h-12 rounded-full border border-surface-4 flex items-center justify-center mb-4">
+          <div className="flex flex-col items-center justify-center py-14 text-center">
+            <div className="w-12 h-12 rounded-full border border-surface-4 bg-surface-2/60 flex items-center justify-center mb-3.5">
               <svg className="w-5 h-5 text-ink-faint" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <p className="text-xs text-ink-soft font-mono tracking-wider uppercase">All clear</p>
-            <p className="text-3xs text-ink-line mt-1">Type or speak a task to get started</p>
+            <p className="text-xs text-ink-soft font-mono font-bold tracking-wider uppercase">ALL CLEAR // ZERO TASKS</p>
+            <p className="text-3xs text-ink-line font-mono mt-1">Type or speak a task above to schedule</p>
           </div>
         )}
-        {active.map((task) => (
+        {active.map((task, index) => (
           <TaskItem
             key={task.id} task={task}
+            style={{ '--stagger-i': index }}
             onToggle={onToggleTask} onDelete={onDeleteTask}
           />
         ))}
@@ -53,9 +54,10 @@ export default function TaskList({ tasks, onAddTask, onToggleTask, onDeleteTask,
             <span className="text-3xs font-bold text-ink-faint uppercase tracking-caption">Completed</span>
           </div>
           <div className="space-y-1.5 max-h-48 overflow-y-auto">
-            {done.map((task) => (
+            {done.map((task, index) => (
               <TaskItem
                 key={task.id} task={task}
+                style={{ '--stagger-i': index }}
                 onToggle={onToggleTask} onDelete={onDeleteTask}
               />
             ))}

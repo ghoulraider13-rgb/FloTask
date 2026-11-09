@@ -4,7 +4,31 @@ export default function SavedNotes({ notes, onDelete }) {
   const [expanded, setExpanded] = useState(false);
   const [openNoteId, setOpenNoteId] = useState(null);
 
-  if (notes.length === 0) return null;
+  if (notes.length === 0) {
+    return (
+      <div className="nothing-card p-4">
+        <div className="flex items-center justify-between text-ink-soft">
+          <span className="flex items-center gap-2">
+            <span className="text-2xs font-bold tracking-caption uppercase">
+              SAVED ARCHIVES
+            </span>
+            <span className="text-3xs px-2 py-0.5 rounded-full bg-surface-3 text-ink-faint font-mono">
+              0
+            </span>
+          </span>
+        </div>
+        <div className="flex flex-col items-center justify-center py-6 text-center">
+          <div className="w-10 h-10 rounded-full border border-surface-4 bg-surface-2/60 flex items-center justify-center mb-2.5">
+            <svg className="w-4 h-4 text-ink-faint" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+            </svg>
+          </div>
+          <p className="text-3xs text-ink-soft font-mono font-bold uppercase tracking-wider">ARCHIVE EMPTY</p>
+          <p className="text-4xs text-ink-line font-mono mt-0.5">Notes saved from scratchpad appear here</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="nothing-card p-4">
@@ -14,7 +38,7 @@ export default function SavedNotes({ notes, onDelete }) {
       >
         <span className="flex items-center gap-2">
           <span className="text-2xs font-bold text-ink-soft tracking-caption uppercase">
-            SAVED NOTES
+            SAVED ARCHIVES
           </span>
           <span className="text-3xs px-2 py-0.5 rounded-full bg-surface-4 text-ink-tertiary font-mono">
             {notes.length}
@@ -29,15 +53,15 @@ export default function SavedNotes({ notes, onDelete }) {
       </button>
 
       {expanded && (
-        <div className="mt-3 space-y-2 max-h-64 overflow-y-auto animate-fade-in">
-          {notes.map((note) => {
+        <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
+          {notes.map((note, index) => {
             const isOpen = openNoteId === note.id;
             const date = new Date(note.createdAt).toLocaleString([], {
               month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
             });
 
             return (
-              <div key={note.id} className="rounded-xl bg-surface-3 border border-surface-5 overflow-hidden">
+              <div key={note.id} style={{ '--stagger-i': index }} className="animate-fade-in rounded-xl bg-surface-3 border border-surface-5 overflow-hidden">
                 <button
                   onClick={() => setOpenNoteId(isOpen ? null : note.id)}
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-surface-4 transition-colors"

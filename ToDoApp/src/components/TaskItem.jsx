@@ -20,7 +20,7 @@ const EDGE_RATIO = 0.55;   // reveal % beyond which release = delete
  * `data-swipe-to-delete` marks this row as owning its horizontal
  * swipe gesture.
  */
-export default function TaskItem({ task, onToggle, onDelete }) {
+export default function TaskItem({ task, onToggle, onDelete, style }) {
   const [isExiting, setIsExiting] = useState(false);
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -97,7 +97,7 @@ export default function TaskItem({ task, onToggle, onDelete }) {
   const revealPx = Math.max(0, -dragX);
 
   return (
-    <div className="relative overflow-hidden rounded-row">
+    <div className="relative overflow-hidden rounded-row" style={style}>
       {/* Delete zone revealed behind the row (touch only) */}
       {revealPx > 0 && (
         <div

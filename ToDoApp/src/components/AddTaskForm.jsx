@@ -175,6 +175,18 @@ export default function AddTaskForm({ onAddTask, onNlmText }) {
         </button>
       </div>
 
+      {/* Loading Skeleton during async NLM / Voice parse */}
+      {parsing && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-row bg-surface-2 border border-surface-4 animate-fade-in" aria-live="polite">
+          <div className="w-5 h-5 rounded skeleton-shimmer shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-3 w-3/5 rounded skeleton-shimmer" />
+            <div className="h-2 w-1/4 rounded skeleton-shimmer" />
+          </div>
+          <div className="w-8 h-4 rounded-full skeleton-shimmer shrink-0" />
+        </div>
+      )}
+
       {voiceError && (
         <p className="text-3xs text-accent-red font-mono">{voiceError}</p>
       )}

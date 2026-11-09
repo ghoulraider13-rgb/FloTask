@@ -168,10 +168,17 @@ body {
     border-color: var(--ink-primary);
     color: var(--ink-primary);
     transform: translateY(-1px);
+    box-shadow: var(--glow);
   }
 
   .btn-pill:active {
     transform: translateY(0) scale(0.97);
+  }
+
+  .btn-pill:focus-visible,
+  .btn-pill-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--surface-0), 0 0 0 4px rgba(255, 255, 255, 0.5);
   }
 
   /* Pill button – inverted / primary (white bg, black text) */
@@ -209,6 +216,16 @@ body {
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+  }
+
+  /* Standard focus-visible ring */
+  .focus-ring {
+    outline: none;
+  }
+
+  .focus-ring:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--surface-0), 0 0 0 4px rgba(255, 255, 255, 0.5);
   }
 
   /* Flush input — bottom border only */
@@ -255,6 +272,11 @@ body {
     border-color: var(--ink-soft);
   }
 
+  .nothing-input-bordered:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--surface-0), 0 0 0 4px rgba(255, 255, 255, 0.5);
+  }
+
   .nothing-input-bordered::-webkit-calendar-picker-indicator {
     filter: invert(0.6);
     cursor: pointer;
@@ -278,6 +300,11 @@ body {
 
 .task-checkbox:hover {
   border-color: var(--ink-soft);
+}
+
+.task-checkbox:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--surface-0), 0 0 0 4px rgba(255, 255, 255, 0.5);
 }
 
 .task-checkbox:checked {
@@ -642,6 +669,31 @@ body {
   animation: agentPulse 1s ease-out;
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 20%,
+    var(--surface-3) 50%,
+    var(--surface-2) 80%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out both;
+  animation-delay: calc(var(--stagger-i, 0) * 45ms);
+}
+
 /* ─── PrismJS Monochrome 'Nothing' Theme ───────────────────────── */
 pre[class*="language-"],
 code[class*="language-"] {
@@ -742,6 +794,7 @@ code[class*="language-"] {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
