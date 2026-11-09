@@ -37,12 +37,14 @@ export const createTask = (title, options = {}) => ({
   priority: options.priority ?? 'normal',
   category: options.category ?? 'general',
   isAgentCreated: options.isAgentCreated ?? false,
+  recurrence: options.recurrence ?? '',                 // RRULE string e.g. 'FREQ=DAILY'
+  parentId: options.parentId ?? null,                   // parent task ID for dependencies/subtasks
 });
 
 /**
  * Create a standalone alarm.
  */
-export const createAlarm = (label, dateTime, intensity = 'medium', isAgentCreated = false) => ({
+export const createAlarm = (label, dateTime, intensity = 'medium', isAgentCreated = false, recurrence = '') => ({
   id: safeUuid(),
   label: String(label).trim() || 'Alarm',
   dateTime,           // ISO string
@@ -50,6 +52,7 @@ export const createAlarm = (label, dateTime, intensity = 'medium', isAgentCreate
   fired: false,
   createdAt: new Date().toISOString(),
   isAgentCreated,
+  recurrence,         // RRULE string e.g. 'FREQ=DAILY'
 });
 
 /**

@@ -2,22 +2,25 @@ import { useState } from 'react';
 import IntensitySelector from './IntensitySelector';
 import { createAlarm, toLocalInputValue } from '../utils/taskHelpers';
 import { playMechanicalClick } from '../utils/audioHelpers';
+import { RECURRENCE_PRESETS, formatRecurrenceBadge } from '../utils/recurrence';
 
 export default function AlarmsHub({ alarms, onAdd, onDelete }) {
   const [showForm, setShowForm] = useState(false);
   const [label, setLabel] = useState('');
   const [dateTime, setDateTime] = useState('');
   const [intensity, setIntensity] = useState('medium');
+  const [recurrence, setRecurrence] = useState('');
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const handleAdd = (e) => {
     e.preventDefault();
     if (!dateTime) return;
     playMechanicalClick();
-    onAdd(createAlarm(label, new Date(dateTime).toISOString(), intensity));
+    onAdd(createAlarm(label, new Date(dateTime).toISOString(), intensity, false, recurrence));
     setLabel('');
     setDateTime('');
     setIntensity('medium');
+    setRecurrence('');
     setShowForm(false);
   };
 
@@ -109,6 +112,17 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
               {formatAlarmTime(alarm.dateTime)}
             </span>
 
+            {/* Recurrence badge */}
+            {alarm.recurrence && (
+              <span
+                className="text-3xs text-ink-primary font-dotmatrix flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-surface-4 border border-surface-5 shrink-0"
+                title={`Repeats: ${alarm.recurrence}`}
+              >
+                <span>↻</span>
+                <span className="text-4xs">{formatRecurrenceBadge(alarm.recurrence)}</span>
+              </span>
+            )}
+
             {/* Label and Date */}
             <span className="text-3xs text-ink-soft font-dotmatrix uppercase truncate max-w-[150px] flex items-baseline ml-auto">
               {alarm.label && alarm.label !== 'Alarm' ? alarm.label : ''}
@@ -165,6 +179,18 @@ export default function AlarmsHub({ alarms, onAdd, onDelete }) {
             className="nothing-input-bordered"
             required
           />
+          <select
+            value={recurrence}
+            onChange={(e) => setRecurrence(e.target.value)}
+            className="nothing-input-bordered text-xs bg-surface-2 font-mono uppercase text-ink-primary"
+            aria-label="Alarm recurrence frequency"
+          >
+            {RECURRENCE_PRESETS.map((p) => (
+              <option key={p.id} value={p.id} className="bg-surface-1 text-ink-primary">
+                {p.label === 'NONE' ? 'NO REPEAT' : `REPEAT ${p.label}`}
+              </option>
+            ))}
+          </select>
           <IntensitySelector value={intensity} onChange={setIntensity} compact />
           <button
             type="submit"

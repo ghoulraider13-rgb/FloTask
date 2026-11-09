@@ -4,6 +4,8 @@ import { useReminders, fireBrowserNotification } from './hooks/useReminders';
 import { createTask, actionToTaskOrAlarm } from './utils/taskHelpers';
 import { parseActions } from './utils/nlm';
 import { playGentleChime, playStandardAlarm, playEnforcerAlarm, playMechanicalClick } from './utils/audioHelpers';
+import { exportBackup, restoreBackup } from './utils/backup';
+import { getNextOccurrence } from './utils/recurrence';
 
 import ReactiveGrid from './components/ReactiveGrid';
 import TimerHub from './components/TimerHub';
@@ -18,6 +20,8 @@ import PwaUpdateToast from './components/PwaUpdateToast';
 import AlarmModal from './components/AlarmModal';
 import EnforcerModal from './components/EnforcerModal';
 import QuickAccessBar from './components/QuickAccessBar';
+import CommandPalette from './components/CommandPalette';
+import ShortcutsModal from './components/ShortcutsModal';
 
 export default function App() {
   const [tasks, setTasks] = useLocalStorage('todo-tasks', []);
@@ -26,10 +30,71 @@ export default function App() {
   const [toasts, setToasts] = useState([]);
   const [mediumAlert, setMediumAlert] = useState(null);
   const [enforcerAlert, setEnforcerAlert] = useState(null);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+
   const alarmStopRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   // Quick access bar state
   const [activeSection, setActiveSection] = useState('tasks');
+
+  const jumpToSection = useCallback((sectionId) => {
+    setActiveSection(sectionId);
+    const el = document.getElementById(sectionId);
+    if (el) {
+      const prefersReduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      el.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
+    }
+  }, []);
+
+  // ── Global Keyboard Shortcuts ─────────────────────────────────
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      // ⌘K / Ctrl+K opens Command Palette
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+        return;
+      }
+
+      // Check if user is typing in an input, textarea, or contenteditable
+      const target = e.target;
+      const isInput = target?.tagName === 'INPUT' ||
+        target?.tagName === 'TEXTAREA' ||
+        target?.tagName === 'SELECT' ||
+        target?.isContentEditable;
+
+      if (isInput) return;
+
+      if (e.key === '?') {
+        e.preventDefault();
+        setIsShortcutsOpen((prev) => !prev);
+      } else if (e.key === 'n' || e.key === 'N') {
+        e.preventDefault();
+        jumpToSection('tasks');
+        setTimeout(() => document.getElementById('add-task-input')?.focus(), 150);
+      } else if (e.key === 'a' || e.key === 'A') {
+        e.preventDefault();
+        jumpToSection('alarms');
+      } else if (e.key === 't' || e.key === 'T') {
+        e.preventDefault();
+        jumpToSection('focus');
+      } else if (e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        jumpToSection('notes');
+      } else if (e.key === 'h' || e.key === 'H') {
+        e.preventDefault();
+        jumpToSection('hydration');
+      } else if (e.key === 'l' || e.key === 'L') {
+        e.preventDefault();
+        jumpToSection('sleep');
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [jumpToSection]);
 
   // ── Cursor glow (desktop fine-pointer only — zero re-renders) ───
   const glowRef = useRef(null);
@@ -78,7 +143,14 @@ export default function App() {
     }
 
     if (source === 'alarm') {
-      setAlarms((prev) => prev.map((a) => (a.id === item.id ? { ...a, fired: true } : a)));
+      setAlarms((prev) => prev.map((a) => {
+        if (a.id !== item.id) return a;
+        if (a.recurrence) {
+          const nextDate = getNextOccurrence(a.dateTime, a.recurrence);
+          return { ...a, dateTime: nextDate || a.dateTime, fired: !nextDate };
+        }
+        return { ...a, fired: true };
+      }));
     }
   }, [setAlarms]);
 
@@ -110,11 +182,30 @@ export default function App() {
   }, [setTasks]);
 
   const handleToggleTask = useCallback((id) => {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
+    setTasks((prev) => {
+      const target = prev.find((t) => t.id === id);
+      if (!target) return prev;
+      const isNowCompleted = !target.completed;
+
+      if (isNowCompleted && target.recurrence) {
+        const nextDate = getNextOccurrence(target.reminderDateTime, target.recurrence);
+        const nextTask = createTask(target.title, {
+          reminderDateTime: nextDate,
+          intensity: target.intensity,
+          priority: target.priority,
+          category: target.category,
+          recurrence: target.recurrence,
+          parentId: target.parentId,
+        });
+        return [nextTask, ...prev.map((t) => (t.id === id ? { ...t, completed: true } : t))];
+      }
+
+      return prev.map((t) => (t.id === id ? { ...t, completed: isNowCompleted } : t));
+    });
   }, [setTasks]);
 
   const handleDeleteTask = useCallback((id) => {
-    setTasks((prev) => prev.filter((t) => t.id !== id));
+    setTasks((prev) => prev.filter((t) => t.id !== id && t.parentId !== id));
   }, [setTasks]);
 
   const handleSetReminder = useCallback((id, dateTime, intensity) => {
@@ -129,6 +220,75 @@ export default function App() {
   const handleDeleteAlarm = useCallback((id) => {
     setAlarms((prev) => prev.filter((a) => a.id !== id));
   }, [setAlarms]);
+
+  // ── Command Palette Action Handler ─────────────────────────────
+  const handleCommandAction = useCallback((actionId) => {
+    switch (actionId) {
+      case 'create-task':
+        jumpToSection('tasks');
+        setTimeout(() => document.getElementById('add-task-input')?.focus(), 250);
+        break;
+      case 'set-alarm':
+        jumpToSection('alarms');
+        break;
+      case 'focus-timer':
+        jumpToSection('focus');
+        break;
+      case 'open-notes':
+        jumpToSection('notes');
+        break;
+      case 'log-hydration': {
+        const cur = Number(window.localStorage.getItem('hydration-intake') || '0');
+        const next = cur + 250;
+        window.localStorage.setItem('hydration-intake', String(next));
+        window.dispatchEvent(new Event('storage'));
+        setToasts((prev) => [...prev, {
+          id: crypto.randomUUID(),
+          message: '+250 ML WATER LOGGED',
+          subtext: `Total: ${next} ml`,
+        }]);
+        break;
+      }
+      case 'export-backup':
+        exportBackup();
+        setToasts((prev) => [...prev, {
+          id: crypto.randomUUID(),
+          message: 'JSON BACKUP EXPORTED',
+          subtext: 'Saved to downloads',
+        }]);
+        break;
+      case 'import-backup':
+        fileInputRef.current?.click();
+        break;
+      case 'view-shortcuts':
+        setIsShortcutsOpen(true);
+        break;
+    }
+  }, [jumpToSection]);
+
+  const handleFileImport = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const res = restoreBackup(event.target?.result);
+      if (res.success) {
+        setToasts((prev) => [...prev, {
+          id: crypto.randomUUID(),
+          message: 'BACKUP RESTORED SUCCESSFULLY',
+          subtext: `${res.count} state collections loaded`,
+        }]);
+      } else {
+        setToasts((prev) => [...prev, {
+          id: crypto.randomUUID(),
+          message: 'BACKUP RESTORE FAILED',
+          subtext: res.error || 'Invalid file format',
+        }]);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
 
   // ── NLM (natural-language model) ───────────────────────────────
   const handleNlmActions = useCallback((actions) => {
@@ -199,10 +359,33 @@ export default function App() {
         <EnforcerModal title={enforcerAlert.title} subtext={enforcerAlert.subtext} onDismiss={dismissEnforcer} />
       )}
 
+      {/* ── Command Palette & Shortcuts Overlays ── */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onSelectAction={handleCommandAction}
+      />
+
+      {isShortcutsOpen && (
+        <ShortcutsModal onDismiss={() => setIsShortcutsOpen(false)} />
+      )}
+
+      {/* Hidden file input for JSON backup restore */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json,application/json"
+        onChange={handleFileImport}
+        className="hidden"
+        aria-hidden="true"
+      />
+
       {/* ── Quick Access Bar (sticky nav, all widths) ── */}
       <QuickAccessBar
         activeSection={activeSection}
         onSectionClick={setActiveSection}
+        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+        onOpenShortcuts={() => setIsShortcutsOpen(true)}
       />
 
       {/* ── Single responsive layout: one column on phones, auto-fit grid above ── */}

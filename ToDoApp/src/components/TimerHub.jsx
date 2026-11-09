@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { formatTime, formatTimeLong } from '../utils/taskHelpers';
 import { playGentleChime, playMechanicalClick } from '../utils/audioHelpers';
@@ -14,6 +14,7 @@ export default function TimerHub() {
   const [pomoPhase, setPomoPhase] = useLocalStorage('pomo-phase', 'work');
   const [pomoTime, setPomoTime] = useLocalStorage('pomo-time', 25 * 60);
   const [sessions, setSessions] = useLocalStorage('pomo-sessions', 0);
+  const [focusHistory, setFocusHistory] = useLocalStorage('focus-history', []);
 
   const [regTotal, setRegTotal] = useLocalStorage('reg-total', 600);
   const [regTime, setRegTime] = useLocalStorage('reg-time', 600);
@@ -63,7 +64,17 @@ export default function TimerHub() {
         if (prev <= 1) {
           playGentleChime();
           if (timerMode === 'pomodoro') {
-            if (pomoPhase === 'work') setSessions((s) => s + 1);
+            if (pomoPhase === 'work') {
+              setSessions((s) => s + 1);
+              setFocusHistory((history) => [
+                {
+                  id: `f_${Date.now()}`,
+                  timestamp: new Date().toISOString(),
+                  minutes: Math.max(1, Math.round(workDuration / 60)),
+                },
+                ...(Array.isArray(history) ? history : []),
+              ]);
+            }
             const next = pomoPhase === 'work' ? 'break' : 'work';
             setPomoPhase(next);
             // Auto continue
@@ -79,7 +90,7 @@ export default function TimerHub() {
     }, 1000);
 
     return () => clearInterval(intervalRef.current);
-  }, [isRunning, timerMode, pomoPhase, workDuration, breakDuration, setPomoTime, setRegTime, setPomoPhase, setSessions]);
+  }, [isRunning, timerMode, pomoPhase, workDuration, breakDuration, setPomoTime, setRegTime, setPomoPhase, setSessions, setFocusHistory]);
 
   const commitCustomTime = useCallback(() => {
     const h = parseInt(hours || '0', 10);
@@ -169,7 +180,32 @@ export default function TimerHub() {
     ? (pomoPhase === 'work' ? 'FOCUS' : 'REST')
     : 'CUSTOM';
 
-  // No customDisplay constant needed.
+  const chartData = useMemo(() => {
+    const days = [];
+    const now = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+      const dateStr = d.toISOString().slice(0, 10);
+      const dayLabel = d.toLocaleDateString('en-US', { weekday: 'narrow' });
+      days.push({ dateStr, dayLabel, minutes: 0 });
+    }
+
+    if (Array.isArray(focusHistory)) {
+      focusHistory.forEach((entry) => {
+        if (!entry?.timestamp) return;
+        const entryDate = entry.timestamp.slice(0, 10);
+        const match = days.find((d) => d.dateStr === entryDate);
+        if (match) {
+          match.minutes += Number(entry.minutes) || 0;
+        }
+      });
+    }
+
+    const maxMinutes = Math.max(60, ...days.map((d) => d.minutes));
+    const totalWeeklyMinutes = days.reduce((acc, d) => acc + d.minutes, 0);
+
+    return { days, maxMinutes, totalWeeklyMinutes };
+  }, [focusHistory]);
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -308,6 +344,82 @@ export default function TimerHub() {
         <button onClick={handleReset} className="btn-pill hover:bg-white hover:text-black hover:border-white font-dotmatrix border border-surface-4">
           RESET ↺
         </button>
+      </div>
+
+      {/* ── Focus Sessions History Chart ────────────────────────── */}
+      <div className="w-full mt-2 pt-4 border-t border-surface-5 flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <span className="text-3xs font-bold text-ink-soft uppercase tracking-label font-dotmatrix">
+            FOCUS HISTORY // 7 DAYS
+          </span>
+          <span className="text-3xs font-mono text-ink-muted">
+            {chartData.totalWeeklyMinutes} MIN TOTAL
+          </span>
+        </div>
+
+        {/* Ruled-line SVG Bar Chart */}
+        <div className="p-3 rounded-lg bg-surface-2 border border-surface-5">
+          <svg viewBox="0 0 280 90" className="w-full h-24 overflow-visible">
+            {/* Ruled horizontal grid lines */}
+            <line x1="0" y1="15" x2="280" y2="15" stroke="var(--surface-4)" strokeDasharray="3 3" strokeWidth="1" />
+            <line x1="0" y1="40" x2="280" y2="40" stroke="var(--surface-4)" strokeDasharray="3 3" strokeWidth="1" />
+            <line x1="0" y1="65" x2="280" y2="65" stroke="var(--surface-4)" strokeWidth="1" />
+
+            {/* Bars & Labels */}
+            {chartData.days.map((d, i) => {
+              const barWidth = 20;
+              const x = 15 + i * 38;
+              const barHeight = d.minutes > 0 ? Math.max(4, Math.round((d.minutes / chartData.maxMinutes) * 50)) : 0;
+              const y = 65 - barHeight;
+              const isToday = i === 6;
+
+              return (
+                <g key={d.dateStr} className="transition-all duration-300">
+                  {/* Minute label on top if active */}
+                  {d.minutes > 0 && (
+                    <text
+                      x={x + barWidth / 2}
+                      y={y - 4}
+                      textAnchor="middle"
+                      fill="var(--ink-muted)"
+                      className="text-4xs font-mono"
+                    >
+                      {d.minutes}
+                    </text>
+                  )}
+                  {/* Bar */}
+                  {barHeight > 0 ? (
+                    <rect
+                      x={x}
+                      y={y}
+                      width={barWidth}
+                      height={barHeight}
+                      rx="2"
+                      fill={isToday ? 'var(--ink-primary)' : 'var(--ink-tertiary)'}
+                    />
+                  ) : (
+                    <circle
+                      cx={x + barWidth / 2}
+                      cy={63}
+                      r="1.5"
+                      fill="var(--surface-5)"
+                    />
+                  )}
+                  {/* Day of week */}
+                  <text
+                    x={x + barWidth / 2}
+                    y={80}
+                    textAnchor="middle"
+                    fill={isToday ? 'var(--ink-primary)' : 'var(--ink-soft)'}
+                    className="text-4xs font-mono font-bold"
+                  >
+                    {d.dayLabel}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
       </div>
     </div>
   );
